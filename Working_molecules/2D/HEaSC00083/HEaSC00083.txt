@@ -1,0 +1,13 @@
+Compound: HEaSC00083
+SMILES:   N#CC(Cl)(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TN4a       0,1                  N,C                  1            36.0     0.1658   -0.0016  -0.0005 
+1        X2         2,3,4,5              C,Cl,Cl,Cl           1            72.0     -0.0829  0.0008   0.0002  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

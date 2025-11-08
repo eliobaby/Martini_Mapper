@@ -1,0 +1,11 @@
+Compound: 67-66-3
+SMILES:   ClC(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X2         0,1,2,3              Cl,C,Cl,Cl           0            72.0     -0.0002  0.0013   -0.0310 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

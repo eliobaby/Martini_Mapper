@@ -1,0 +1,11 @@
+Compound: HEaSC00074
+SMILES:   CO
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TN2a       0,1                  C,O                  0            36.0     0.0276   -0.0266  -0.0135 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

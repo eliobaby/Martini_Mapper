@@ -1,0 +1,11 @@
+Compound: HEaSC00160
+SMILES:   CNC=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        P1         0,1,2,3              C,N,C,O              0            72.0     0.0414   0.0339   0.0084  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

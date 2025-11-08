@@ -1,0 +1,11 @@
+Compound: HEaSC00336
+SMILES:   CCC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC3        0,1,2                C,C,C                0            54.0     0.0002   -0.0014  0.0046  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

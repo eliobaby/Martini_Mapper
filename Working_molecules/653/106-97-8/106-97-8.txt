@@ -1,0 +1,11 @@
+Compound: 106-97-8
+SMILES:   CCCC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        C3         0,1,2,3              C,C,C,C              0            72.0     0.0005   -0.0060  -0.0043 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

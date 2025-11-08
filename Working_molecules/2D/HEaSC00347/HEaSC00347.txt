@@ -1,0 +1,11 @@
+Compound: HEaSC00347
+SMILES:   CC(C)O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N2         0,1,2,3              C,C,C,O              0            72.0     -0.0016  0.0302   -0.0142 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

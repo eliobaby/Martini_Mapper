@@ -1,0 +1,11 @@
+Compound: N
+SMILES:   C(F)(F)(S)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X4         0,1,2,3,4            C,F,F,S,Cl           0            72.0     -0.0387  0.0062   -0.0007 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

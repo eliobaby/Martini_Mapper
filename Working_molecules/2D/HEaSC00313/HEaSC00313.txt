@@ -1,0 +1,13 @@
+Compound: HEaSC00313
+SMILES:   OCCCCl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN2        0,1,2                O,C,C                1            54.0     -0.1033  0.0101   -0.0076 
+1        TX3h       3,4                  C,Cl                 1            36.0     0.1802   0.0518   -0.0461 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

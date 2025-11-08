@@ -1,0 +1,13 @@
+Compound: HEaSC00115
+SMILES:   OCC(Cl)(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TN2a       0,1                  O,C                  1            36.0     -0.0997  -0.0307  -0.0097 
+1        X2         2,3,4,5              C,Cl,Cl,Cl           1            72.0     0.1328   -0.0043  0.0010  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

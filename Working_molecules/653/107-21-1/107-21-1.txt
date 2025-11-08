@@ -1,0 +1,11 @@
+Compound: 107-21-1
+SMILES:   OCCO
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        P4         0,1,2,3              O,C,C,O              0            72.0     0.0032   0.0098   -0.0155 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

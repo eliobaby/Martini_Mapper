@@ -1,0 +1,13 @@
+Compound: HEaSC00214
+SMILES:   COC(=O)C(Cl)(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N5a        0,1,2,3              C,O,C,O              1            72.0     0.0545   -0.0230  -0.0090 
+1        X2         4,5,6,7              C,Cl,Cl,Cl           1            72.0     -0.2292  -0.0057  0.0069  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

@@ -1,0 +1,11 @@
+Compound: 60-35-5
+SMILES:   CC(=O)N
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN5        0,1,2,3              C,C,O,N              0            54.0     0.0159   0.0253   0.0431  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

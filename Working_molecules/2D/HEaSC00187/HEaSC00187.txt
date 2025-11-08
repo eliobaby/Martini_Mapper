@@ -1,0 +1,11 @@
+Compound: HEaSC00187
+SMILES:   CNC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN5        0,1,2                C,N,C                0            54.0     -0.0021  0.0118   -0.0162 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

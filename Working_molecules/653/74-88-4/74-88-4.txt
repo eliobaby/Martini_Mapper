@@ -1,0 +1,11 @@
+Compound: 74-88-4
+SMILES:   CI
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TX1        0,1                  C,I                  0            36.0     0.0861   0.0019   0.0015  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

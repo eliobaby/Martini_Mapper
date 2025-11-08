@@ -1,0 +1,11 @@
+Compound: 75-03-6
+SMILES:   CCI
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X1         0,1,2                C,C,I                0            72.0     0.0616   0.0348   -0.0097 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

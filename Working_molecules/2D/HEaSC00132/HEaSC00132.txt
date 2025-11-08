@@ -1,0 +1,11 @@
+Compound: HEaSC00132
+SMILES:   ClCCCl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X2         0,1,2,3              Cl,C,C,Cl            0            72.0     0.0069   0.0285   0.0488  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

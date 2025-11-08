@@ -1,0 +1,11 @@
+Compound: HEaSC00064
+SMILES:   NC=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SP3a       0,1,2                N,C,O                0            54.0     0.0456   -0.0299  0.0018  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

@@ -1,0 +1,13 @@
+Compound: HEaSC00099
+SMILES:   Cl/C=C/Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TX3h       0,1                  Cl,C                 1            36.0     0.1344   -0.0047  -0.0236 
+1        TX3h       2,3                  C,Cl                 1            36.0     -0.1344  0.0047   -0.0218 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        2.0     

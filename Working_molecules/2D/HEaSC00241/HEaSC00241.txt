@@ -1,0 +1,13 @@
+Compound: HEaSC00241
+SMILES:   N#CCCCl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN2a       0,1,2                N,C,C                1            54.0     0.1408   -0.0227  0.0157  
+1        TX3h       3,4                  C,Cl                 1            36.0     -0.1170  -0.0630  0.0574  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

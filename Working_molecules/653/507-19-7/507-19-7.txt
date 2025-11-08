@@ -1,0 +1,11 @@
+Compound: 507-19-7
+SMILES:   BrC(C)(C)C
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X2         0,1,2,3,4            Br,C,C,C,C           0            72.0     -0.0167  -0.0131  0.0404  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

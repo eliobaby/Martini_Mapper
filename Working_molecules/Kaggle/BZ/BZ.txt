@@ -1,0 +1,11 @@
+Compound: BZ
+SMILES:   CC(F)(F)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X4         0,1,2,3,4            C,C,F,F,Cl           0            72.0     0.0712   0.0072   -0.0005 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

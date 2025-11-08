@@ -1,0 +1,11 @@
+Compound: HEaSC00181
+SMILES:   CCO
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN2        0,1,2                C,C,O                0            54.0     0.0322   0.0035   0.0188  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

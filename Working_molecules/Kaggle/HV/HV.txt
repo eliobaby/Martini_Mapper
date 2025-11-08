@@ -1,0 +1,13 @@
+Compound: HV
+SMILES:   C(CBr)C(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SX1        0,1,2                C,C,Br               1            54.0     -0.0950  0.0555   -0.0439 
+1        SX3h       3,4,5                C,Cl,Cl              1            54.0     0.1487   0.0299   0.0614  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

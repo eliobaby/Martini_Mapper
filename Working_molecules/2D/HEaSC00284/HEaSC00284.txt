@@ -1,0 +1,13 @@
+Compound: HEaSC00284
+SMILES:   BrCCCBr
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SX1        0,1,2                Br,C,C               1            54.0     -0.1120  -0.0169  -0.0056 
+1        TX1        3,4                  C,Br                 1            36.0     0.1954   -0.0549  -0.0074 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

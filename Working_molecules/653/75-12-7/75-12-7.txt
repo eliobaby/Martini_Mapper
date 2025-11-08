@@ -1,0 +1,11 @@
+Compound: 75-12-7
+SMILES:   O=CN
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SP3a       0,1,2                O,C,N                0            54.0     0.0461   -0.0265  0.0120  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

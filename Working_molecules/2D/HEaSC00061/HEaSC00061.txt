@@ -1,0 +1,11 @@
+Compound: HEaSC00061
+SMILES:   CF
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TX3e       0,1                  C,F                  0            36.0     0.0632   0.0058   0.0050  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
