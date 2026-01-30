@@ -2,20 +2,29 @@ import numpy as np
 import re
 
 def get_atom_properties(mol):
-    #Create the array of arrays with atomic properties
+    """
+    Returns per-atom properties:
+      [symbol, is_in_ring, is_edge, num_H]
+    where num_H = total number of H attached (implicit + explicit).
+    """
     atom_properties = []
+
     for atom in mol.GetAtoms():
-        mass = atom.GetMass()
-        neighbor = atom.GetNeighbors()
+        neighbors = atom.GetNeighbors()
+
+        is_edge = (any(n.GetMass() > 1.1 for n in neighbors) and atom.GetDegree() == 1)
+
+        # Total Hs attached to this atom (implicit + explicit)
+        num_H = atom.GetTotalNumHs(includeNeighbors=True)
+
         atom_data = [
-            atom.GetSymbol(),            # Atom type (e.g., C, O, N)
-            #atom.GetMass(),              # Atomic mass
-            #atom.GetFormalCharge(),      # Formal charge
-            atom.IsInRing(),             # Part of a ring?
-            any(mass > 1.1 for neighbor in neighbor) and atom.GetDegree() == 1
-            # Is it an edge node? (connects to only 1 other large node)
+            atom.GetSymbol(),   # Atom type (e.g., C, O, N)
+            atom.IsInRing(),    # Part of a ring?
+            is_edge,            # Edge node?
+            num_H               # How many H attached to this atom
         ]
         atom_properties.append(atom_data)
+
     return atom_properties
 
 def connectivity_matrix(mol, length):

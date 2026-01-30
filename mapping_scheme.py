@@ -191,7 +191,8 @@ def append_ring_section(ring_indices: List[int],
                 local_j = ring_indices.index(j)
                 inner_connection.append((local_j, bond))
         isedge = False  # default set to False; will update later
-        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge]
+        num_H = properties[idx][3]
+        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge, num_H]
         section.append(atom_rep)
         # Mark as mapped (set element to "X")
         properties[idx][0] = "X"
@@ -241,7 +242,8 @@ def append_non_ring_section(section_indices: List[int],
                 local_j = section_indices.index(j)
                 inner_connection.append((local_j, bond))
         isedge = False  # default set to False; will update later
-        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge]
+        num_H = properties[idx][3]
+        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge, num_H]
         section.append(atom_rep)
         properties[idx][0] = "X"
     solution.append(section)

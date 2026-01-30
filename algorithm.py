@@ -1,55 +1,81 @@
-import random
-import string
 from typing import List, Dict, Any, Tuple, Optional
 import warnings
 
-def generate_random_string(length=6):
-    """
-    Generates a random string of a given length using all printable characters.
-    
-    Parameters:
-        length (int): The length of the generated string (default is 6).
-    
-    Returns:
-        str: A random string of the specified length.
-    """
-    allowed_chars = string.printable.strip()  # Excludes whitespace characters
-    return ''.join(random.choices(allowed_chars, k=length))
+# =================================================
+# HELPER FUNCTIONS
+# =================================================
+from non_aromatic_helpers import (
+    build_cn_candidate_graph, 
+    choose_pairs_for_nonbenzene_5_ring, 
+    adjacent_in_allowed_set,
+    nb6_assign_lone_carbon,
+    nb6_try_assign_connected_pair_T,
+    nb6_handle_count2,
+    nb6_handle_count3,
+)
 
-def pick_bead_key(martini_dict: Dict[str, List[Any]],
-                  element: str,
-                  bond_order: Optional[int] = None,
-                  kind: str = 'S') -> Optional[str]:
-    """
-    Pick a bead‐type key from martini_dict whose
-      • key starts with `kind` ('S' or 'T'),
-      • val[0] == 2,
-      • and whose val[2] (the "(...)" part) matches our element + optional '='.
+from non_ring_helpers import (
+    trace_linear_path,
+    trace_branch,
+    get_final_edge,
+    find_branch_candidates,
+    resolve_unique_candidate,
+    bfs_path,
+    map_two_atoms_by_connectivity,
+    build_and_assign_trio,
+    build_inner_graph_local,
+    bfs_distance_graph,
+    bfs_path_graph,
+    induced_subgraph_is_connected,
+    induced_subgraph_components,
+    dfs_trace_from_seed,
+)
 
-    element: e.g. 'O', 'N', 'S', 'CL', 'I', 'C', 'BR', F
-    bond_order: if element == 'O' and bond_order == 2, we look for '(=O)' else '(O)'
-    kind: 'S' for SN6*, 'SC6'…, 'SN6a', etc.; 'T' for TN6*, 'TC4'…, 'TX2', etc.
-    """
-    # build the pattern to look for inside the parentheses
-    el = element.capitalize()  # so 'CL' -> 'Cl'
-    if element == 'O' and bond_order == 2:
-        pat = '(=O)'
-    else:
-        pat = f'({el})'
+from ring_helpers import (
+     outer_info,
+     assign_bead,
+     benzene_process_array3_two_passes,
+     pick_bead_key,
+     generate_random_string,
+     find_bead,
+     merge_phenol_to_diol,
+)
 
-    for key, val in martini_dict.items():
-        if not key.startswith(kind):
-            if key.startswith('X') and kind == "S":
-                key
-            else:
-                continue
-        if val[0] != 2:
-            continue
-        # val[2] is something like 'CC(O)' or 'C(Cl)' or 'CC(=O)'
-        if val[2].endswith(pat):
-            return key
+def build_section_index(section: List[List[Any]]):
+    """Fast lookups for this section."""
+    atoms_by_gid = {a[0]: a for a in section}
+    gid_to_local = {a[0]: i for i, a in enumerate(section)}
+    return atoms_by_gid, gid_to_local
+
+def foreign_is_size1_nonring(full_mapping, outer_tup) -> bool:
+    """True if outer points to section type 0, size 1."""
+    foreign_sec, foreign_atom, _ = outer_info(full_mapping, outer_tup)
+    return foreign_atom[2] == 0 and len(foreign_sec) == 1
+
+def find_bead_by_val1(martini_dict: Dict[str, List[Any]], sect: int, val1: int) -> Optional[str]:
+    for k, v in martini_dict.items():
+        if len(v) > 1 and v[0] == sect and v[1] == val1:
+            return k
     return None
 
+def map_adjacent_SS_pairs(section, final, martini_dict) -> None:
+    """If two unmapped sulfurs are adjacent, map them as SS immediately."""
+    atoms_by_gid, _ = build_section_index(section)
+    bead_key = find_bead(martini_dict, 5, "SS")
+    if bead_key is None:
+        return
+
+    for atom in section:
+        g = atom[0]
+        if atom[1].upper() != "S" or final[g] != "":
+            continue
+        for nbr_local, _ in atom[4]:
+            if 0 <= nbr_local < len(section):
+                nbr_gid = section[nbr_local][0]
+                if atoms_by_gid[nbr_gid][1].upper() == "S" and final[nbr_gid] == "":
+                    assign_bead(final, bead_key, g, nbr_gid)
+                    break
+                
 # =============================================================================
 # TASK 3.a: Mapping Benzene Ring Section
 # =============================================================================
@@ -87,6 +113,8 @@ def map_benzene_ring_section(section: List[List[Any]],
          ("TC5" if both C, "TN6a" if one N).
       7. Final check: ensure every atom is mapped.
     """
+    # Fast lookups: global atom id -> atom record (keeps original list-based atom structure)
+    atoms_by_gid, gid_to_local = build_section_index(section)
     # ---------------------- Step 1: Build array0 ----------------------
     array0 = []
     seen0 = set()
@@ -104,7 +132,7 @@ def map_benzene_ring_section(section: List[List[Any]],
                 if nbr_global in seen0 or nbr_global == idx:
                     continue
     
-                nbr_obj = next(a for a in section if a[0] == nbr_global)
+                nbr_obj = atoms_by_gid[nbr_global]
                 if (nbr_obj[1].lower() == 'c'
                     and final[nbr_global] == ""
                     and nbr_obj[3]
@@ -131,8 +159,7 @@ def map_benzene_ring_section(section: List[List[Any]],
                         used0.add(neighbor[0])
                         break
     for p in pairs0:
-        rstr = generate_random_string()
-        atom_candidate = next(a for a in section if a[0] == p[0])
+        atom_candidate = atoms_by_gid[p[0]]
     
         # pick bead key from martini_dict instead of hard-coding
         bead_key = None
@@ -141,100 +168,109 @@ def map_benzene_ring_section(section: List[List[Any]],
             order = foreign_atom[2]
             if order in (1, 2):
                 # find the dict key where val[0] == 8 and val[1] == bond order
-                bead_key = next(
-                    (k for k, v in martini_dict.items() if v[0] == 8 and v[1] == order),
-                    None
-                )
+                bead_key = find_bead_by_val1(martini_dict, 8, order)
                 break
-            
-        # fallback if not found
-        if bead_key is None:
-            raise ValueError(f"bead_key is not 1 at step 2 of TASK 3.a (order={order!r})")
-    
-        bead = bead_key + rstr
-        final[p[0]] = bead
-        final[p[1]] = bead
-
-    # ---------------------- Step 3: Build array1 ----------------------
-    # Atoms that are unmapped and either have no outer connections OR have at least one outer connection
-    # where the foreign section satisfies:
-    #   - length >= 3, OR
-    #   - length == 2 and the two atoms are not (one C and one O)
-    def qualifies_foreign(tup):
-        foreign_sec = full_mapping[tup[0]]
-        if len(foreign_sec) >= 3:
-            return True
-        elif len(foreign_sec) == 2:
-            # Get the uppercase types of both atoms in the foreign section.
-            types = [foreign_sec[0][1].upper(), foreign_sec[1][1].upper()]
-            if sorted(types) != ['C', 'O']:
-                return True
-        return False
-
-    array1 = [atom[0] for atom in section 
-              if final[atom[0]] == "" and 
-              (len(atom[3]) == 0 or any(qualifies_foreign(tup) for tup in atom[3]))]
-    # New parity correction: if array1 has an odd number of atoms.
-    # Leftover atoms go to array2.
-    array2 = []
-    # try to remove any atom that is not connected to any other atom in array1.
-    for idx in list(array1):  # iterate over a copy to avoid modification during iteration
-        atom_obj = next(a for a in section if a[0] == idx)
-        connection_count = sum(1 for tup in atom_obj[4] 
-                               if 0 <= tup[0] < len(section) and section[tup[0]][0] in array1)
-        if connection_count == 0:
-            array2.append(idx)
-            array1.remove(idx)
-            removed = True
-            break
-    if len(array1) % 2 == 1:
-        removed = False
-        # First, try to remove any atom that is not connected to any other atom in array1.
-        for idx in list(array1):  # iterate over a copy to avoid modification during iteration
-            atom_obj = next(a for a in section if a[0] == idx)
-            connection_count = sum(1 for tup in atom_obj[4] 
-                                   if 0 <= tup[0] < len(section) and section[tup[0]][0] in array1)
-            if connection_count == 0:
-                array2.append(idx)
-                array1.remove(idx)
-                removed = True
-                break
-        # If none found, try to remove any atom that is connected to an inner atom 
-        # that is unmapped and is not in array1.
-        if not removed:
-            for idx in list(array1):
-                atom_obj = next(a for a in section if a[0] == idx)
-                # Look for any inner connection to an unmapped atom not in array1.
-                for tup in atom_obj[4]:
-                    if 0 <= tup[0] < len(section):
-                        neighbor = section[tup[0]]
-                        # Check that the neighbor is unmapped and its global index is not in array1.
-                        if final[neighbor[0]] == "" and neighbor[0] not in array1:
-                            array2.append(idx)
-                            array1.remove(idx)
-                            removed = True
-                            break
-                if removed:
+        assign_bead(final, bead_key, p[0], p[1])
+        
+    # ---------------------- Step 3: Build array3 ----------------------
+    # For every atom with an outer connection (index3 non-empty) that is still unmapped,
+    # and for at least one outer connection the foreign atom (in full_mapping) has section type 0
+    # and the foreign section has length 1, and that foreign atom is unmapped.
+    array3 = []
+    for atom in section:
+        if len(atom[3]) != 0 and final[atom[0]] == "":
+            for tup in atom[3]:
+                foreign_sec = full_mapping[tup[0]]
+                foreign_atom = foreign_sec[tup[1]]
+                if foreign_atom[2] == 0 and len(foreign_sec) == 1 and final[foreign_atom[0]] == "":
+                    array3.append(atom[0])
                     break
-        if not removed:
-            raise ValueError("Benzene ring odd parity is bugged!")
-    # ---------------------- Step 4: Pair atoms from array1 ----------------------
-    # Revised pairing for array1 according to rules described.
+    
+    
+    # ---------------------- Step 4: Build array4 ----------------------
+    # Atoms with outer connections still unmapped where for at least one outer connection
+    # the foreign section has length 2 and the foreign atom is section type 0 and unmapped.
+    array4 = []
+    for atom in section:
+        if len(atom[3]) != 0 and final[atom[0]] == "":
+            for tup in atom[3]:
+                foreign_sec = full_mapping[tup[0]]
+                foreign_atom = foreign_sec[tup[1]]
+                if foreign_atom[2] == 0 and len(foreign_sec) == 2 and final[foreign_atom[0]] == "":
+                    array4.append(atom[0])
+                    break
+    
+    
+    # ---------------------- Step 5: Process array4 (SN2a) ----------------------
+    # NEW RULE:
+    # Only map SN2a if array3 has size 1+ (instead of the old parity check).
+    if len(array3) >= 1:
+        for a_idx in array4:
+            atom = atoms_by_gid[a_idx]
+            foreign_tup = atom[3][0]  # take the first outer connection
+            foreign_sec = full_mapping[foreign_tup[0]]
+            foreign_atom = foreign_sec[foreign_tup[1]]
+    
+            # find the bead key for C(OC)
+            bead_key = find_bead(martini_dict, 2, "C(OC)")
+            targets = [atom[0], foreign_atom[0]]
+            if foreign_atom[4]:
+                nbr_local = foreign_atom[4][0][0]
+                nbr_in_foreign = foreign_sec[nbr_local]
+                targets.append(nbr_in_foreign[0])
+            
+            assign_bead(final, bead_key, *targets)
+    # else: skip SN2a completely
+    
+    
+    # ---------------------- Step 6: Process array3 (TWO PASSES) ----------------------
+    # NEW:
+    # - We run the loop twice.
+    # - Candidate neighbors must:
+    #   (c0) array4 must be empty to even consider candidates for 3-long beads (S-bead).
+    #   (c1) be Carbon (candidate atom type == 'C')
+    #   (c2) be unmapped
+    #   (c3) and satisfy:
+    #        - has 0 outer connections
+    #          OR
+    #        - has an outer connection to a foreign section:
+    #            (a) len >= 3, OR
+    #            (b) len == 2 and not (C,O)
+    #
+    # - If len(nbr_candidates) == 2:
+    #     * PASS 1: skip
+    #     * PASS 2: handle (choose candidate adjacent to an already mapped atom; else first)
+    #
+    # - Every time we successfully assign a bead for an array3 atom, remove it from array3
+    #   so PASS 2 only sees what's left.
+    benzene_process_array3_two_passes(
+        section=section,
+        atoms_by_gid=atoms_by_gid,
+        final=final,
+        martini_dict=martini_dict,
+        full_mapping=full_mapping,
+        array3=array3,
+        array4=array4,
+    )
+        
+    # ---------------------- Step 7: Build array1 (NO SEARCH) ----------------------
+    # NEW:
+    # "the rest of the atoms can be put into array1 ... without any search whatsoever"
+    array1 = [atom[0] for atom in section if final[atom[0]] == ""]
+    
+    # ---------------------- Step 8: Pair atoms from array1 (done LAST) ----------------------
+    # This is Step 4 (pairing rules) reused as-is, but now it runs last.
     pairs1 = []
     
     if len(array1) == 2:
-        # If exactly two atoms remain, pair them.
         pairs1.append((array1[0], array1[1]))
     
     elif len(array1) == 4:
-        # Try to find an atom that is connected to exactly 1 other atom in array1.
         candidate_pair = None
         for a_global in array1:
-            a_atom = next(atom for atom in section if atom[0] == a_global)
-            # Gather neighbors from inner connections, adjusting using the neighbor's local position.
+            a_atom = atoms_by_gid[a_global]
             connected_neighbors = []
-            for tup in a_atom[4]:
-                nbr_local = tup[0]
+            for nbr_local, _ in a_atom[4]:
                 if 0 <= nbr_local < len(section):
                     neighbor = section[nbr_local]
                     if neighbor[0] in array1:
@@ -242,47 +278,62 @@ def map_benzene_ring_section(section: List[List[Any]],
             if len(connected_neighbors) == 1:
                 candidate_pair = (a_global, connected_neighbors[0])
                 break
+    
         if candidate_pair is not None:
             pairs1.append(candidate_pair)
             remaining = [x for x in array1 if x not in candidate_pair]
-            # The remaining should be two atoms; pair them.
             if len(remaining) == 2:
                 pairs1.append((remaining[0], remaining[1]))
             else:
-                # If something unexpected happens, pair sequentially.
                 for i in range(0, len(remaining), 2):
                     pairs1.append((remaining[i], remaining[i+1]))
         else:
-            # Fallback: sort array1 by section order and pair sequentially.
-            sorted_array1 = sorted(array1, key=lambda x: next(i for i, atom in enumerate(section) if atom[0] == x))
+            sorted_array1 = sorted(array1, key=gid_to_local.get)
             for i in range(0, len(sorted_array1), 2):
                 pairs1.append((sorted_array1[i], sorted_array1[i+1]))
     
     elif len(array1) == 6:
-        # First, try to find any atom that connects to at least one other in array1.
+        # --- NEW: Prefer N–N pairing first if possible (6-case only) ---
         candidate_pair = None
-        for a_global in array1:
-            a_atom = next(atom for atom in section if atom[0] == a_global)
-            connected_neighbors = []
-            for tup in a_atom[4]:
-                nbr_local = tup[0]
-                if 0 <= nbr_local < len(section):
-                    neighbor = section[nbr_local]
-                    if neighbor[0] in array1:
-                        connected_neighbors.append(neighbor[0])
-            if connected_neighbors:
-                candidate_pair = (a_global, connected_neighbors[0])
-                break
+        n_nodes = [g for g in array1 if atoms_by_gid[g][1].upper() == "N"]
+        if len(n_nodes) >= 2:
+            # try to find a connected N–N pair
+            for a_global in n_nodes:
+                a_atom = atoms_by_gid[a_global]
+                for nbr_local, _ in a_atom[4]:
+                    if 0 <= nbr_local < len(section):
+                        neighbor = section[nbr_local]
+                        if neighbor[0] in n_nodes:
+                            candidate_pair = (a_global, neighbor[0])
+                            break
+                if candidate_pair is not None:
+                    break
+    
+        # --- Original logic (fallback) ---
+        if candidate_pair is None:
+            # First, try to find any atom that connects to at least one other in array1.
+            for a_global in array1:
+                a_atom = atoms_by_gid[a_global]
+                connected_neighbors = []
+                for nbr_local, _ in a_atom[4]:
+                    if 0 <= nbr_local < len(section):
+                        neighbor = section[nbr_local]
+                        if neighbor[0] in array1:
+                            connected_neighbors.append(neighbor[0])
+                if connected_neighbors:
+                    candidate_pair = (a_global, connected_neighbors[0])
+                    break
+    
         if candidate_pair is not None:
             pairs1.append(candidate_pair)
             remaining = [x for x in array1 if x not in candidate_pair]
+    
             # Now, remaining should have 4 atoms. Process them as in the 4-case.
             candidate_pair_4 = None
             for a_global in remaining:
                 a_atom = next(atom for atom in section if atom[0] == a_global)
                 connected_neighbors = []
-                for tup in a_atom[4]:
-                    nbr_local = tup[0]
+                for nbr_local, _ in a_atom[4]:
                     if 0 <= nbr_local < len(section):
                         neighbor = section[nbr_local]
                         if neighbor[0] in remaining:
@@ -290,6 +341,7 @@ def map_benzene_ring_section(section: List[List[Any]],
                 if len(connected_neighbors) == 1:
                     candidate_pair_4 = (a_global, connected_neighbors[0])
                     break
+    
             if candidate_pair_4 is not None:
                 pairs1.append(candidate_pair_4)
                 remaining = [x for x in remaining if x not in candidate_pair_4]
@@ -299,300 +351,33 @@ def map_benzene_ring_section(section: List[List[Any]],
                     for i in range(0, len(remaining), 2):
                         pairs1.append((remaining[i], remaining[i+1]))
             else:
-                sorted_remaining = sorted(remaining, key=lambda x: next(i for i, atom in enumerate(section) if atom[0]==x))
+                sorted_remaining = sorted(remaining, key=gid_to_local.get)
                 for i in range(0, len(sorted_remaining), 2):
                     pairs1.append((sorted_remaining[i], sorted_remaining[i+1]))
         else:
             # Fallback: sort array1 and pair sequentially.
-            sorted_array1 = sorted(array1, key=lambda x: next(i for i, atom in enumerate(section) if atom[0] == x))
+            sorted_array1 = sorted(array1, key=gid_to_local.get)
             for i in range(0, len(sorted_array1), 2):
                 pairs1.append((sorted_array1[i], sorted_array1[i+1]))
     
-    # pairs1 now contains the paired candidates following the specified rules.
-    # Assign beads for each pair in pairs1.
+    # Assign beads for each pair in pairs1 (same as before)
     for pair in pairs1:
-        rstr = generate_random_string()
-        atom1 = next(a for a in section if a[0] == pair[0])
-        atom2 = next(a for a in section if a[0] == pair[1])
+        atom1 = atoms_by_gid[pair[0]]
+        atom2 = atoms_by_gid[pair[1]]
         e1 = atom1[1].upper()
         e2 = atom2[1].upper()
     
-        # build the two‐letter key
         path = e1 + e2
+        bead_key = find_bead(martini_dict, 1, path)
+        assign_bead(final, bead_key, pair[0], pair[1])
     
-        # try to find a bead where val[0]==1 and val[2] matches CC, NN or CN (order‐insensitive)
-        bead_key = next((
-            k for k, v in martini_dict.items()
-            if v[0] == 1 and (v[2].upper() == path or v[2].upper() == path[::-1])
-        ), None)
-    
-        if bead_key is None:
-            raise ValueError(f"Benzene double bond not mappable (no section-1 bead for {path!r})")
-        bead = bead_key + rstr
-        final[pair[0]] = bead
-        final[pair[1]] = bead
-    # ---------------------- Step 5: array2 remains from array1 pairing ----------------------
-    # (array2 holds atoms that could not be paired from array1.)
-    ''' We can test this later
-    # Make sure any leftovers are all carbons
-    for idx in array2:
-        atom = next(a for a in section if a[0] == idx)
-        if atom[1].upper() != 'C':
-            raise ValueError(f"Non-C atom in benzene not mappable (found '{atom[1]}' at index {idx}).")
-            '''    
-    # ---------------------- Step 6: Build array3 ----------------------
-    # For every atom with an outer connection (index3 non-empty) that is still unmapped,
-    # and for at least one outer connection the foreign atom (in full_mapping) has section type 0 and the foreign section has length 1.
-    array3 = []
-    for atom in section:
-        if len(atom[3]) != 0 and final[atom[0]] == "":
-            for tup in atom[3]:
-                foreign_sec = full_mapping[tup[0]]
-                foreign_atom = foreign_sec[tup[1]]
-                # require section type 0, length 1, and unmapped
-                if foreign_atom[2] == 0 and len(foreign_sec) == 1 and final[foreign_atom[0]] == "":
-                    array3.append(atom[0])
-                    break
-    # ---------------------- Step 7: Process array3 ----------------------
-    # For every atom in array3, check inner connections for neighbors that satisfy:
-    # either the neighbor is in array2 OR has an outer connection to a section that meets one of the following:
-    # (a) foreign section length >= 3, or
-    # (b) foreign section length == 2 and the two atoms in that section are not one C and one O.
-    for a_idx in array3:
-        atom = next(a for a in section if a[0] == a_idx)
-        nbr_candidates = []
-        for tup in atom[4]:
-            nbr_local = tup[0]
-            bond_order = tup[1]
-            if 0 <= nbr_local < len(section):
-                neighbor = section[nbr_local]
-                qualifies = False
-                # Condition 1: directly in array2.
-                if neighbor[0] in array2:
-                    qualifies = True
-                else:
-                    # Check neighbor's outer connections.
-                    for outer in neighbor[3]:
-                        foreign_sec = full_mapping[outer[0]]
-                        if len(foreign_sec) >= 3:
-                            qualifies = True
-                            break
-                        elif len(foreign_sec) == 2:
-                            # Get the types of both atoms in the foreign section.
-                            types = [a[1].upper() for a in foreign_sec]
-                            # Only disqualify if they are one C and one O.
-                            if sorted(types) != ['C', 'O']:
-                                qualifies = True
-                                break
-                if qualifies and final[neighbor[0]] == "":
-                    nbr_candidates.append((neighbor[0], bond_order))
-        rstr = generate_random_string()
-        foreign_tup = atom[3][0]  # Use the first outer connection.
-        foreign_sec = full_mapping[foreign_tup[0]]
-        foreign_atom = foreign_sec[foreign_tup[1]]
-        if len(nbr_candidates) == 1:
-            candidate = nbr_candidates[0][0]
-            if candidate in array2:
-                array2.remove(candidate)
-            bond_order = atom[3][0][2]
-            key = pick_bead_key(martini_dict,
-                                foreign_atom[1].upper(),
-                                bond_order,
-                                kind='S')
-            bead = (key + rstr) if key else ''
-            final[atom[0]] = bead
-            final[candidate] = bead
-            final[foreign_atom[0]] = bead
-            
-        elif len(nbr_candidates) == 2:
-            # If two candidates qualify, choose one—preferring a candidate adjacent to an already mapped atom.
-            chosen = None
-            for candidate, _ in nbr_candidates:
-                neighbor_atom = next(a for a in section if a[0] == candidate)
-                if any(final[section[tup[0]][0]] != "" for tup in neighbor_atom[4]):
-                    chosen = candidate
-                    break
-            if chosen is None:
-                chosen = nbr_candidates[0][0]
-            if chosen in array2:
-                array2.remove(chosen)
-            bond_order = atom[3][0][2]
-            key = pick_bead_key(martini_dict,
-                                foreign_atom[1].upper(),
-                                bond_order,
-                                kind='S')
-            bead = (key + rstr) if key else ''
-            final[atom[0]] = bead
-            final[chosen] = bead
-            final[foreign_atom[0]] = bead
-            
-        else:
-            # No qualifying neighbor: decide based on the bond order of the first outer connection.
-            bond_order = atom[3][0][2]
-            rstr = generate_random_string()
-            if atom[1].upper() == "C":
-                key = pick_bead_key(martini_dict, foreign_atom[1].upper(), bond_order, kind='T')
-            elif foreign_atom[1].upper() == "C":
-                key = pick_bead_key(martini_dict, atom[1].upper(), bond_order, kind='T')
-            else:
-                raise ValueError("atom and foreign are both not C")
-            bead = (key + rstr) if key else ''
-            final[atom[0]] = bead
-            final[foreign_atom[0]] = bead
-                
-    # ---------------------- Step 8: Build array4 ----------------------
-    # Atoms with outer connections still unmapped where for at least one outer connection
-    # the foreign section has length 2.
-    array4 = []
-    for atom in section:
-        if len(atom[3]) != 0 and final[atom[0]] == "":
-            for tup in atom[3]:
-                foreign_sec = full_mapping[tup[0]]
-                foreign_atom = foreign_sec[tup[1]]
-                # require section type 0, length 2, and unmapped foreign atom
-                if foreign_atom[2] == 0 and len(foreign_sec) == 2 and final[foreign_atom[0]] == "":
-                    array4.append(atom[0])
-                    break
-    
-    # ---------------------- Step 9: Process array4 ----------------------
-    # Only map SN2a if the number of remaining unmapped atoms in this section,
-    # after subtracting the size of array4, is an even number.
-    unmapped_count = len([atom for atom in section if final[atom[0]] == ""])
-    if (unmapped_count - len(array4)) % 2 == 0:
-        for a_idx in array4:
-            atom = next(a for a in section if a[0] == a_idx)
-            foreign_tup = atom[3][0]  # take the first outer connection
-            foreign_sec = full_mapping[foreign_tup[0]]
-            foreign_atom = foreign_sec[foreign_tup[1]]
-    
-            # find the bead key for C(OC)
-            bead_key = next((
-                k for k, v in martini_dict.items()
-                if v[0] == 2 and v[2].upper() == "C(OC)"
-            ), None)
-            if bead_key is None:
-                raise ValueError("No bead found for array4 C–O–C case (expected val[0]=2, val[2]='C(OC)').")
-    
-            rstr = generate_random_string()
-            bead = bead_key + rstr
-    
-            # now assign
-            final[atom[0]] = bead
-            final[foreign_atom[0]] = bead
-            if foreign_atom[4]:
-                nbr_local = foreign_atom[4][0][0]
-                nbr_in_foreign = foreign_sec[nbr_local]
-                final[nbr_in_foreign[0]] = bead
-    else:
-        # If the condition is not met, we skip mapping SN2a.
-        pass
-
-    # ---------------------- Step 10: Build array5 ----------------------
-    # Every remaining unmapped atom.
-    array5 = [atom[0] for atom in section if final[atom[0]] == ""]
-    pairs5 = []
-    # Case: six remaining
-    if len(array5) == 6:
-        used = set()
-        for idx in array5:
-            if idx in used:
-                continue
-            atom = next(a for a in section if a[0] == idx)
-            for tup in atom[4]:  # inner connections
-                nbr = section[tup[0]][0]
-                if nbr in array5 and nbr not in used:
-                    pairs5.append((idx, nbr))
-                    used.add(idx)
-                    used.add(nbr)
-                    break
-        # pair the last two
-        rem = [i for i in array5 if i not in used]
-        if len(rem) == 2:
-            pairs5.append((rem[0], rem[1]))
-    # Case: four remaining
-    elif len(array5) == 4:
-        used = set()
-        # find a node with an already‑mapped neighbor
-        for idx in array5:
-            if idx in used:
-                continue
-            atom = next(a for a in section if a[0] == idx)
-            for tup in atom[4]:
-                nbr = section[tup[0]][0]
-                if nbr in array5 and final[nbr] != "" and idx not in used and nbr not in used:
-                    pairs5.append((idx, nbr))
-                    used.add(idx)
-                    used.add(nbr)
-                    break
-        # pair the remaining two
-        rem = [i for i in array5 if i not in used]
-        if len(rem) == 2:
-            pairs5.append((rem[0], rem[1]))
-    # Case: two remaining
-    elif len(array5) == 2:
-        i1, i2 = array5
-        # if they’re directly connected, great:
-        atom1 = next(a for a in section if a[0] == i1)
-        if any(section[nbr_local][0] == i2 for nbr_local, _ in atom1[4]):
-            pairs5 = [(i1, i2)]
-        else:
-            # fallback: reuse the first original pair from Step 2
-            if not pairs0:
-                # no original pair to borrow—just pair arbitrarily
-                pairs5 = [(i1, i2)]
-            else:
-                orig_a, orig_b = pairs0[0]
-    
-                # 1) Unmap that bead entirely
-                bead_tag = final[orig_a]
-                for j, v in enumerate(final):
-                    if v == bead_tag:
-                        final[j] = ""
-    
-                # 2) Recompute who’s unmapped now (should be 4 atoms)
-                unmapped = {a[0] for a in section if final[a[0]] == ""}
-    
-                # 3) For each of the two originals, pair it with one of its as-yet-unmapped neighbors
-                for orig in (orig_a, orig_b):
-                    atom = next(a for a in section if a[0] == orig)
-                    for nbr_local, _ in atom[4]:
-                        nbr_global = section[nbr_local][0]
-                        if nbr_global in unmapped and nbr_global != orig:
-                            pairs5.append((orig, nbr_global))
-                            # mark both as used
-                            unmapped.remove(orig)
-                            unmapped.remove(nbr_global)
-                            break
-    # Map generated pairs (final benzene fallback)
-    for pair in pairs5:
-        rstr = generate_random_string()
-        atom1 = next(a for a in section if a[0] == pair[0])
-        atom2 = next(a for a in section if a[0] == pair[1])
-        e1 = atom1[1].upper()
-        e2 = atom2[1].upper()
-    
-        # build the two‐letter key
-        path = e1 + e2
-    
-        # try to find a bead where val[0]==1 and val[2] matches CC, NN or CN (order‐insensitive)
-        bead_key = next((
-            k for k, v in martini_dict.items()
-            if v[0] == 1 and (v[2].upper() == path or v[2].upper() == path[::-1])
-        ), None)
-    
-        if bead_key is None:
-            raise ValueError(f"Benzene double bond not mappable (no section-1 bead for {path!r})")
-    
-        bead = bead_key + rstr
-        final[pair[0]] = bead
-        final[pair[1]] = bead
-
+    # step 9
+    merge_phenol_to_diol(section, final, martini_dict, full_mapping)
     # ---------------------- Final Check ----------------------
     for atom in section:
         if final[atom[0]] == "":
             raise ValueError("Benzene ring section not fully mappable!")
     return final
-
 
 # =============================================================================
 # TASK 3.b: Mapping Non-Benzene 6-Ring Section
@@ -639,39 +424,21 @@ def map_nonbenzene_6_ring_section(
     """
     # --- SPECIAL S–S HANDLER  ---
     # If two unmapped sulfurs sit next to each other in the ring, pair them immediately.
-    for atom in section:
-        if atom[1].upper() == 'S' and final[atom[0]] == "":
-            for (nbr_local, _) in atom[4]:
-                nbr = section[nbr_local]
-                if nbr[1].upper() == 'S' and final[nbr[0]] == "":
-                    # look up the bead key for SS in section 5
-                    bead_key = next((
-                        k for k, v in martini_dict.items()
-                        if v[0] == 5 and v[2].upper() == "SS"
-                    ), None)
-                    if bead_key is None:
-                        raise ValueError("No section-5 bead found for 'SS'")
-                    rstr = generate_random_string()
-                    bead = bead_key + rstr
-                    final[atom[0]] = bead
-                    final[nbr[0]]  = bead
-                    break
-    
-    # Helper function: Get foreign atom from an outer connection tuple.
-    def get_foreign_info(tup):
-        foreign_sec = full_mapping[tup[0]]
-        foreign_atom = foreign_sec[tup[1]]
-        return foreign_atom
-    
-    # Helper function: Check if an outer connection qualifies as non-ring (section 0 with size 1)
-    def qualifies_foreign(tup):
-        foreign_sec = full_mapping[tup[0]]
-        foreign_atom = foreign_sec[tup[1]]
-        return (foreign_atom[2] == 0 and len(foreign_sec) == 1)
+    map_adjacent_SS_pairs(section, final, martini_dict)
+    atoms_by_gid, gid_to_local = build_section_index(section)
     
     # --- Step A: Process ring–ring border nodes
     for atom in section:
-        if final[atom[0]] == "" and any(full_mapping[t[0]][t[1]][2] != 0 for t in atom[3]):
+        has_outer = False
+        for t in atom[3]:
+            si, li = t[0], t[1]
+            if 0 <= si < len(full_mapping) and 0 <= li < len(full_mapping[si]):
+                fa = full_mapping[si][li]
+                if len(fa) > 2 and fa[2] != 0:
+                    has_outer = True
+                    break
+        
+        if final[atom[0]] == "" and has_outer:
             candidate = atom
             matching_neighbors = []
             # Check candidate's inner neighbors for one that has an outer connection to the same ring
@@ -687,12 +454,13 @@ def map_nonbenzene_6_ring_section(
                             if foreign_atom[2] == candidate[2]:
                                 matching_neighbors.append(neighbor)
                                 break
+                            
             if len(matching_neighbors) == 0:
                 print("ring-ring neighbors connected through only 1 atom, is ignore")
             elif len(matching_neighbors) == 1:
                 inner_neighbor = matching_neighbors[0]
-                cand_qual = [t for t in candidate[3] if qualifies_foreign(t)]
-                neigh_qual = [t for t in inner_neighbor[3] if qualifies_foreign(t)]
+                cand_qual = [t for t in candidate[3] if foreign_is_size1_nonring(full_mapping, t)]
+                neigh_qual = [t for t in inner_neighbor[3] if foreign_is_size1_nonring(full_mapping, t)]
                 if candidate[1].upper() != 'C' or inner_neighbor[1].upper() != 'C':
                     print(f"ring–ring border fallback supports only C–C; found {candidate[1].upper()}-{inner_neighbor[1].upper()} skipping")
                     continue
@@ -702,46 +470,28 @@ def map_nonbenzene_6_ring_section(
                     # Use each node's first qualifying connection
                     fc1 = cand_qual[0]
                     fc2 = neigh_qual[0]
-                    foreign_atom1 = get_foreign_info(fc1)
-                    foreign_atom2 = get_foreign_info(fc2)
+                    _, foreign_atom1, _ = outer_info(full_mapping, fc1)
+                    _, foreign_atom2, _ = outer_info(full_mapping, fc2)
                     # Use the same bond order from one of the nodes
                     bond_order = atom[3][0][2]
                     key1 = pick_bead_key(martini_dict, foreign_atom1[1].upper(), bond_order, kind='T')
                     key2 = pick_bead_key(martini_dict, foreign_atom2[1].upper(), bond_order, kind='T')
-                    rstr = generate_random_string()
-                    bead1 = (key1 + rstr) if key1 else ''
-                    rstr = generate_random_string()
-                    bead2 = (key2 + rstr) if key2 else ''
-                    final[candidate[0]] = bead1
-                    final[foreign_atom1[0]] = bead1
-                    final[inner_neighbor[0]] = bead2
-                    final[foreign_atom2[0]] = bead2
+                    assign_bead(final, key1, candidate[0], foreign_atom1[0])
+                    assign_bead(final, key2, inner_neighbor[0], foreign_atom2[0])
                 elif (len(cand_qual) == 1) or (len(neigh_qual) == 1):
                     # Case B1: Use the one (candidate or neighbor) that has 2 outer connections.
-                    rstr = generate_random_string()
                     fc = cand_qual[0] if len(cand_qual) == 1 else neigh_qual[0]
-                    foreign_atom = get_foreign_info(fc)
+                    _, foreign_atom, _ = outer_info(full_mapping, fc)
                     bond_order = candidate[3][0][2]  # using candidate's first outer connection's bond order
                     key = pick_bead_key(martini_dict,
                                         foreign_atom[1].upper(),
                                         bond_order,
                                         kind='S')
-                    bead = (key + rstr) if key else ''
-                    final[candidate[0]] = bead
-                    final[inner_neighbor[0]] = bead
-                    final[foreign_atom[0]] = bead
+                    assign_bead(final, key, candidate[0], inner_neighbor[0], foreign_atom[0])
                 else:
                     # Case B3: only C–C allowed, lookup the bead with val[0]==1 and val[2]=="CC"
-                    bead_key = next(
-                        (k for k, v in martini_dict.items()
-                         if v[0] == 1 and v[2].upper() == "CC"),
-                        None
-                    )
-                    if bead_key is None:
-                        raise ValueError("No section-1 bead for CC found in dictionary")
-                    bead = bead_key + generate_random_string()
-                    final[candidate[0]]      = bead
-                    final[inner_neighbor[0]] = bead
+                    bead_key = find_bead(martini_dict, 1, "CC")
+                    assign_bead(final, bead_key, candidate[0], inner_neighbor[0])
             else:
                 # Ambiguous: more than one matching inner neighbor → skip this atom
                 print(f"Ambiguous ring–ring border for atom {atom[0]}; skipping")
@@ -772,23 +522,19 @@ def map_nonbenzene_6_ring_section(
             bond_order = bo
     
             # find qualifying foreign connections on each
-            cand_qual  = [x for x in atom[3]     if qualifies_foreign(x)]
-            neigh_qual = [x for x in neighbor[3] if qualifies_foreign(x)]
+            cand_qual  = [x for x in atom[3]     if foreign_is_size1_nonring(full_mapping, x)]
+            neigh_qual = [x for x in neighbor[3] if foreign_is_size1_nonring(full_mapping, x)]
             # Case D1: both sides qualify
             if len(cand_qual) == 1 and len(neigh_qual) == 1:
                 # FIX: ensure both ring atoms are carbon
                 if atom[1].upper() != 'C' or neighbor[1].upper() != 'C':
                     raise ValueError("Double‐bond not mappable: both atoms must be C–C for D1")
-                fa = get_foreign_info(cand_qual[0])
-                fb = get_foreign_info(neigh_qual[0])
+                _, fa, _ = outer_info(full_mapping, cand_qual[0])
+                _, fb, _ = outer_info(full_mapping, neigh_qual[0])
                 key1 = pick_bead_key(martini_dict, fa[1].upper(), bond_order, kind='T')
                 key2 = pick_bead_key(martini_dict, fb[1].upper(), bond_order, kind='T')
-                bead1 = (key1 + generate_random_string()) if key1 else ''
-                bead2 = (key2 + generate_random_string()) if key2 else ''
-                final[a_idx]   = bead1
-                final[fa[0]]   = bead1
-                final[b_idx]   = bead2
-                final[fb[0]]   = bead2
+                assign_bead(final, key1, a_idx, fa[0])
+                assign_bead(final, key2, b_idx, fb[0])
     
             # Case D2: exactly one side qualifies
             elif len(cand_qual) == 1 or len(neigh_qual) == 1:
@@ -796,15 +542,12 @@ def map_nonbenzene_6_ring_section(
                 if atom[1].upper() != 'C' or neighbor[1].upper() != 'C':
                     raise ValueError("Double‐bond not mappable: both atoms must be C–C for D2")
                 fc = cand_qual[0] if len(cand_qual)==1 else neigh_qual[0]
-                foreign = get_foreign_info(fc)
+                _, foreign, _ = outer_info(full_mapping, fc)
                 key = pick_bead_key(martini_dict,
                                     foreign[1].upper(),
                                     bond_order,
                                     kind='S')
-                bead = (key + generate_random_string()) if key else ''
-                final[a_idx]         = bead
-                final[b_idx]         = bead
-                final[foreign[0]]    = bead
+                assign_bead(final, key, a_idx, b_idx, foreign[0])
             # Case D3: neither side qualifies – choose bead type based on atom types
             else:
                 # Fallback: look up a section-1 bead for the pair via the dictionary
@@ -813,18 +556,8 @@ def map_nonbenzene_6_ring_section(
                 path = elem_a + elem_b
 
                 # find a bead key in martini_dict where v[0]==1 and v[2] matches "CC", "CN"/"NC", or "NN"
-                bead_key = next(
-                    (k for k, v in martini_dict.items()
-                     if v[0] == 1
-                        and (v[2].upper() == path or v[2].upper() == path[::-1])),
-                    None
-                )
-                if bead_key is None:
-                    raise ValueError(f"Double-bond not mappable: no section-1 bead for {path!r}")
-                bead = bead_key + generate_random_string()
-                final[a_idx] = bead
-                final[b_idx] = bead
-                
+                bead_key = find_bead(martini_dict, 1, path)
+                assign_bead(final, bead_key, a_idx, b_idx)
             processed_double.add((a_idx, b_idx))
             # once we’ve assigned for this atom, break out to next atom
             break
@@ -834,78 +567,61 @@ def map_nonbenzene_6_ring_section(
             if final[atom[0]] == "":
                 # collect all size-1 non-ring outer tuples whose foreign atom is still unmapped
                 f_tups = [t for t in atom[3]
-                          if qualifies_foreign(t) and final[full_mapping[t[0]][t[1]][0]] == ""]
+                          if foreign_is_size1_nonring(full_mapping, t) and final[full_mapping[t[0]][t[1]][0]] == ""]
                 # case: two size-1 foreigns → check all-C and assign via martini_dict
                 if len(f_tups) == 2:
                     ft1, ft2 = f_tups
-                    fa1 = get_foreign_info(ft1)
-                    fa2 = get_foreign_info(ft2)
+                    _, fa1, _ = outer_info(full_mapping, ft1)
+                    _, fa2, _ = outer_info(full_mapping, ft2)
                     elem = atom[1].upper()
                     e1, e2 = fa1[1].upper(), fa2[1].upper()
-                
-                    def assign_key(key: str):
-                        tag = key + generate_random_string()
-                        final[atom[0]] = tag
-                        final[fa1[0]]   = tag
-                        final[fa2[0]]   = tag
-                
-                    if elem == 'C':
-                        # one foreign is C, the other something else
-                        if e1 == 'C' or e2 == 'C':
-                            chosen_ft = ft1 if e1 != 'C' else ft2
-                            fa        = get_foreign_info(chosen_ft)
-                            bond      = chosen_ft[2]
-                            key = pick_bead_key(martini_dict, fa[1].upper(), bond, kind='S')
-                            if not key:
-                                raise ValueError(f"No S-key for {fa[1]}")
-                            assign_key(key)
-                
-                        # both O → SN5a ([0]=4, [2]="OCO")
-                        elif e1 == 'O' and e2 == 'O':
-                            bead_key = next((k for k,v in martini_dict.items()
-                                             if v[0] == 4 and v[2].upper() == "OCO"), None)
-                            if bead_key is None:
-                                raise ValueError("No OCO bead found in martini_dict")
-                            assign_key(bead_key)
-                
-                        # both N → SN1 ([0]=4, [2]="NCN")
-                        elif e1 == 'N' and e2 == 'N':
-                            bead_key = next((k for k,v in martini_dict.items()
-                                             if v[0] == 4 and v[2].upper() == "NCN"), None)
-                            if bead_key is None:
-                                raise ValueError("No NCN bead found in martini_dict")
-                            assign_key(bead_key)
-                
-                        # both F → SX4e ([0]=4, [2]="FCF")
-                        elif e1 == 'F' and e2 == 'F':
-                            bead_key = next((k for k,v in martini_dict.items()
-                                             if v[0] == 4 and v[2].upper() == "FCF"), None)
-                            if bead_key is None:
-                                raise ValueError("No FCF bead found in martini_dict")
-                            assign_key(bead_key)
-                
-                        else:
-                            raise ValueError("2 size-1 neighbors incompatible for central C")
-                
-                    elif elem == 'O':
-                        # only C–C allowed → SN3a ([0]=4, [2]="COC")
-                        if e1 == 'C' and e2 == 'C':
-                            bead_key = next((k for k,v in martini_dict.items()
-                                             if v[0] == 4 and v[2].upper() == "COC"), None)
-                            if bead_key is None:
-                                raise ValueError("No COC bead found in martini_dict")
-                            assign_key(bead_key)
-                        else:
-                            raise ValueError("2 size-1 neighbors incompatible for central O")
-                
-                    else:
+
+                    if elem not in ("C", "O"):
                         raise ValueError("2 size-1 neighbors but central atom not C/O")
+                    
+                    # convenience
+                    pair = (e1, e2)
+                    pair_set = frozenset(pair)
+                    
+                    # Case 1: central C and ONE foreign carbon -> use S-key based on the *non-carbon* neighbor
+                    if elem == "C" and ("C" in pair_set):
+                        # pick the non-carbon if available, otherwise just pick one (old code picked ft2 when both are C)
+                        if e1 != "C":
+                            chosen_ft = ft1
+                        else:
+                            chosen_ft = ft2
+                    
+                        _, fa, bond = outer_info(full_mapping, chosen_ft)
+                    
+                        key = pick_bead_key(martini_dict, fa[1].upper(), bond, kind="S")
+                        if not key:
+                            raise ValueError(f"No S-key for {fa[1]}")
+                        assign_bead(final, key, atom[0], fa1[0], fa2[0])
+                                            
+                    else:
+                        # Case 2: central C or O with matching pair rules -> pick the bead pattern
+                        pattern_map = {
+                            # central C rules
+                            ("C", frozenset({"O"})): "OCO",
+                            ("C", frozenset({"N"})): "NCN",
+                            ("C", frozenset({"F"})): "FCF",
+                    
+                            # central O rules
+                            ("O", frozenset({"C"})): "COC",
+                        }
+                    
+                        pattern = pattern_map.get((elem, pair_set))
+                        if pattern is None:
+                            raise ValueError(f"2 size-1 neighbors incompatible for central {elem}")
+                    
+                        bead_key = find_bead(martini_dict, 4, pattern)
+                        assign_bead(final, bead_key, atom[0], fa1[0], fa2[0])
                 
                     continue  # move on after handling this case
                 # case: single size-1 foreign → proceed with original single-tuple logic
                 if len(f_tups) == 1:
                     primary = f_tups[0]
-                    foreign_atom = get_foreign_info(primary)
+                    _, foreign_atom, _ = outer_info(full_mapping, primary)
                     bond_order = primary[2]
                     # build array1 of candidate inner neighbors
                     array1 = []
@@ -918,285 +634,235 @@ def map_nonbenzene_6_ring_section(
                             )
                             # gather neighbor's size-1 non-ring foreign tuples unmapped
                             nf_tups = [x for x in nbr[3]
-                                       if qualifies_foreign(x) and final[full_mapping[x[0]][x[1]][0]] == ""]
+                                       if foreign_is_size1_nonring(full_mapping, x) and final[full_mapping[x[0]][x[1]][0]] == ""]
                             # include if neighbor is C and not inner_unmapped, with tuple rules
                             if nbr[1].upper() == 'C' and not inner_unmapped and not nf_tups:
                                 array1.append(nbr)
                     # map based on how many neighbors found
                     if len(array1) == 0:
-                        rstr = generate_random_string()
-                        key = pick_bead_key(martini_dict, foreign_atom[1].upper(), bond_order, kind='T')
-                        bead = (key + rstr) if key else ''
-                        final[atom[0]] = bead
-                        final[foreign_atom[0]] = bead
+                        key = pick_bead_key(martini_dict, foreign_atom[1].upper(), bond_order, kind="T")
+                        assign_bead(final, key, atom[0], foreign_atom[0])
+                    
                     elif len(array1) == 1:
-                        rstr = generate_random_string()
-                        key = pick_bead_key(martini_dict,
-                                            foreign_atom[1].upper(),
-                                            bond_order,
-                                            kind='S')
-                        bead = (key + rstr) if key else ''
-                        final[atom[0]] = bead
-                        final[array1[0][0]] = bead
-                        final[foreign_atom[0]] = bead
+                        key = pick_bead_key(martini_dict, foreign_atom[1].upper(), bond_order, kind="S")
+                        assign_bead(final, key, atom[0], array1[0][0], foreign_atom[0])
+                    
                     elif len(array1) == 2:
                         if i == 1:
-                            # We have two candidate inner‐neighbors in array1.  Pick one whose
-                            # inner neighbors do NOT already carry a “T”-bead in final[].  If both
-                            # are already “tethered” to a T‐bead, just pick the first.
+                            # We have two candidate inner‐neighbors in array1. Pick one whose
+                            # inner neighbors do NOT already carry a “T”-bead in final[].
                             chosen = None
                             for nbr in array1:
-                                # collect all of nbr’s inner‐neighbor globals
-                                inner_globals = [ section[t2[0]][0] for t2 in nbr[4] ]
-                                # check if any of those already has a “T” bead
+                                inner_globals = [section[t2[0]][0] for t2 in nbr[4]]
                                 if not any(final[g].startswith("T") for g in inner_globals if final[g] != ""):
                                     chosen = nbr
                                     break
                             if chosen is None:
                                 chosen = array1[0]
                     
-                            # Now do exactly what the len(array1)==1 case does:
-                            rstr = generate_random_string()
                             bond_order = primary[2]
-                            key = pick_bead_key(
-                                martini_dict,
-                                foreign_atom[1].upper(),
-                                bond_order,
-                                kind="S"
-                            )
-                            bead = (key + rstr) if key else ""
-                            # assign the triple‐atom bead: ring‐atom, chosen inner neighbor, and foreign
-                            final[ atom[0] ]       = bead
-                            final[ chosen[0] ]     = bead
-                            final[ foreign_atom[0] ] = bead
+                            key = pick_bead_key(martini_dict, foreign_atom[1].upper(), bond_order, kind="S")
+                            assign_bead(final, key, atom[0], chosen[0], foreign_atom[0])
+                            
     # --- Step C.5: Special catch‐all for any unmapped inner atom that is not C or O,
-    #                 but has a single‐sized non‑ring (section 0) foreign neighbor which is C.
-    #                 Map both atoms to a T‐type bead (bond order = 1).
+    #                 but has a single‐sized non-ring (section 0) foreign neighbor which is C.
+    #                 Map both atoms to a T‐type bead (bond order = 1).
     for atom in section:
         if final[atom[0]] != "":
             continue
-        # If atom is neither C nor O, attempt to see if it has a qualifying outer neighbor that is C
         elem = atom[1].upper()
         if elem in ('C', 'O'):
             continue
-    
-        # Look for a non‑ring foreign connection of size 1 (qualifies_foreign) where the foreign atom is C
         for ft in atom[3]:
             # ft = (foreign_section_index, foreign_atom_local_index, bond_order)
-            foreign_atom = get_foreign_info(ft)
-            if qualifies_foreign(ft) and foreign_atom[1].upper() == 'C':
-                # We have an inner atom (elem ≠ C/O) and a foreign carbon
+            _, foreign_atom, _ = outer_info(full_mapping, ft)
+            if foreign_is_size1_nonring(full_mapping, ft) and foreign_atom[1].upper() == 'C':
                 # Use bond_order = 1 and kind='T'
                 key = pick_bead_key(martini_dict, elem, 1, kind='T')
-                bead = (key + generate_random_string()) if key else ''
-                # Assign both inner atom and foreign carbon to the same bead
-                final[atom[0]] = bead
-                final[foreign_atom[0]] = bead
+                assign_bead(final, key, atom[0], foreign_atom[0])
                 break   # move on to next atom
     # --- Step D: Final fallback mapping for remaining unmapped atoms
     remaining = [atom for atom in section if final[atom[0]] == ""]
     count = len(remaining)
     # ensure only C or O remain
-    if count in (6,5,4,3,2,1):
-        if any(atom[1].upper() not in ('C','O') for atom in remaining):
+    if count in (5, 4, 3, 2, 1):
+        if any(atom[1].upper() not in ('C', 'O', 'N') for atom in remaining):
             raise ValueError("non-benzene 6-ring section has non C/O atom")
+            
     if count == 6:
+        if any(atom[1].upper() not in ('C', 'O', 'N') for atom in remaining):
+            raise ValueError("non-benzene 6-ring section has non C/O/N atom")
+    
         # Fall back to the original oxygen-based mapping.
         array_O = [atom[0] for atom in section if atom[1].upper() == "O" and final[atom[0]] == ""]
-        # Helper to look up a bead_key by val[0], val[2], and (optionally) val[4]
-        def find_bead_by(sect, pattern, tag=None):
-            for k, v in martini_dict.items():
-                if v[0] == sect and v[2].upper() == pattern:
-                    if tag is None or (len(v) > 4 and v[4] == tag):
-                        return k
-            return None
     
         if len(array_O) == 1:
             # SN4a case: val[0]=3, val[2]=="COC", val[4]=="SC3"
-            bead_key = find_bead_by(3, "COC", "SC3")
-            if bead_key is None:
-                raise ValueError("No SN4a‐type bead found in martini_dict")
-            tag = generate_random_string()
-            bead = bead_key + tag
+            bead_key = find_bead(martini_dict, 3, "COC", tag="SC3")
             target_idx = array_O[0]
-            final[target_idx] = bead
-            # map its two neighbors too
-            for nbr_local, _ in next(a for a in section if a[0] == target_idx)[4]:
-                final[ section[nbr_local][0] ] = bead
+    
+            # map oxygen + its two neighbors with one bead
+            nbr_globals = [
+                section[nbr_local][0]
+                for nbr_local, _ in next(a for a in section if a[0] == target_idx)[4]
+            ]
+            assign_bead(final, bead_key, target_idx, *nbr_globals)
     
         elif len(array_O) == 2:
             # SN3a case: val[0]=3, val[2]=="COC", val[4]=="SN3a"
-            bead_key = find_bead_by(3, "COC", "SN3a")
-            if bead_key is None:
-                raise ValueError("No SN3a‐type bead found in martini_dict")
+            bead_key = find_bead(martini_dict, 3, "COC", tag="SN3a")
             for idx in array_O:
-                tag = generate_random_string()
-                bead = bead_key + tag
-                final[idx] = bead
-                for nbr_local, _ in next(a for a in section if a[0] == idx)[4]:
-                    final[ section[nbr_local][0] ] = bead
-                    
+                nbr_globals = [
+                    section[nbr_local][0]
+                    for nbr_local, _ in atoms_by_gid[idx][4]
+                ]
+                assign_bead(final, bead_key, idx, *nbr_globals)
+    
         # now whatever remains
         array1 = [atom[0] for atom in section if final[atom[0]] == ""]
+    
+        # --- NEW CASE: 1 N and 5 C -> group CCN and CCC ---
+        # i.e., make one 3-atom bead with pattern "CCN" and one 3-atom bead with pattern "CCC"
+        if len(array1) == 6:
+            n_nodes = [g for g in array1 if atoms_by_gid[g][1].upper() == "N"]
+            c_nodes = [g for g in array1 if atoms_by_gid[g][1].upper() == "C"]
+    
+            if len(n_nodes) == 1 and len(c_nodes) == 5:
+                n_g = n_nodes[0]
+    
+                n_adj_c = adjacent_in_allowed_set(section, gid_to_local, global_idx=n_g, allowed=set(c_nodes))
+                if len(n_adj_c) < 2:
+                    raise ValueError("1N+5C case: N does not have 2 adjacent carbons in this section")
+    
+                cA, cB = n_adj_c[0], n_adj_c[1]
+                ccn_group = [cA, cB, n_g]
+    
+                ccc_group = [g for g in array1 if g not in ccn_group]
+                if len(ccc_group) != 3 or any(atoms_by_gid[g][1].upper() != "C" for g in ccc_group):
+                    raise ValueError("1N+5C case: leftover after CCN is not exactly 3 carbons")
+    
+                bead_key_ccn = find_bead(martini_dict, 3, "CCN")
+                if bead_key_ccn is None:
+                    raise ValueError("No section-3 bead found for pattern 'CCN'")
+    
+                bead_key_ccc = find_bead(martini_dict, 3, "CCC")
+                if bead_key_ccc is None:
+                    raise ValueError("No section-3 bead found for pattern 'CCC'")
+    
+                assign_bead(final, bead_key_ccn, *ccn_group)
+                assign_bead(final, bead_key_ccc, *ccc_group)
+    
+            else:
+                # Existing behavior for 6 remaining (all carbon etc.)
+                # split into two SC3 groups of three
+                bead_key = find_bead(martini_dict, 3, "CCC")
+                g1, g2 = array1[:3], array1[3:]
+                assign_bead(final, bead_key, *g1)
+                assign_bead(final, bead_key, *g2)
+    
         if len(array1) == 3:
             # SC3 case: val[0]=3, val[2]=="CCC"
-            bead_key = find_bead_by(3, "CCC")
-            if bead_key is None:
-                raise ValueError("No SC3‐type bead found in martini_dict")
-            tag = generate_random_string()
-            bead = bead_key + tag
-            for idx in array1:
-                final[idx] = bead
+            bead_key = find_bead(martini_dict, 3, "CCC")
+            assign_bead(final, bead_key, *array1)
     
-        elif len(array1) == 6:
-            # split into two SC3 groups of three
-            bead_key = find_bead_by(3, "CCC")
-            if bead_key is None:
-                raise ValueError("No SC3‐type bead found in martini_dict")
-            g1, g2 = array1[:3], array1[3:]
-            tag1 = generate_random_string()
-            tag2 = generate_random_string()
-            for idx in g1:
-                final[idx] = bead_key + tag1
-            for idx in g2:
-                final[idx] = bead_key + tag2
-        elif len(array1) == 0:
-            print("COCCOC pattern is successfully mapped")
-        else:
+        elif len(array1) != 0:
             raise ValueError(f"Fallback for count=6 has {len(array1)} remaining — not implemented.")
+    
     elif count == 5:
         # find the C-atom with exactly one unmapped C neighbor
         cand = None
         for atom in remaining:
             if final[atom[0]] != "":
                 continue
-            nbrs = [section[t[0]] for t in atom[4]
-                    if final[ section[t[0]][0] ] != ""]
-            if len(nbrs) == 1 and nbrs[0][1].upper() == 'C':
-                cand = (atom, nbrs[0]); break
+            if atom[1].upper() != "C":
+                continue
+    
+            # unmapped neighbors (not mapped neighbors)
+            unmapped_nbrs = [section[t[0]] for t in atom[4]
+                             if final[section[t[0]][0]] == ""]
+    
+            # exactly one unmapped neighbor and it must be carbon
+            if len(unmapped_nbrs) == 1 and unmapped_nbrs[0][1].upper() == "C":
+                cand = (atom, unmapped_nbrs[0])
+                break
+    
         if not cand:
             raise ValueError("Non-benzene 6-ring: no singleton C neighbor for count=5")
+    
         atom, nbr = cand
         old_bead = final[nbr[0]]
+    
         # find all indices in final with old_bead
-        targets = [i for i,v in enumerate(final) if v == old_bead]
+        targets = [i for i, v in enumerate(final) if v == old_bead]
+    
         new_bead = old_bead
         if new_bead.startswith('T'):
             new_bead = 'S' + new_bead[1:]
         else:
             raise ValueError("Non-benzene 6-ring: C neighbor next to no T beads")
+    
         for i in targets:
             final[i] = new_bead
         final[atom[0]] = new_bead
+    
         # now fall through to count=4 logic
         count = 4
         remaining = [atom for atom in section if final[atom[0]] == ""]
+    
     if count == 4:
-        # for each atom with only one unmapped neighbor, build type string
-        for atom in remaining:
-            idx = atom[0]
-            if final[idx] != "":
-                continue
-            nbrs = [section[t[0]] for t in atom[4] if final[ section[t[0]][0] ] == ""]
-            if len(nbrs) == 1:
-                types = atom[1].upper() + nbrs[0][1].upper()
-                # find T-keys with val[0]==3 or 5 matching types or reversed
-                for key,val in martini_dict.items():
-                    if key.startswith('T') and val[0] in (3,5) and (val[2] == types or val[2] == types[::-1]):
-                        bead = key + generate_random_string()
-                        final[atom[0]] = bead
-                        final[nbrs[0][0]] = bead
-                        break
-    elif count == 3:
-        # center atom has two unmapped neighbors
-        center = next(atom for atom in remaining
-                      if len([t for t in atom[4] if final[ section[t[0]][0] ] == ""]) == 2)
-        nbrs = [section[t[0]] for t in center[4] if final[ section[t[0]][0] ] == ""]
-        s = nbrs[0][1].upper() + center[1].upper() + nbrs[1][1].upper()
-        for key,val in martini_dict.items():
-            if key.startswith('S') and val[0] in (3,5) and (val[2] == s or val[2] == s[::-1]):
-                bead = key + generate_random_string()
-                final[center[0]] = bead
-                for n in nbrs: final[n[0]] = bead
-                break
-        # if still unmapped, do the “merge” logic
-        if final[center[0]] == "":
-            merged = False
-
-            # 1) look for a C-neighbor with a T-bead neighbor
-            for nbr in nbrs:
-                if nbr[1].upper() == 'C':
-                    # gather all neighbor indices (inner + outer)
-                    inner_idxs = [section[t[0]][0] for t in nbr[4]]
-                    outer_idxs = [full_mapping[t[0]][t[1]][0] for t in nbr[3]]
-                    all_idxs = inner_idxs + outer_idxs
-
-                    t_beads = [final[i] for i in all_idxs if final[i].startswith('T')]
-                    if t_beads:
-                        old = t_beads[0]
-                        new = 'S' + old[1:]
-                        # reassign everywhere
-                        for j, v in enumerate(final):
-                            if v == old:
-                                final[j] = new
-                        final[nbr[0]] = new
-                        merged = True
-                        break
-
-            # 2) if still not merged, fall back to any S-bead neighbor
-            if not merged:
-                for nbr in nbrs:
-                    inner_idxs = [section[t[0]][0] for t in nbr[4]]
-                    outer_idxs = [full_mapping[t[0]][t[1]][0] for t in nbr[3]]
-                    all_idxs = inner_idxs + outer_idxs
-
-                    s_beads = [final[i] for i in all_idxs if final[i].startswith('S')]
-                    if s_beads:
-                        bead = s_beads[0]
-                        final[nbr[0]] = bead
-                        merged = True
-                        break
-
-            # 3) if we still failed, error out
-            if not merged:
-                raise ValueError(
-                    "Merging is not possible; mapping failed for count=3"
-                )
-            count = 2
-            remaining = [atom for atom in section if final[atom[0]] == ""]
-    if count == 2:
-        a1,a2 = remaining
-        types = a1[1].upper() + a2[1].upper()
-        for key,val in martini_dict.items():
-            if key.startswith('T') and val[0] in (3,5) and (val[2] == types or val[2] == types[::-1]):
-                bead = key + generate_random_string()
-                final[a1[0]] = bead
-                final[a2[0]] = bead
-                break
-    elif count == 1:
-        lone = remaining[0]
-        if lone[1].upper() != 'C':
-            raise ValueError("non benzene 6-ring has a lone non-Carbon left")
-        # else C
-        # try find T-bead neighbor
-        # check its mapped neighbors
-        nbrs = [section[t[0]] for t in lone[4]]
-        t_beads = [final[n[0]] for n in nbrs if final[n[0]].startswith('T')]
-        if t_beads:
-            old = t_beads[0]
-            new = old
-            if old.startswith('TN6'): new = 'SN4' + new[3:]
-            elif not new.startswith('S'): new = 'S' + new[1:]
-            for i,v in enumerate(final):
-                if v == old: final[i] = new
-            final[lone[0]] = new
+        # --- Special case: one atom is disconnected from the other three ---
+        remaining_gids = {a[0] for a in remaining}
+    
+        # For each atom, see if it has at least one neighbor that is also in remaining
+        connected_flags = {}
+        for a in remaining:
+            gid = a[0]
+            has_neighbor_in_remaining = any(section[t[0]][0] in remaining_gids for t in a[4])
+            connected_flags[gid] = has_neighbor_in_remaining
+    
+        isolated = [a for a in remaining if not connected_flags[a[0]]]
+    
+        if len(isolated) == 1:
+            lone = isolated[0]
+            triple = [a for a in remaining if a[0] != lone[0]]
+    
+            # Handle the connected triple using the same logic as count==3 (center + 2 neighbors)
+            nb6_handle_count3(final, section, martini_dict, full_mapping, triple, assign_bead)
+    
+            # Then handle the isolated atom as count==1
+            if final[lone[0]] == "":
+                nb6_assign_lone_carbon(final, section, lone)
+    
         else:
-            s_beads = [final[n[0]] for n in nbrs if final[n[0]].startswith('S')]
-            if s_beads:
-                final[lone[0]] = s_beads[0]
-            else:
-                raise ValueError("non benzene 6-ring: cannot assign lone C bead")
+            # Original count==4 behavior: map any connected (atom, single-unmapped-neighbor) as a T-pair
+            for atom in remaining:
+                idx = atom[0]
+                if final[idx] != "":
+                    continue
+    
+                nbrs = [section[t[0]] for t in atom[4] if final[section[t[0]][0]] == ""]
+                if len(nbrs) == 1:
+                    # Only assign if the pair is actually connected (mutual), otherwise leave it for lower tiers.
+                    _ = nb6_try_assign_connected_pair_T(section, final, martini_dict, atom, nbrs[0], assign_bead)
+    
+        remaining = [atom for atom in section if final[atom[0]] == ""]
+        count = len(remaining)
+    
+    if count == 3:
+        nb6_handle_count3(final, section, martini_dict, full_mapping, remaining, assign_bead)
+        remaining = [atom for atom in section if final[atom[0]] == ""]
+        count = len(remaining)
+    
+    if count == 2:
+        nb6_handle_count2(final, section, martini_dict, remaining, assign_bead)
+        remaining = [atom for atom in section if final[atom[0]] == ""]
+        count = len(remaining)
+    
+    if count == 1:
+        nb6_assign_lone_carbon(final, section, remaining[0])
+
     return final
+
 
 # =============================================================================
 # TASK 3.c: Mapping Non-Benzene 5-Ring Section
@@ -1269,125 +935,50 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
       
     Returns final
     """
-    # --- SPECIAL S–S HANDLER  ---
-    # If two unmapped sulfurs sit next to each other in the ring, pair them immediately.
-    for atom in section:
-        if atom[1].upper() == 'S' and final[atom[0]] == "":
-            for (nbr_local, _) in atom[4]:
-                nbr = section[nbr_local]
-                if nbr[1].upper() == 'S' and final[nbr[0]] == "":
-                    # look up the bead key for SS in section 5
-                    bead_key = next((
-                        k for k, v in martini_dict.items()
-                        if v[0] == 5 and v[2].upper() == "SS"
-                    ), None)
-                    if bead_key is None:
-                        raise ValueError("No section-5 bead found for 'SS'")
-                    rstr = generate_random_string()
-                    bead = bead_key + rstr
-                    final[atom[0]] = bead
-                    final[nbr[0]]  = bead
-                    break
-    # -----------------------
-    # (A) Process double bonds among C and N atoms.
-    # --- STEP A (revised): double-bonded pairing + bead assignment ---
-    # 1) collect all unmapped C/N atoms with an inner bond order == 2 or 1.5
-    candidates = []
+    map_adjacent_SS_pairs(section, final, martini_dict)
+    atoms_by_gid, gid_to_local = build_section_index(section)
+    
+    # --- nH HANDLER (must run before STEP A) ---
+    # If an unmapped nitrogen has exactly 1 attached H AND it has at least one INNER bond of order 1.5,
+    # assign it immediately as TN6d.
     for atom in section:
         g = atom[0]
         if final[g] != "":
             continue
-        if atom[1].upper() not in ("C","N"):
-            continue
-        for nbr_local, bo in atom[4]:
-            if bo in (2, 1.5):
-                candidates.append(g)
-                break
-
-    def try_pairing(cands):
-        """Return a list of (a,b) pairs and leftover candidates."""
-        working = list(cands)
-        matches = []
-
-        # helper to remove a match
-        def take(a,b):
-            matches.append((a,b))
-            working.remove(a)
-            working.remove(b)
-
-        # N–C
-        for a in working:
-            atom = next(a_rec for a_rec in section if a_rec[0]==a)
-            if atom[1].upper()=="N":
-                for nbr_local,_ in atom[4]:
-                    b = section[nbr_local][0]
-                    if b in working and section[nbr_local][1].upper()=="C":
-                        take(a,b)
-                        break
-
-        # N–N
-        for a in working:
-            atom = next(a_rec for a_rec in section if a_rec[0]==a)
-            if atom[1].upper()=="N":
-                for nbr_local,_ in atom[4]:
-                    b = section[nbr_local][0]
-                    if b in working and section[nbr_local][1].upper()=="N":
-                        take(a,b)
-                        break
-
-        # C–C
-        for a in working:
-            atom = next(a_rec for a_rec in section if a_rec[0]==a)
-            if atom[1].upper()=="C":
-                for nbr_local,_ in atom[4]:
-                    b = section[nbr_local][0]
-                    if b in working and section[nbr_local][1].upper()=="C":
-                        take(a,b)
-                        break
-
-        return matches, working
-
-    # attempt pairing (with one retry)
-    matching, leftover = try_pairing(candidates)
-    if len(leftover) > 1:
-        # --- RETRY: clear *all* bead assignments in this section ---
-        for atom in section:
-            final[atom[0]] = ""
-        # --- and now *recalculate* your candidates from scratch ---
-        candidates = []
-        for pos, atom in enumerate(section):
-            idx = atom[0]
-            if final[idx] != "":
-                continue
-            elem = atom[1].upper()
-            # whatever your original logic was for picking double-bond C/N
-            if elem in ('C','N'):
-                for _, bo in atom[4]:
-                    if bo in (2, 1.5):
-                        candidates.append(idx)
-                        break
     
-        matching, leftover = try_pairing(candidates)
-        if len(leftover) > 1:
-            raise ValueError("5-ring double bond not mappable")
+        if atom[1].upper() != "N":
+            continue
+    
+        num_H = atom[6]  # [global_index, element, ring_status, outer_connection, inner_connection, isedge, num_H]
+        if num_H != 1:
+            continue
+    
+        # NEW requirement: N must have an inner aromatic bond (bond order 1.5) to qualify
+        has_inner_15 = any(bo == 1.5 for _, bo in atom[4])
+        if not has_inner_15:
+            continue
+    
+        bead_key = find_bead(martini_dict, 5, "NH")
+        assign_bead(final, bead_key, g)
+    # -----------------------
+    # (A) Process double bonds among C and N atoms.
+    # --- STEP A (revised): graph-based matching + required C/N pattern handling ---
+    # Build a candidate graph on unmapped C/N atoms involved in (2 or 1.5) inner bonds,
+    # then pick an edge-matching that (1) maximizes pairing, and (2) prefers CC pairs when possible.
+    cand, elem_of, neighbors = build_cn_candidate_graph(section, final)
+    pairs = choose_pairs_for_nonbenzene_5_ring(
+        cand=cand,
+        elem_of=elem_of,
+        neighbors=neighbors,
+        final=final,
+    )
 
     # 2) assign beads for each pair
-    for a, b in matching:
-        atomA = next(a_rec for a_rec in section if a_rec[0] == a)
-        atomB = next(a_rec for a_rec in section if a_rec[0] == b)
+    for a, b in pairs:
+        atomA = atoms_by_gid[a]
+        atomB = atoms_by_gid[b]
         eA, eB = atomA[1].upper(), atomB[1].upper()
-        rstr = generate_random_string()
-    
-        # helper to find a bead_key by section-size and SMILES string (order-insensitive)
-        def find_key(sec_size, pattern):
-            pat = pattern.upper()
-            return next(
-                (k for k,v in martini_dict.items()
-                 if v[0] == sec_size and (v[2].upper() == pat or v[2].upper() == pat[::-1])),
-                None
-            )
-    
-        # ---- both C–C ----
+        
         if eA == "C" and eB == "C":
             # look for size-1 foreign neighbors
             fA = next((t for t in atomA[3] if len(full_mapping[t[0]]) == 1), None)
@@ -1401,10 +992,7 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
                     key = pick_bead_key(martini_dict, fa[1].upper(), bo, kind="T")
                     if key is None:
                         raise ValueError(f"No T-key for foreign {fa[1].upper()} on double bond")
-                    tag = generate_random_string()
-                    bead = key + tag
-                    final[atom_inner[0]] = bead
-                    final[fa[0]]          = bead
+                    assign_bead(final, key, atom_inner[0], fa[0])
     
             elif fA or fB:
                 # exactly one small foreign → S-bead trio
@@ -1414,54 +1002,35 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
                 key = pick_bead_key(martini_dict, fa[1].upper(), bo, kind="S")
                 if key is None:
                     raise ValueError(f"No S-key for foreign {fa[1].upper()} on double bond")
-                bead = key + rstr
-                final[a]     = bead
-                final[b]     = bead
-                final[fa[0]] = bead
-    
+                assign_bead(final, key, a, b, fa[0])
             else:
                 # no small foreign → default CC-double bead from dict
-                key = find_key(1, "CC")
+                key = find_bead(martini_dict, 1, "CC")
                 if key is None:
                     raise ValueError("5-ring CC double not mappable (no bead for CC)")
-                bead = key + rstr
-                final[a] = bead
-                final[b] = bead
+                assign_bead(final, key, a, b)
     
         # ---- C–N ----
         elif ("C" in (eA,eB)) and ("N" in (eA,eB)):
-            key = find_key(1, "CN")
+            key = find_bead(martini_dict, 1, "CN")
             if key is None:
                 raise ValueError("5-ring CN double not mappable (no bead for CN)")
-            bead = key + rstr
-            final[a] = bead
-            final[b] = bead
+            assign_bead(final, key, a, b)
     
         # ---- N–N ----
         else:
             # both must be N
-            key = find_key(1, "NN")
+            key = find_bead(martini_dict, 1, "NN")
             if key is None:
                 raise ValueError("5-ring NN double not mappable (no bead for NN)")
-            bead = key + rstr
-            final[a] = bead
-            final[b] = bead
+            assign_bead(final, key, a, b)
+            
     # -----------------------
     # (B) Build array1 for atoms not of type C.
     array1 = [atom[0] for atom in section if final[atom[0]] == "" and atom[1].upper() != "C"]
     if len(array1) == 1:
-        rstr = generate_random_string()
         idx = array1[0]
-        atom = next(a for a in section if a[0] == idx)
-    
-        # helper to look up by section size and SMARTS-style pattern (order-insensitive)
-        def find_key(sec_size: int, pattern: str):
-            pat = pattern.upper()
-            return next((
-                k for k,v in martini_dict.items()
-                if v[0] == sec_size
-                   and (v[2].upper() == pat or v[2].upper() == pat[::-1])
-            ), None)
+        atom = atoms_by_gid[idx]
     
         el = atom[1].upper()
         # S-center
@@ -1472,43 +1041,40 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
                 inn1 = section[atom[4][0][0]]
                 inn2 = section[atom[4][1][0]]
                 if final[inn1[0]] == "" and final[inn2[0]] == "":
-                    key = find_key(5, "CSC")   # SC6 → [0]=5, [2]="CSC"
+                    key = find_bead(martini_dict, 5, "CSC")   # SC6 → [0]=5, [2]="CSC"
             if key is None:
-                key = find_key(5, "S")        # TC6  → [0]=5, [2]="S"
+                key = find_bead(martini_dict, 5, "S")        # TC6  → [0]=5, [2]="S"
             if key is None:
                 raise ValueError("No bead found for sulfur in 5-ring special case")
-            bead = key + rstr
-            final[atom[0]] = bead
-            # if SC6, also tag those two
-            if key != find_key(5, "S"):
-                final[inn1[0]] = bead
-                final[inn2[0]] = bead
+                # if SC6, also tag those two
+            if key != find_bead(martini_dict, 5, "S"):
+                assign_bead(final, key, atom[0], inn1[0], inn2[0])
+            else:
+                assign_bead(final, key, atom[0])
     
         # double-bond N(C) center
         elif el == "N" and len(atom[3]) > 0:
             # TN3 → [0]=6, [2]="N(C)"
-            key = find_key(6, "N(C)")
+            key = find_bead(martini_dict, 6, "N(C)")
             if key is None:
                 raise ValueError("No bead found for N(C) in 6-ring special case")
             foreign = full_mapping[atom[3][0][0]][atom[3][0][1]]
-            bead = key + rstr
-            final[atom[0]]         = bead
-            final[foreign[0]]      = bead
-    
+            assign_bead(final, key, atom[0], foreign[0])
+            
         # NH center
         elif el == "NH" or el == "N":
             # TN6d → [0]=5, [2]="NH"
-            key = find_key(5, "NH")
+            key = find_bead(martini_dict, 5, "NH")
             if key is None:
                 raise ValueError("No bead found for NH in 5-ring special case")
             # if two inners available and both unmapped → tag one, else just center
-            bead = key + rstr
-            final[atom[0]] = bead
+            assign_bead(final, key, atom[0])
+            
             if len(atom[4]) >= 2:
                 inn1 = section[atom[4][0][0]]
                 inn2 = section[atom[4][1][0]]
                 if final[inn1[0]] == "" and final[inn2[0]] == "":
-                    final[inn1[0]] = bead
+                    final[inn1[0]] = final[atom[0]]
     
         # O-center
         elif el == "O":
@@ -1519,16 +1085,13 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
                 inn1 = section[atom[4][0][0]]
                 inn2 = section[atom[4][1][0]]
                 if final[inn1[0]] == "" and final[inn2[0]] == "":
-                    bead_key = find_key(5, "OC")   # TP6a
+                    bead_key = find_bead(martini_dict, 5, "OC")   # TP6a
             if bead_key is None:
-                bead_key = find_key(5, "O")      # TN3a
-            if bead_key is None:
-                raise ValueError("No bead found for oxygen in 5-ring special case")
-            bead = bead_key + rstr
-            final[atom[0]] = bead
-            if bead_key == find_key(5, "OC"):
+                bead_key = find_bead(martini_dict, 5, "O")      # TN3a
+            assign_bead(final, bead_key, atom[0])
+            if bead_key == find_bead(martini_dict, 5, "OC"):
                 # only the left neighbor
-                final[inn1[0]] = bead
+                final[inn1[0]] = final[atom[0]]  
     
         else:
             raise ValueError(f"Unrecognized single-atom case for element {el}")
@@ -1552,19 +1115,8 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
     
             if common is not None:
                 # lookup SN5a in martini_dict: v[0]==4, v[2]=="OCO" (order-insensitive)
-                bead_key = next((
-                    k for k,v in martini_dict.items()
-                    if v[0] == 4
-                       and (v[2].upper() == "OCO" or v[2].upper() == "OCO"[::-1])
-                ), None)
-                if bead_key is None:
-                    raise ValueError("No section-4 bead found for pattern ‘OCO’ (SN5a)")
-                
-                rstr = generate_random_string()
-                bead = bead_key + rstr
-                final[atom1[0]] = bead
-                final[atom2[0]] = bead
-                final[common]    = bead
+                bead_key = find_bead(martini_dict, 4, "OCO")
+                assign_bead(final, bead_key, atom1[0], atom2[0], common)
                 
     # -----------------------
     # (C) Build array2: for unmapped Cs.
@@ -1573,59 +1125,31 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
         # Try to handle the “one C with an outer” case exactly once.
         assigned = False
         for idx in array2:
-            atom = next(a for a in section if a[0] == idx)
+            atom = atoms_by_gid[idx]
             if atom[3]:  # has at least one outer connection
                 foreign_tup  = atom[3][0]
                 foreign_sec  = full_mapping[foreign_tup[0]]
                 foreign_atom = foreign_sec[foreign_tup[1]]
-                rstr = generate_random_string()
                 
-                if foreign_atom[1].upper() == "C" and len(foreign_sec) == 1:
-                    # SC3 → v[0]==6, v[2]=="CC(C)"
-                    bead_key = next((
-                        k for k,v in martini_dict.items()
-                        if v[0] == 6 and v[2].upper() == "CC(C)"
-                    ), None)
-                    if bead_key is None:
-                        raise ValueError("No section-6 bead found for pattern 'CC(C)'")
-                elif foreign_atom[1].upper() == "O" and len(foreign_sec) == 1:
-                    # SN6 → v[0]==6, v[2]=="CC(O)"
-                    bead_key = next((
-                        k for k,v in martini_dict.items()
-                        if v[0] == 6 and v[2].upper() == "CC(O)"
-                    ), None)
-                    if bead_key is None:
-                        raise ValueError("No section-6 bead found for pattern 'CC(O)'")
-                elif foreign_atom[1].upper() == "N" and len(foreign_sec) == 1:
-                    # SN6 → v[0]==6, v[2]=="CC(O)"
-                    bead_key = next((
-                        k for k,v in martini_dict.items()
-                        if v[0] == 6 and v[2].upper() == "CC(N)"
-                    ), None)
-                    if bead_key is None:
-                        raise ValueError("No section-6 bead found for pattern 'CC(N)'")
-                elif len(foreign_sec) == 1:
-                    raise ValueError("No section-6 bead found for pattern 'CC(?)'")
+                if len(foreign_sec) == 1:
+                    pattern_map = {"C": "CC(C)", "O": "CC(O)", "N": "CC(N)"}
+                    f_el = foreign_atom[1].upper()
+                    pattern = pattern_map.get(f_el)
+                    if pattern is None:
+                        raise ValueError("No section-6 bead found for pattern 'CC(?)'")
+                    bead_key = find_bead(martini_dict, 6, pattern)
                 else:
-                    # TC3 → v[0]==5, v[2]=="CC"
-                    bead_key = next((
-                        k for k,v in martini_dict.items()
-                        if v[0] == 5 and v[2].upper() == "CC"
-                    ), None)
-                    if bead_key is None:
-                        raise ValueError("No section-5 bead found for pattern 'CC' (TC3)")
-                
-                bead = bead_key + rstr
+                    bead_key = find_bead(martini_dict, 5, "CC")
                 
                 # assign to the trio: this C, its foreign neighbour, and its first inner neighbour
-                final[atom[0]] = bead
-                final[foreign_atom[0]] = bead
+                targets = [atom[0], foreign_atom[0]]
                 if atom[4]:
                     inn = section[atom[4][0][0]]
-                    final[inn[0]] = bead
-    
+                    targets.append(inn[0])
+                assign_bead(final, bead_key, *targets)
                 assigned = True
                 break  # << don’t assign again!
+                
         for idx in array2:
             if not assigned:
                 # fallback: pair any two connected Cs once, with TC3 looked up from martini_dict
@@ -1634,15 +1158,8 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
                     for idx2 in array2[i+1:]:
                         if any(section[t][0] == idx2 for t,_ in atom1[4]):
                             # lookup the TC3 bead key: v[0]==5 and v[2]=="CC"
-                            bead_key = next((
-                                k for k,v in martini_dict.items()
-                                if v[0] == 5 and v[2].upper() == "CC"
-                            ), None)
-                            if bead_key is None:
-                                raise ValueError("No section-5 bead found for pattern 'CC' (TC3)")
-                            bead = bead_key + generate_random_string()
-                            final[idx1] = bead
-                            final[idx2] = bead
+                            bead_key = find_bead(martini_dict, 5, "CC")
+                            assign_bead(final, bead_key, idx1, idx2)
                             assigned = True
                             break
                     if assigned:
@@ -1651,38 +1168,21 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
                     raise ValueError(
                        "Could not find any two connecting atoms in 5-ring array2 for TC3 assignment."
                     )
+    
         # now remove those atoms from array2
         array2 = [idx for idx in array2 if final[idx] == ""]
     # At this point, array2 contains only the *unmapped* Cs after above.
     # If exactly two remain, pair them using TC3 from martini_dict; if three remain, use SC3.
     if len(array2) == 2:
-        # lookup the TC3 bead key: v[0] == 5 and v[2] == "CC"
-        bead_key = next((
-            k for k, v in martini_dict.items()
-            if v[0] == 5 and v[2].upper() == "CC"
-        ), None)
-        if bead_key is None:
-            raise ValueError("No section-5 bead found for pattern 'CC' (TC3)")
-        rstr = generate_random_string()
-        bead = bead_key + rstr
-        for idx in array2:
-            final[idx] = bead
+        bead_key = find_bead(martini_dict, 5, "CC")
+        assign_bead(final, bead_key, *array2)
         array2.clear()
-
+    
     elif len(array2) == 3:
-        # lookup the SC3 bead key: v[0] == 6 and v[2] == "CCC"
-        bead_key = next((
-            k for k, v in martini_dict.items()
-            if v[0] == 3 and v[2].upper() == "CCC"
-        ), None)
-        if bead_key is None:
-            raise ValueError("No section-6 bead found for pattern 'CCC' (SC3)")
-        rstr = generate_random_string()
-        bead = bead_key + rstr
-        for idx in array2:
-            final[idx] = bead
+        bead_key = find_bead(martini_dict, 3, "CCC")
+        assign_bead(final, bead_key, *array2)
         array2.clear()
-
+        
     # -----------------------
     # (D) Final check with merging fallback
     for atom in section:
@@ -1742,14 +1242,13 @@ def map_nonbenzene_5_ring_section(section: List[List[Any]],
             raise ValueError("Non-benzene 5-ring section not fully mappable!")
     return final
 
-
 # =============================================================================
 # TASK 3.d: Determine if a Non-Ring Section Is 1-Bead Mappable
 # =============================================================================
 def is_non_ring_section_1bead_mappable(section: List[List[Any]]) -> bool:
     """
     Determine whether a non-ring section (section type == 0) is mappable as a single bead.
-    
+
     Pseudocode:
       - Collect all edge atoms (atom[5] == True) into an array.
       - If exactly one edge atom exists, return True.
@@ -1757,37 +1256,22 @@ def is_non_ring_section_1bead_mappable(section: List[List[Any]]) -> bool:
       - If more than one, for each pair of edge atoms compute the shortest path (using BFS on the inner connections).
         If any such path is longer than 4 atoms, return False; otherwise, return True.
     """
-    edge_atoms = [atom[0] for atom in section if atom[5]]
-    if len(edge_atoms) == 1:
+    edge_locals = [i for i, atom in enumerate(section) if atom[5]]
+    if len(edge_locals) == 1:
         return True
-    if len(edge_atoms) == 0:
+    if len(edge_locals) == 0:
         raise ValueError("Cannot map non-ring section: no edge atoms found!")
-    
-    # Build a simple graph from inner connections
-    graph = {}
-    for atom in section:
-        graph[atom[0]] = [section[t[0]][0] for t in atom[4]]
-    
-    def bfs_shortest_path(start: int, end: int) -> int:
-        visited = set()
-        queue = [(start, 1)]
-        while queue:
-            current, dist = queue.pop(0)
-            if current == end:
-                return dist
-            visited.add(current)
-            for neighbor in graph.get(current, []):
-                if neighbor not in visited:
-                    queue.append((neighbor, dist + 1))
-        return float('inf')
-    
-    for i in range(len(edge_atoms)):
-        for j in range(i+1, len(edge_atoms)):
-            dist = bfs_shortest_path(edge_atoms[i], edge_atoms[j])
-            if dist > 4:
+
+    graph = build_inner_graph_local(section)
+
+    # Original behavior measured path length in *atoms* (nodes), starting at 1.
+    # That is equivalent to (edge-distance + 1).
+    for i in range(len(edge_locals)):
+        for j in range(i + 1, len(edge_locals)):
+            edge_dist = bfs_distance_graph(graph, edge_locals[i], edge_locals[j])
+            if edge_dist + 1 > 4:
                 return False
     return True
-
 
 # =============================================================================
 # TASK 3.e: Map Non-Ring Section Using 1–Bead Mapping
@@ -1820,121 +1304,11 @@ def map_non_ring_section_1bead(section: List[List[Any]],
             gi = atom_info[0]
             global_to_sec_loc[gi] = (sec_idx, loc_idx)
     # ----------------------------------------------------------------
-    # --- Helper functions ---
-    def trace_linear_path(section: List[List[Any]], start_local: int) -> str:
-        """Trace a linear SMILES path starting from an edge atom until a different edge is reached."""
-        visited = set()
-        current_local = start_local
-        # Start with the atom’s type.
-        path = section[current_local][1]
-        prev_local = None
-        visited.add(current_local)
-        while True:
-            # Get inner connections (list of tuples: (neighbor_local, bond order)).
-            connections = section[current_local][4]
-            next_local = None
-            for (nbr, bond) in connections:
-                if nbr != prev_local:
-                    next_local = nbr
-                    # Determine bond symbol.
-                    bond_symbol = ""
-                    if bond in (2, 1.5):
-                        bond_symbol = "="
-                    elif bond == 3:
-                        bond_symbol = "#"
-                    path += bond_symbol + section[nbr][1]
-                    break
-            if next_local is None:
-                break
-            # Stop if we reached a different edge atom.
-            if section[next_local][5] and next_local != start_local:
-                break
-            if next_local in visited:
-                break
-            prev_local = current_local
-            current_local = next_local
-            visited.add(current_local)
-        return path
-
-    def trace_branch(section: List[List[Any]], center_local: int, next_local: int) -> str:
-        """
-        Trace a branch from a center atom along one inner connection.
-        Returns a string representing that branch (using bond symbols and atom types).
-        """
-        visited = {center_local}
-        # Find bond order from center to next_local.
-        bond = None
-        for (nbr, b) in section[center_local][4]:
-            if nbr == next_local:
-                bond = b
-                break
-        bond_symbol = ""
-        if bond in (2, 1.5):
-            bond_symbol = "="
-        elif bond == 3:
-            bond_symbol = "#"
-        branch_str = bond_symbol + section[next_local][1]
-        visited.add(next_local)
-        current_local = next_local
-        prev_local = center_local
-        while True:
-            connections = section[current_local][4]
-            next_candidate = None
-            for (nbr, b) in connections:
-                if nbr != prev_local:
-                    next_candidate = nbr
-                    bond_sym = ""
-                    if b in (2, 1.5):
-                        bond_sym = "="
-                    elif b == 3:
-                        bond_sym = "#"
-                    branch_str += bond_sym + section[nbr][1]
-                    break
-            if next_candidate is None:
-                break
-            if section[next_candidate][5]:
-                break
-            if next_candidate in visited:
-                break
-            prev_local = current_local
-            current_local = next_candidate
-            visited.add(current_local)
-        return branch_str
-
-    def get_final_edge(section: List[List[Any]], center_local: int, next_local: int) -> Optional[int]:
-        """
-        Trace along a branch (starting from center_local via next_local) and return the local index
-        of the final edge atom (if found).
-        """
-        visited = {center_local}
-        current_local = next_local
-        prev_local = center_local
-        visited.add(current_local)
-        while True:
-            connections = section[current_local][4]
-            next_candidate = None
-            for (nbr, _) in connections:
-                if nbr != prev_local:
-                    next_candidate = nbr
-                    break
-            if next_candidate is None:
-                break
-            if section[next_candidate][5]:
-                return next_candidate
-            if next_candidate in visited:
-                break
-            prev_local = current_local
-            current_local = next_candidate
-            visited.add(current_local)
-        return current_local if section[current_local][5] else None
-
-    # --- Main body of TASK 3.e ---
-    # Build array0: list of global indices for edge atoms.
+    # --- Helper variables ---
     edge_globals = [a[0] for a in section if a[5]]
     num_edges = len(edge_globals)
     # --- fallback for single-edge sections ---
     # … earlier in map_non_ring_section_1bead …
-    # Build cache at top (you already have this)
     # global_to_sec_loc: Dict[int, (int,int)] = { … }
     if len(section) == 1:
         idx  = section[0][0]
@@ -1969,186 +1343,29 @@ def map_non_ring_section_1bead(section: List[List[Any]],
                     final[gi] = final[n] = bead
                     return final
 
-        # If it’s not C, and not O, we can’t handle it
-        if atom[1].upper() != 'C':
-            if atom[1].upper() != 'O':
-                raise ValueError("1-edge non-ring not mappable (non-C)")
-            
-            # --- lone‐O special handling ---
-            neighbor_beads = [final[n] for n in neigh]
-            stripped = [
-                (b[:-6].replace('+','') if b and len(b) > 6 else '')
-                for b in neighbor_beads
-            ]
-
-            # Case 1: all neighbors unmapped
-            if all(not s for s in stripped):
-                raise ValueError("lone atom is next to unmapped atoms")
-
-            # helper to get (sec,loc) for any global index
-            def lookup_atom(gidx):
-                sec_idx, loc_idx = global_to_sec_loc[gidx]
-                return full_mapping[sec_idx][loc_idx]
-            '''
-            This section will be fixed in a later update
-            # Case 2: SC3
-            if 'SC3' in stripped:
-                i         = stripped.index('SC3')
-                neigh_idx = neigh[i]
-                bead_tag  = neighbor_beads[i]
-
-                # try inner‐bond first
-                bond = next((b for nbr, b in atom[4]
-                             if section[nbr][0] == neigh_idx),
-                            None)
-                if bond is None:
-                    # unpack the outer‐connection triples properly
-                    bond = next((bo for sec_i, loc_i, bo in atom[3]
-                                 if full_mapping[sec_i][loc_i][0] == neigh_idx),
-                                None)
-
-                # gather the existing SC3 group globals
-                group_idxs = [j for j,v in enumerate(final) if v == bead_tag]
-
-                # find the centre atom in that SC3 chain
-                centre = None
-                for g in group_idxs:
-                    a = lookup_atom(g)
-                    # count how many of its connections hit the other two SC3 atoms
-                    # outer neighbours (already global):
-                    outer_globals = [ full_mapping[si][li][0] for si,li,_ in a[3] ]
-                    
-                    # inner neighbours (lookup in a's own section):
-                    sec_idx, _   = global_to_sec_loc[a[0]]
-                    a_section    = full_mapping[sec_idx]
-                    inner_globals = [ a_section[nbr_local][0] for nbr_local,_ in a[4] ]
-                    
-                    conns = outer_globals + inner_globals
-                    if sum(1 for c in conns if c in group_idxs) == 2:
-                        centre = a
-                        break
-
-                # is O connected to that centre?
-                connected = False
-                if centre:
-                    connected = any(
-                        section[t][0] == centre[0]
-                        for t in atom[4]
-                    )
-
-                # pick new key
-                if   bond == 1 and  connected: key = 'SN6'
-                elif bond == 2 and  connected: key = 'SN6a'
-                elif bond == 1 and not connected: key = 'N5'
-                else:                            key = 'N5a'
-
-                new_bead = key + generate_random_string()
-                final[gi] = new_bead
-                for g in group_idxs:
-                    final[g] = new_bead
-                return final
-
-            # Case 3: SC4
-            if 'SC4' in stripped:
-                i         = stripped.index('SC4')
-                neigh_idx = neigh[i]
-                bead_tag  = neighbor_beads[i]
-
-                # O–C bond
-                bond = next((b for nbr,b in atom[4]
-                             if section[nbr][0] == neigh_idx), None)
-                if bond is None:
-                    bond = next((bo for _,_,bo in atom[3]
-                                 if lookup_atom(neigh_idx)[0] == neigh_idx),
-                                None)
-
-                key      = 'N5' if bond == 1 else 'N5a'
-                new_bead = key + generate_random_string()
-
-                final[gi] = new_bead
-                # reassign the full SC4 group
-                for j,v in enumerate(final):
-                    if v == bead_tag:
-                        final[j] = new_bead
-                return final
-
-            # Cases 4–6: TN4a, SN6, SN4a
-            case_map = {
-                'TN4a': {'prefixes': ['TN4a'], 'bond_map': {1: 'SN5a', 2: 'SN4a'}},
-                'SN6':  {'prefixes': ['SN6'],  'bond_map': {1: 'N5',   2: 'N5a'}},
-                'SN4a': {'prefixes': ['SN4a'], 'bond_map': {1: 'N5a',  2: 'N4a'}},
-            }
-            for base, info in case_map.items():
-                if base in stripped:
-                    i         = stripped.index(base)
-                    bead_tag  = neighbor_beads[i]
-                    neigh_idx = neigh[i]
-
-                    ca = lookup_atom(neigh_idx)
-                    if ca[1].upper() == 'C':
-                        # find bond order: try inner then outer
-                        bond = next((b for nbr,b in atom[4]
-                                     if section[nbr][0] == neigh_idx),
-                                    None)
-                        if bond is None:
-                            bond = next((bo for sec_i, loc_i, bo in atom[3]
-                                         if full_mapping[sec_i][loc_i][0] == neigh_idx),
-                                        None)
-
-                        key = info['bond_map'].get(bond)
-                        if key:
-                            new_bead = key + generate_random_string()
-                            # reassign the lone-O (gi) and the entire matched group
-                            final[gi] = new_bead
-                            for j, v in enumerate(final):
-                                if v == bead_tag:
-                                    final[j] = new_bead
-                            return final
-                    break  # if base matched but CA wasn’t C, skip to fallback
-            # Case 7: TN6a
-            if 'TN6a' in stripped:
-                i = stripped.index('TN6a')
-                bead_tag = neighbor_beads[i]
-                new_bead = 'SN4a' + generate_random_string()
-                final[gi] = new_bead
-                for j, v in enumerate(final):
-                    if v == bead_tag:
-                        final[j] = new_bead
-                return final
-            '''
-            # nothing matched
-            print(f"[lone‑O] couldn’t map O@{gi}, neighbor beads = {neighbor_beads}")
+        # If it’s not C, we can’t handle it and therefore we will assign a provisional bead.
+        if atom[1].upper() != "C":
             raise ValueError("1-edge non-ring not mappable (non-C)")
-        # convert T* to S*
-        for n in neigh:
-            b=final[n]
-            if b.startswith('TN6'):
-                new='SN4'+b[3:]
-                ids=[i for i,v in enumerate(final) if v==b]
-                for i in ids: final[i]=new
-                final[idx]=final[n]=new
-                return final
-            if b.startswith('TP6a'):
-                new='SN4a'+b[4:]
-                ids=[i for i,v in enumerate(final) if v==b]
-                for i in ids: final[i]=new
-                final[idx]=final[n]=new
-                return final
-            elif b.startswith('T'):
-                new='S'+b[1:]
-                ids=[i for i,v in enumerate(final) if v==b]
-                for i in ids: final[i]=new
-                final[idx]=final[n]=new
-                return final
-        # propagate S*
-        for n in neigh:
-            b=final[n]
-            if b.startswith('S'):
-                ids=[i for i,v in enumerate(final) if v==b]
-                for i in ids: final[i]=b
-                final[idx]=final[n]=b
-                return final
-        raise ValueError("1-edge non-ring still not mappable")
+        else:
+            # convert T* to S* (or borrow S*)
+            for n in neigh:
+                b = final[n]
+                if b.startswith("T"):
+                    new = "S" + b[1:]
+                    ids = [i for i, v in enumerate(final) if v == b]
+                    for i in ids:
+                        final[i] = new
+                    final[idx] = final[n] = new
+                    return final
+        
+                elif b.startswith("S"):
+                    ids = [i for i, v in enumerate(final) if v == b]
+                    for i in ids:
+                        final[i] = b
+                    final[idx] = final[n] = b
+                    return final
+        
+            raise ValueError("1-edge non-ring still not mappable")
       
     # CASE 1: 2 edge atoms.
     if num_edges == 2:
@@ -2171,39 +1388,6 @@ def map_non_ring_section_1bead(section: List[List[Any]],
             if len(section) == 4:
                 print(f"Linear path of 4 cannot be mapped: no candidate bead found for 2-edge mapping (path: {path_str}). Beginning to break down further.")
                 # Build a little helper to map exactly two atoms by connectivity
-                def map_two_atoms(local_a: int, local_b: int):
-                    ga = section[local_a][0]
-                    gb = section[local_b][0]
-                    # Build the SMILES‐like path between them
-                    sym = ""
-                    for nbr, bo in section[local_a][4]:
-                        if nbr == local_b:
-                            sym = "=" if bo == 2 else "#" if bo == 3 else ""
-                            break
-                    path = (section[local_a][1] + sym + section[local_b][1]).upper()
-            
-                    # Lookup in section 7
-                    keys = [
-                        k for k,v in martini_dict.items()
-                        if v[0] == 7 and v[1] == 0
-                           and (v[2].upper() == path or v[2].upper() == path[::-1])
-                    ]
-                    if not keys:
-                        # fallback to section 11
-                        keys = [
-                            k for k,v in martini_dict.items()
-                            if v[0] == 11 and v[1] == 0
-                               and (v[2].upper() == path or v[2].upper() == path[::-1])
-                        ]
-                    if not keys:
-                        raise ValueError(
-                            f"Linear path of 2 from 4 cannot be mapped: no candidate bead found for 2-edge mapping (path: {path})."
-                        )
-                    bead = keys[0] + generate_random_string()
-                    final[ga] = bead
-                    final[gb] = bead
-            
-                # Identify the first pair: start_global & its only neighbor
                 start_local = next(i for i,a in enumerate(section) if a[0] == edge_globals[0])
                 nbr_local, _ = section[start_local][4][0]
                 # Identify the other two locals
@@ -2212,8 +1396,8 @@ def map_non_ring_section_1bead(section: List[List[Any]],
                 if len(others) != 2:
                     raise ValueError("Expected exactly 2 leftover atoms when splitting 4‑atom 2‑edge case.")
                 # Map each sub‑pair
-                map_two_atoms(start_local, nbr_local)
-                map_two_atoms(others[0],    others[1])
+                map_two_atoms_by_connectivity(section, start_local, nbr_local, martini_dict, final, generate_random_string)
+                map_two_atoms_by_connectivity(section, others[0], others[1], martini_dict, final, generate_random_string)
                 return final
 
             else:
@@ -2243,31 +1427,27 @@ def map_non_ring_section_1bead(section: List[List[Any]],
                 f"Non-ring section cannot be mapped: no candidate bead found for 2-edge mapping (path: {path_str})."
             )
         else:
-            # If more than one candidate remains, check for a special case.
+            # If more than one candidate remains, resolve it.
+            # For CO/OC we use the foreign bead prefix rule first (SX4e -> TP1d, TC5 -> TN2a),
+            # otherwise we disambiguate using the val[5] hydrogen-count rule.
+            foreign_bead = None
             if path_str in ("CO", "OC"):
                 for atom in section:
                     if atom[0] in edge_globals and atom[3]:
-                        # Use the first outer connection, but instead of using final directly,
-                        # look up the foreign section via full_mapping and take its first atom.
                         foreign_sec_index = atom[3][0][0]
                         index = atom[3][0][1]
-                        foreign_atom = full_mapping[foreign_sec_index][index]  # the first atom in the foreign section
+                        foreign_atom = full_mapping[foreign_sec_index][index]
                         foreign_bead = final[foreign_atom[0]]
-                        if foreign_bead.startswith("SX4e"):
-                            rstr = generate_random_string()
-                            for a in section:
-                                final[a[0]] = "TP1d" + rstr
-                            return final
-                        else:
-                            rstr = generate_random_string()
-                            for a in section:
-                                final[a[0]] = "TN2a" + rstr
-                            return final
-                    else:
-                        rstr = generate_random_string()
-                        for a in section:
-                            final[a[0]] = "TN2a" + rstr
-                        return final
+                        break
+
+            bead_key = resolve_unique_candidate(
+                candidate_keys, martini_dict, section, path_str=path_str, foreign_bead=foreign_bead
+            )
+            rstr = generate_random_string()
+            for a in section:
+                final[a[0]] = bead_key + rstr
+            return final
+
     # CASE 2: 3 edge atoms.
     elif num_edges == 3:
         # Find the atom with 3 inner connections.
@@ -2285,120 +1465,30 @@ def map_non_ring_section_1bead(section: List[List[Any]],
             branch_paths.append(branch_str)
 
         # 1) Try section 7 matching
-        import re
-        candidate_keys = []
-        for key, val in martini_dict.items():
-            if val[0] == 7 and val[1] == 1 and "(" in val[2]:
-                prefix, remainder = val[2].split("(", 1)
-                if prefix.strip() != section[center_local][1]:
-                    continue
-                branch_segments = re.findall(r'\(([^)]+)\)', val[2])
-                if len(branch_segments) != len(branch_paths):
-                    continue
-                # order-independent match
-                unmatched = branch_segments.copy()
-                matched_all = True
-                for bp in branch_paths:
-                    for bs in list(unmatched):
-                        if bp == bs:
-                            unmatched.remove(bs)
-                            break
-                    else:
-                        matched_all = False
-                        break
-                if matched_all:
-                    candidate_keys.append(key)
-        candidate_keys = list(set(candidate_keys))
+        candidate_keys = find_branch_candidates(
+            martini_dict, 7, section[center_local][1], branch_paths
+        )
 
         # 2) Fallback to section 11 if needed
         if not candidate_keys:
-            for key, val in martini_dict.items():
-                if val[0] == 11 and val[1] == 1 and "(" in val[2]:
-                    prefix, remainder = val[2].split("(", 1)
-                    if prefix.strip() != section[center_local][1]:
-                        continue
-                    branch_segments = re.findall(r'\(([^)]+)\)', val[2])
-                    if len(branch_segments) != len(branch_paths):
-                        continue
-                    unmatched = branch_segments.copy()
-                    matched_all = True
-                    for bp in branch_paths:
-                        for bs in list(unmatched):
-                            if bp == bs:
-                                unmatched.remove(bs)
-                                break
-                        else:
-                            matched_all = False
-                            break
-                    if matched_all:
-                        candidate_keys.append(key)
-            if candidate_keys:
-                warnings.warn(
-                    f"Warning: falling back to section 11 for 3-edge mapping (center: {section[center_local][1]} and branches: {branch_paths})",
-                    UserWarning
-                )
-            candidate_keys = list(set(candidate_keys))
+            candidate_keys = find_branch_candidates(
+                martini_dict, 11, section[center_local][1], branch_paths
+            )
 
-        # 3) Commit or error
-        if len(candidate_keys) == 1:
-            rstr = generate_random_string()
-            for atom in section:
-                final[atom[0]] = candidate_keys[0] + rstr
-            return final
-        elif not candidate_keys:
+        # 3) Commit or error (resolve to exactly one candidate)
+        if not candidate_keys:
             raise ValueError(
-                f"Non‐ring section cannot be mapped: no candidate bead found for 3‐edge mapping (center: {section[center_local][1]} and branches: {branch_paths})."
+                f"Non‐ring section cannot be mapped: no candidate bead found for 3-edge mapping "
+                f"(center: {section[center_local][1]} and branches: {branch_paths})."
             )
-        else:
-            raise ValueError(
-                f"Non‐ring section cannot be mapped: ambiguous candidate keys for 3‐edge mapping (center: {section[center_local][1]} and branches: {branch_paths})."
-            )
-            ''' OLD VERSION KEPT JUST IN CASE
-    # CASE 3: 4 edge atoms.
-    elif num_edges == 4:
-        # Find the center atom that has 4 inner connections.
-        center_local = None
-        for i, atom in enumerate(section):
-            if len(atom[4]) == 4:
-                center_local = i
-                break
-        if center_local is None:
-            raise ValueError("Non‐ring section with 4 edges does not have an atom with 4 inner connections.")
-        
-        # Build array4: for each inner connection of the center atom, trace to the final edge atom.
-        #  start by adding the central atom's global index.
-        array4 = [section[center_local][0]]
-        for (nbr, _) in section[center_local][4]:
-            final_edge_local = get_final_edge(section, center_local, nbr)
-            # Only add if the final atom is an edge and its type is 'F'
-            if final_edge_local is not None and section[final_edge_local][5] and section[final_edge_local][1] == 'F':
-                array4.append(section[final_edge_local][0])
-        
-        # Ensure exactly 4 branch edge atoms were found.
-        if len(array4) != 4:
-            raise ValueError("Non‐ring section cannot be mapped: expected 4 branch edge atoms, found {}.".format(len(array4)))
-        
-        # Assign the bead "SX4e" with a random tag to all atoms in array4.
+
+        bead_key = resolve_unique_candidate(candidate_keys, martini_dict, section)
+
         rstr = generate_random_string()
-        for idx in array4:
-            final[idx] = "SX4e" + rstr
-        
-        # Build array5: the list of atoms still unmapped.
-        array5 = [atom[0] for atom in section if final[atom[0]] == ""]
-        
-        # If exactly 2 atoms remain and their types are C and O, assign bead "TP1d" with a random tag.
-        if len(array5) == 2:
-            types = [next(a for a in section if a[0] == idx)[1].upper() for idx in array5]
-            if sorted(types) == ['C', 'O']:
-                rstr2 = generate_random_string()
-                for idx in array5:
-                    final[idx] = "TP1d" + rstr2
-                return final
-            else:
-                raise ValueError("Non‐ring section cannot be mapped: remaining atoms are not C and O (found: {}).".format(types))
-        else:
-            raise ValueError("Non‐ring section cannot be mapped: unexpected number of unmapped atoms in 4‐edge mapping (found {} in array5).".format(len(array5)))
-    '''
+        for atom in section:
+            final[atom[0]] = bead_key + rstr
+        return final
+
     # CASE 3: 4 edge atoms.
     elif num_edges == 4:
         center_local = None
@@ -2419,51 +1509,9 @@ def map_non_ring_section_1bead(section: List[List[Any]],
                 # Unpack the two 3-connected centers
                 (c1, edges1), (c2, edges2) = three_centers
 
-                def build_and_assign(center_idx: int, edge_pair: List[int]):
-                    eA, eB = edge_pair
-                    # Map atom indices → element symbols
-                    symA = section[eA][1]
-                    symC = section[center_idx][1]
-                    symB = section[eB][1]
-
-                    # Find bond order between eA and center
-                    bond1 = next(bo for (nbr, bo) in section[eA][4] if nbr == center_idx)
-                    sym_bond1 = "=" if bond1 == 2 else "#" if bond1 == 3 else ""
-
-                    # Find bond order between center and eB
-                    bond2 = next(bo for (nbr, bo) in section[center_idx][4] if nbr == eB)
-                    sym_bond2 = "=" if bond2 == 2 else "#" if bond2 == 3 else ""
-
-                    path_str = (symA + sym_bond1 + symC + sym_bond2 + symB).upper()
-
-                    # 1) Try section 7 (two-edge, val[1] == 0)
-                    candidate_keys = [
-                        key for key, val in martini_dict.items()
-                        if val[0] == 7 and val[1] == 0
-                           and (val[2].upper() == path_str or val[2].upper() == path_str[::-1])
-                    ]
-                    candidate_keys = list(set(candidate_keys))
-
-                    # 2) Fallback to section 11 if needed
-                    if not candidate_keys:
-                        candidate_keys = [
-                            key for key, val in martini_dict.items()
-                            if val[0] == 11 and val[1] == 0
-                               and (val[2].upper() == path_str or val[2].upper() == path_str[::-1])
-                        ]
-                        candidate_keys = list(set(candidate_keys))
-
-                    if len(candidate_keys) != 1:
-                        raise ValueError(f"Cannot map 2-edge path “{path_str}” for center {symC}.")
-                    bead = candidate_keys[0] + generate_random_string()
-                    # Assign this bead to all three atoms
-                    for idx in (eA, center_idx, eB):
-                        final[section[idx][0]] = bead
-
-                # Map first trio (c1 with edges1)
-                build_and_assign(c1, edges1)
+                build_and_assign_trio(section, c1, edges1, martini_dict, final, generate_random_string)
                 # Map second trio (c2 with edges2)
-                build_and_assign(c2, edges2)
+                build_and_assign_trio(section, c2, edges2, martini_dict, final, generate_random_string)
 
                 return final
             else:
@@ -2475,22 +1523,7 @@ def map_non_ring_section_1bead(section: List[List[Any]],
             for (nbr_local, _) in section[center_local][4]:
                 final_edge = get_final_edge(section, center_local, nbr_local)
                 if final_edge is not None:
-                    from collections import deque
-        
-                    def bfs_path(start, end):
-                        visited = {start}
-                        queue = deque([(start, [start])])
-                        while queue:
-                            curr, path = queue.popleft()
-                            if curr == end:
-                                return path
-                            for (nbr, _) in section[curr][4]:
-                                if nbr not in visited:
-                                    visited.add(nbr)
-                                    queue.append((nbr, path + [nbr]))
-                        return []
-        
-                    path = bfs_path(center_local, final_edge)
+                    path = bfs_path(section, center_local, final_edge)
                     if len(path) == 3:
                         two_branch = path   # [center_local, intermediate_local, final_edge]
                     else:
@@ -2744,7 +1777,8 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
             sub_section = [section[i] for i in sub_old_indices]
             remainder = [section[i] for i in rem_old_indices]
             return sub_section, remainder, sub_old_indices, rem_old_indices
-   # NEW SPECIAL CASE: look for any “center” atom with ≥ 4 inner connections and ≥ 3 of those neighbors flagged as edges
+
+    # NEW SPECIAL CASE: look for any “center” atom with ≥ 4 inner connections and ≥ 3 of those neighbors flagged as edges
     for i, atom in enumerate(section):
         if len(atom[4]) >= 4:
             # gather inner‐neighbors that are currently edges (atom[5] == True)
@@ -2760,34 +1794,18 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
                 remainder   = [section[idx] for idx in rem_old_indices]
                 return sub_section, remainder, sub_old_indices, rem_old_indices
 
-    # (Inside subdivide_non_ring_section_normal)
+    # If there are many candidate edges, attempt a BFS-based split that yields mappable pieces.
     if len(candidate_edges) > 2:
-        from collections import deque
-
-        # Build a graph of inner connections (using local indices).
-        graph = {i: [tup[0] for tup in atom[4]] for i, atom in enumerate(section)}
-
-        def bfs_local(start: int, end: int) -> int:
-            visited = set()
-            queue = deque([(start, 0)])
-            while queue:
-                current, dist = queue.popleft()
-                if current == end:
-                    return dist
-                visited.add(current)
-                for nbr in graph.get(current, []):
-                    if nbr not in visited:
-                        queue.append((nbr, dist + 1))
-            return float('inf')
+        graph = build_inner_graph_local(section)
 
         # Make a copy of candidate_edges before removal.
         candidate_edges_copy = candidate_edges[:]
 
-        # Remove too-close candidate edges.
+        # Remove too-close candidate edges (distance <= 4 edges).
         to_remove = set()
         for i in range(len(candidate_edges)):
             for j in range(i + 1, len(candidate_edges)):
-                if bfs_local(candidate_edges[i], candidate_edges[j]) <= 4:
+                if bfs_distance_graph(graph, candidate_edges[i], candidate_edges[j]) <= 4:
                     to_remove.add(candidate_edges[i])
                     to_remove.add(candidate_edges[j])
         candidate_edges = [i for i in candidate_edges if i not in to_remove]
@@ -2802,7 +1820,7 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
             min_distance = float('inf')
             for i in range(len(candidate_edges)):
                 for j in range(i + 1, len(candidate_edges)):
-                    d = bfs_local(candidate_edges[i], candidate_edges[j])
+                    d = bfs_distance_graph(graph, candidate_edges[i], candidate_edges[j])
                     if d < min_distance:
                         min_distance = d
                         minimal_pairs = [[candidate_edges[i], d, candidate_edges[j]]]
@@ -2812,69 +1830,22 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
                         if pair_sorted not in [sorted([p[0], p[2]]) for p in minimal_pairs]:
                             minimal_pairs.append([candidate_edges[i], d, candidate_edges[j]])
 
-            def bfs_path_between(start: int, end: int, section: List[List[Any]]) -> List[int]:
-                """Return a BFS path from start to end as a list of local indices, or empty if none."""
-                q = deque([(start, [start])])
-                visited = {start}
-                while q:
-                    current, path = q.popleft()
-                    if current == end:
-                        return path
-                    for (nbr, bond) in section[current][4]:
-                        if nbr not in visited:
-                            visited.add(nbr)
-                            q.append((nbr, path + [nbr]))
-                return []
-
-            def is_connected(indices: List[int], section: List[List[Any]]) -> bool:
-                """Check if the atoms with local indices in 'indices' form a connected subgraph."""
-                if not indices:
-                    return False
-                visited = set()
-                to_visit = [indices[0]]
-                while to_visit:
-                    curr = to_visit.pop(0)
-                    visited.add(curr)
-                    for (nbr, _) in section[curr][4]:
-                        if nbr in indices and nbr not in visited:
-                            to_visit.append(nbr)
-                return set(indices) == visited
-
-            def get_connected_components(indices: List[int], section: List[List[Any]]) -> List[List[int]]:
-                """Return connected components (lists of indices) in the subgraph induced by 'indices'."""
-                components = []
-                remaining = set(indices)
-                while remaining:
-                    start = next(iter(remaining))
-                    comp = []
-                    q = [start]
-                    while q:
-                        curr = q.pop(0)
-                        if curr not in comp:
-                            comp.append(curr)
-                            for (nbr, _) in section[curr][4]:
-                                if nbr in remaining and nbr not in comp:
-                                    q.append(nbr)
-                    components.append(comp)
-                    remaining -= set(comp)
-                return components
-
             # Now try each candidate minimal pair.
             success = False
             chosen_sub_old_indices = None
             chosen_rem_old_indices = None
             for pair_info in minimal_pairs:
-                edge1, d, edge2 = pair_info
-                path = bfs_path_between(edge1, edge2, section)
+                edge1, _d, edge2 = pair_info
+                path = bfs_path_graph(graph, edge1, edge2)
                 if not path:
                     continue
                 candidate_sub_old_indices = sorted(path)
                 candidate_rem_old_indices = [i for i in range(len(section)) if i not in candidate_sub_old_indices]
+
                 # First, ensure connectivity on the remainder:
-                if not is_connected(candidate_rem_old_indices, section):
-                    section_index = full_mapping.index(section)
+                if not induced_subgraph_is_connected(candidate_rem_old_indices, section):
                     # The remainder is split into multiple connected components.
-                    components = get_connected_components(candidate_rem_old_indices, section)
+                    components = induced_subgraph_components(candidate_rem_old_indices, section)
                     if len(components) == 2:
                         if len(components[0]) == len(components[1]):
                             # Try both merging options.
@@ -2884,12 +1855,9 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
                             option2_rem = [i for i in range(len(section)) if i not in option2_sub]
                             try:
                                 dummy_final = final[:]  # Test option1
-                                # Automatically find the section index in full_mapping.
                                 section_index = full_mapping.index(section)
                                 dummy_full_mapping = full_mapping[:]  
-                                # Remove the section being subdivided
                                 dummy_full_mapping.pop(section_index)
-                                # Insert the candidate subdivisions in its place.
                                 dummy_full_mapping.insert(section_index, [section[i] for i in option1_sub])
                                 dummy_full_mapping.insert(section_index + 1, [section[i] for i in option1_rem])
                                 # --- New reindexing step:
@@ -2932,12 +1900,13 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
                             else:
                                 merged_sub = sorted(candidate_sub_old_indices + components[0])
                             rem_after_merge = [i for i in range(len(section)) if i not in merged_sub]
-                            if not is_connected(rem_after_merge, section):
+                            if not induced_subgraph_is_connected(rem_after_merge, section):
                                 continue
                             candidate_sub_old_indices = merged_sub
                             candidate_rem_old_indices = rem_after_merge
                     else:
                         continue
+
                 # *** New test: update boundary mapping and try mapping the candidate parts.
                 try:
                     dummy_final = final[:]  # Make a copy of current final mapping.
@@ -2964,6 +1933,7 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
                 chosen_rem_old_indices = candidate_rem_old_indices
                 success = True
                 break
+
             if success and chosen_sub_old_indices is not None and chosen_rem_old_indices is not None:
                 # Instead of proceeding with DFS tracing, immediately return this subdivision.
                 sub_section = [section[i] for i in chosen_sub_old_indices]
@@ -2972,20 +1942,11 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
             else:
                 raise ValueError("Non‐ring section division leads to unassignable sections.")
         # --- End of new procedure ---
+
     # Use the first candidate as seed for DFS tracing if candidate_edges is nonempty.
     seed = candidate_edges[0]
+    trace_nodes = dfs_trace_from_seed(section, seed)
 
-    def dfs_trace(local_idx: int, visited: set) -> List[int]:
-        trace = [local_idx]
-        visited.add(local_idx)
-        for (nbr, bond) in section[local_idx][4]:
-            if nbr not in visited and len(section[nbr][4]) < 3:
-                trace.extend(dfs_trace(nbr, visited))
-                break
-        return trace
-
-    visited_trace = set()
-    trace_nodes = dfs_trace(seed, visited_trace)
     # NEW CONDITION 1: If the trace is long enough and the fourth node has ≥ 3 inner connections, limit trace to 3 nodes.
     if len(trace_nodes) >= 4 and len(section[trace_nodes[3]][4]) >= 3:
         trace_nodes = trace_nodes[:3]
@@ -3002,7 +1963,6 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
     remainder = [section[i] for i in rem_old_indices]
     return sub_section, remainder, sub_old_indices, rem_old_indices
 
-
 def subdivide_non_ring_section_multi(section: List[List[Any]]) -> Tuple[List[List[Any]], List[List[Any]], List[int], List[int]]:
     """
     Special subdivision: when candidate_edges has 2 or more elements.
@@ -3011,45 +1971,41 @@ def subdivide_non_ring_section_multi(section: List[List[Any]]) -> Tuple[List[Lis
     Returns:
       sub_section, remainder, sub_old_indices, rem_old_indices
     """
-    from collections import deque
     edge_nodes = [i for i, atom in enumerate(section) if atom[5]]
     if len(edge_nodes) < 2:
         raise ValueError("Special subdivision not possible: fewer than 2 edge nodes.")
-    graph = {i: [tup[0] for tup in atom[4]] for i, atom in enumerate(section)}
-    def bfs_path(start: int, end: int) -> Tuple[int, List[int]]:
-        queue = deque([(start, [start])])
-        visited = {start}
-        while queue:
-            current, path = queue.popleft()
-            if current == end:
-                return (len(path)-1, path)
-            for nbr in graph.get(current, []):
-                if nbr not in visited:
-                    visited.add(nbr)
-                    queue.append((nbr, path + [nbr]))
-        return (float('inf'), [])
-    best_path = None
+
+    graph = build_inner_graph_local(section)
+
+    best_path: Optional[List[int]] = None
     best_length = float('inf')
+
     for i in range(len(edge_nodes)):
-        for j in range(i+1, len(edge_nodes)):
-            length, path = bfs_path(edge_nodes[i], edge_nodes[j])
+        for j in range(i + 1, len(edge_nodes)):
+            path = bfs_path_graph(graph, edge_nodes[i], edge_nodes[j])
+            if not path:
+                continue
+            length = len(path) - 1
             if length < best_length:
                 best_length = length
                 best_path = path
+
     if best_path is None or len(best_path) < 2:
         raise ValueError("Special subdivision not possible: no valid path found.")
+
     sub_old_indices = sorted(best_path)
     rem_old_indices = [i for i in range(len(section)) if i not in sub_old_indices]
+
     if len(rem_old_indices) < 2:
         # If remainder too small, try removing the last node from best_path.
         sub_old_indices = best_path[:-1]
         rem_old_indices = [i for i in range(len(section)) if i not in sub_old_indices]
         if len(rem_old_indices) < 2:
             raise ValueError("Special subdivision not possible: remainder too small.")
+
     sub_section = [section[i] for i in sub_old_indices]
     remainder = [section[i] for i in rem_old_indices]
     return sub_section, remainder, sub_old_indices, rem_old_indices
-
 
 def subdivide_non_ring_section(section: List[List[Any]],
                                final: List[str],
@@ -3175,12 +2131,7 @@ def map_nonbenzene_3_ring_section(section: List[List[Any]],
 
     # Case A: All three are carbon → look up the SC3 bead in martini_dict (v[0]==9, v[2]=="CCC")
     if o_count == 0 and c_count == 3:
-        bead_key = next((
-            k for k, v in martini_dict.items()
-            if v[0] == 9 and v[2].upper() == "CCC"
-        ), None)
-        if bead_key is None:
-            raise ValueError("No section-9 bead found for pattern 'CCC' (SC3)")
+        bead_key = find_bead(martini_dict, 9, "CCC")
         bead = bead_key + generate_random_string()
         for atom in section:
             final[atom[0]] = bead
@@ -3188,12 +2139,7 @@ def map_nonbenzene_3_ring_section(section: List[List[Any]],
 
     # Case B: Exactly one oxygen and two carbons → look up the SN4a bead (v[0]==9, v[2]=="COC")
     if o_count == 1 and c_count == 2:
-        bead_key = next((
-            k for k, v in martini_dict.items()
-            if v[0] == 9 and v[2].upper() == "COC"
-        ), None)
-        if bead_key is None:
-            raise ValueError("No section-9 bead found for pattern 'COC' (SN4a)")
+        bead_key = find_bead(martini_dict, 9, "COC")
         bead = bead_key + generate_random_string()
         for atom in section:
             final[atom[0]] = bead
@@ -3235,7 +2181,7 @@ def map_martini_beads(mapping: List[List[List[Any]]],
                     # record for second pass
                     print(f"mapping section {idx} failed:", e)
                     skipped.append(("benzene", idx))
-    
+                    
         # --- PASS 1: Non-benzene rings (type 1) ---
         for idx, section in enumerate(mapping):
             if section and section[0][2] == 1 and any(final[a[0]] == "" for a in section):

@@ -1,4 +1,5 @@
-from output_manip import get_coordinates_from_smiles
+from rdkit import Chem
+from rdkit.Chem import AllChem
 import math
 def group_beads_by_type(final):
     """
@@ -179,26 +180,51 @@ def export_bead_mapping(final, mapping, smiles, compound_name, write_file=True):
     # 6) pull atomic coords from SMILES
     # --- TRY to get a 3D conformer; on failure, use (0,0,0) for all atoms ---
     try:
-        atom_coords  = get_coordinates_from_smiles(smiles)
-        coord_lookup = {
-            c['index']: (c['x'] / 10.0, c['y'] / 10.0, c['z'] / 10.0)
-            for c in atom_coords
-        }
-    except ValueError as e:
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            raise ValueError(f"Invalid SMILES: {smiles}")
+    
+        molH = Chem.AddHs(mol)  # make H explicit
+    
+        # embed + (optional) relax
+        AllChem.EmbedMolecule(molH, AllChem.ETKDG())
+        AllChem.UFFOptimizeMolecule(molH)
+    
+        conf = molH.GetConformer()
+    
+        # coord_lookup for ALL atoms in molH (heavy + hydrogens)
+        coord_lookup = {}
+        for a in molH.GetAtoms():
+            i = a.GetIdx()
+            p = conf.GetAtomPosition(i)
+            coord_lookup[i] = (p.x / 10.0, p.y / 10.0, p.z / 10.0)
+    
+        # map each heavy atom index -> attached hydrogen atom indices
+        # (heavy indices are preserved when you AddHs; H's are appended)
+        h_neighbors = {}
+        for i in range(mol.GetNumAtoms()):  # only heavy atoms
+            ai = molH.GetAtomWithIdx(i)
+            h_neighbors[i] = [n.GetIdx() for n in ai.GetNeighbors() if n.GetSymbol() == "H"]
+    
+    except Exception as e:
         print(f"[export_bead_mapping] warning: 3D embed failed ({e}), using zero‐coords")
-
-        # Build a coord_lookup that maps every atom's global index to (0.0,0.0,0.0)
         coord_lookup = {}
         for sec in mapping:
             for atom_info in sec:
-                gi = atom_info[0]   # global index
+                gi = atom_info[0]
                 coord_lookup[gi] = (0.0, 0.0, 0.0)
-                
+        h_neighbors = {}
+                    
     # --- assemble beads_data ---
     beads_data = []
     for b_idx, atom_list in enumerate(coi):
-        # centroid of its atoms
-        xs, ys, zs = zip(*(coord_lookup[i] for i in atom_list))
+        # centroid of its atoms INCLUDING attached hydrogens
+        expanded = []
+        for i in atom_list:
+            expanded.append(i)
+            expanded.extend(h_neighbors.get(i, []))
+        
+        xs, ys, zs = zip(*(coord_lookup[i] for i in expanded))
         x0, y0, z0 = sum(xs)/len(xs), sum(ys)/len(ys), sum(zs)/len(zs)
         # mass by bead‐type prefix
         bt = fixed_types[b_idx]
