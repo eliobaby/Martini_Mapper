@@ -777,13 +777,13 @@ def map_nonbenzene_6_ring_section(
             if atom[1].upper() != "C":
                 continue
     
-            # unmapped neighbors (not mapped neighbors)
-            unmapped_nbrs = [section[t[0]] for t in atom[4]
-                             if final[section[t[0]][0]] == ""]
+            # mapped neighbors
+            mapped_nbrs = [section[t[0]] for t in atom[4]
+                             if final[section[t[0]][0]] != ""]
     
             # exactly one unmapped neighbor and it must be carbon
-            if len(unmapped_nbrs) == 1 and unmapped_nbrs[0][1].upper() == "C":
-                cand = (atom, unmapped_nbrs[0])
+            if len(mapped_nbrs) == 1 and mapped_nbrs[0][1].upper() == "C":
+                cand = (atom, mapped_nbrs[0])
                 break
     
         if not cand:
