@@ -8,7 +8,7 @@ from martini_mapper.main import run_mapping
     "name,smiles",
     [
         ("Benzene", "c1ccccc1"),
-        ("Methane", "C"),
+        ("Aspirin", "CC(=O)OC1=CC=CC=C1C(=O)O"),
     ],
 )
 def test_run_mapping_library_mode(name, smiles):
