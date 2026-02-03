@@ -6,6 +6,7 @@ dependencies:
   - numpy
   - rdkit
   - mdtraj
+  - xtb
   - xtb-python
   - setuptools
   - wheel
