@@ -236,6 +236,3 @@ Bigting, K. V.; Nag, S.; An, Y. *Martini Mapper: An Automated Fragment-Based Fra
 ---
 
 ## License
-
-MIT
-
