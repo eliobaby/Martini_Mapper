@@ -14,3 +14,10 @@ dependencies = [
   "mdtraj",
   "xtb",
 ]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*", "docs*", "build*", "dist*"]
