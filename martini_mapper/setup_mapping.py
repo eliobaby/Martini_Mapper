@@ -33,7 +33,7 @@ def connectivity_matrix(mol, length):
     for bond in mol.GetBonds():
         # Check if the bond is aromatic and assign a bond order accordingly
         if bond.GetIsAromatic():
-            # You can choose how to represent aromatic bonds.
+            # We can choose how to represent aromatic bonds.
             # For instance, 1.5 is a common representation.
             bond_order = 1.5
         else:

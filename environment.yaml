@@ -12,3 +12,5 @@ dependencies:
   - wheel
   - pytest
   - pip
+  - pip:
+    - -e .

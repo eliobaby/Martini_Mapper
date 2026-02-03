@@ -77,7 +77,7 @@ def run_mapping(
     # Write mapping output (optional)
     if write_files:
         try:
-            from .text_file import export_bead_mapping, gro_maker, itp_maker
+            from .outputs import export_bead_mapping, gro_maker, itp_maker
         except Exception as e:  # pragma: no cover
             raise OutputError(f"Failed to import output writers: {e}") from e
 
@@ -88,7 +88,7 @@ def run_mapping(
     # xtb pipeline (optional)
     if run_xtb:
         try:
-            from .xtb import smiles_to_ref
+            from .xtb_runner import smiles_to_ref
             from .cg_from_xtb_pipeline import build_cg_from_xtb
         except Exception as e:
             raise ExternalToolError(
@@ -164,7 +164,6 @@ def main(argv=None) -> int:
             keep_intermediates=args.keep_intermediates,
         )
     except (InvalidSmilesError, MappingError, ExternalToolError, OutputError) as e:
-        # Human-friendly error for CLI usage
         raise SystemExit(str(e)) from e
 
     return 0

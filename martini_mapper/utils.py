@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import shutil
-from typing import Iterable, Sequence, Optional
+from typing import Sequence, Optional
 
 from rdkit import Chem
 
@@ -44,7 +44,7 @@ def safe_mol_from_smiles(smiles: str) -> Chem.Mol:
     if mol is None:
         raise InvalidSmilesError(
             "Invalid SMILES string: RDKit could not parse it. "
-            "Check for typos and ensure you are passing a canonical SMILES."
+            "Check for typos and ensure we are passing a canonical SMILES."
         )
     return mol
 

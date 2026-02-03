@@ -396,7 +396,7 @@ def merge_phenol_to_diol(section, final, martini_dict, full_mapping, tn_prefix="
 
     ring_len = len(order)
     if ring_len != n:
-        # section isn't a simple 1-cycle ring (rare for your ring tasks) -> don't touch
+        # section isn't a simple 1-cycle ring (rare for ring tasks) -> don't touch
         return
 
     # map cycle position -> local index, and local -> cycle position
@@ -463,7 +463,6 @@ def merge_phenol_to_diol(section, final, martini_dict, full_mapping, tn_prefix="
             if o1 is None or o2 is None:
                 continue
 
-            # "rip everything off" for these 4 atoms (optional but matches your intent)
             for g in (gid1, gid2, o1, o2):
                 final[g] = ""
 

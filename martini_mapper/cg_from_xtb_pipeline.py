@@ -33,9 +33,7 @@ def _circular_std(phi: np.ndarray) -> float:
     R = max(R, 1e-300)  # numerical safety only
     return float(np.sqrt(max(0.0, -2.0 * np.log(R))))
 
-# Reuse your existing functions from text_file.py
-# (adjust import path/name as needed)
-from text_file import (
+from outputs import (
     group_beads_by_type,
     compute_beads_connections,
     fix_beadtypes,
@@ -324,7 +322,7 @@ def fit_dihedrals_simple(
 
 
 # -----------------------------
-# 4) Write .itp using your style (atoms + bonds + angles)
+# 4) Write .itp (atoms + bonds + angles)
 # -----------------------------
 
 def bead_mass_from_type(bt: str) -> float:
@@ -344,7 +342,7 @@ def write_itp_with_bonds_angles_dihedrals(
     out_itp: str,
 ):
     """
-    Writes a self-contained .itp for a single residue named 'res', similar to your itp_maker(),
+    Writes a self-contained .itp for a single residue named 'res', similar to itp_maker(),
     but uses fitted bond/angle values (instead of constant k=20000 and b0 from one frame).
     """
     lines = []
@@ -368,7 +366,7 @@ def write_itp_with_bonds_angles_dihedrals(
         lines.append(f"{i+1:5d} {j+1:5d} {1:5d} {b0:12.5f} {k:16.1f}")
     lines.append("")
 
-    # angles (funct=1 harmonic, in radians here — if you prefer degrees we can convert)
+    # angles (funct=1 harmonic, in radians here — if we prefer degrees we can convert)
     lines.append("[ angles ]")
     lines.append(";  ai    aj    ak  funct     th0(deg)        k(kJ/mol/rad^2)")
     for (i, j, k_, th0_rad, k_rad, sigma_rad) in angles_fit:
@@ -385,7 +383,7 @@ def write_itp_with_bonds_angles_dihedrals(
     Path(out_itp).write_text("\n".join(lines) + "\n")
 
 # -----------------------------
-# 5) The one function you call
+# 5) The main xtb function
 # -----------------------------
 
 def build_cg_from_xtb(
@@ -400,7 +398,7 @@ def build_cg_from_xtb(
 ):
     """
     End-to-end:
-      final+mapping -> bead groups + bead types + bead bonds (reuses your code)
+      final+mapping -> bead groups + bead types + bead bonds
       smiles -> add attached H indices (RDKit)
       ref.gro/ref.xtc -> cg_ref.gro/cg_ref.xtc (center of geometry, with H)
       fit bonds+angles from cg_ref.xtc
@@ -427,7 +425,7 @@ def build_cg_from_xtb(
     out_cg_gro = f"{out_prefix}_cg_ref.gro"
     out_cg_xtc = f"{out_prefix}_cg_ref.xtc"
     bead_names = [f"C{i+1}" for i in range(n_beads)]
-    # Load AA once (also lets us fail early if ref.gro is corrupt)
+    # Load AA once (fail early if ref.gro is corrupt)
     aa = md.load(ref_xtc, top=ref_gro)
     
     # Strict: assign H by true bond connectivity from SMILES (RDKit)
