@@ -52,8 +52,6 @@ def smiles_to_ref(name, smiles, *, drop_first_frac: float = 0):
     )
 
     traj = md.load_xyz(f"{name}_md/xtb.trj", top=f"{name}.pdb")
-    
-    #traj.xyz *= 0.1
 
     # ---- NaN/Inf guard + frame filter ----
     finite_frame = np.isfinite(traj.xyz).all(axis=(1,2))

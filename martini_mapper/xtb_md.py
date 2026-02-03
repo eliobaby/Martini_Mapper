@@ -12,9 +12,9 @@ def run_xtb_md(
     *,
     step_fs: float = 0.1,
     shake: int = 0,
-    hmass: int = 4,
+    hmass: int = 1,
     nvt: bool = True,
-    dump: int = 50,
+    dump: int = 100,
 ) -> Dict[str, Any]:
 
     xtb_exe = shutil.which("xtb")
