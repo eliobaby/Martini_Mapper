@@ -23,41 +23,44 @@ This framework automates that entire process. It uses a sophisticated, rule-base
 
 ---
 
-## Installation (pip)
+## Installation
 
-Because this project depends on **xtb** (Python API) and `pip` installs for `xtb` can fail on Windows (often requires building from source), the **recommended** setup is using **Anaconda/conda** for the easiest user experience.
+Because this project depends on **xtb (Python API)** and `pip` installs for `xtb` can fail on Windows (often requires building from source), the **recommended** setup is using **Anaconda/conda**.
 
-If you don’t already have Anaconda installed, see the official installer guide:
-https://docs.anaconda.com/free/anaconda/install/
+### Option A (Recommended): Anaconda / conda via `environment.yaml`
 
----
+1) Install Anaconda (if you don’t have it):
+[Install Anaconda](https://docs.anaconda.com/free/anaconda/install/)
 
-
-### Option A (Recommended): Install with Anaconda / conda
+2) Create the environment and activate it:
 
 ```bash
 # Clone the repository
 git clone https://github.com/eliobaby/Martini_Mapper.git
 cd Martini_Mapper
 
-# Create a new conda environment
-conda create -n martini_mapper python=3.11 -y
+# Create the conda environment from the file
+conda env create -f environment.yaml
 
-# Activate the environment
+# Activate
 conda activate martini_mapper
+```
 
-# Install dependencies from conda-forge
-conda install -c conda-forge -y rdkit mdtraj xtb-python numpy
+3) Run:
 
-# Run (see Usage below)
+```bash
 python main.py
 ```
 
+> Notes:
+> - `environment.yaml` uses **conda-forge** to install `xtb-python`, `rdkit`, and other compiled dependencies reliably.
+> - If you update dependencies, update `environment.yaml` accordingly.
+
 ---
 
-### Option B (Advanced): Install with pip (may fail for xtb on Windows)
+### Option B (Advanced): pip + venv (may fail for xtb on Windows)
 
-> **Windows note:** If installation fails with Meson/MSVC errors like “Unknown compiler(s)” or “cl.exe not found”, you need **Visual Studio Build Tools** (C++ toolchain) installed and must retry from a VS Developer prompt.
+> **Windows note:** If installation fails with Meson/MSVC errors like “Unknown compiler(s)” or “cl.exe not found”, `xtb` is being built from source and you need the MSVC C++ build tools.
 
 ```bash
 # Clone the repository
@@ -76,10 +79,10 @@ source .venv/bin/activate
 # Upgrade pip
 python -m pip install --upgrade pip
 
-# Install pinned dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Run (see Usage below)
+# Run
 python main.py
 ```
 
