@@ -59,7 +59,7 @@ python main.py
 
 ---
 
-### Option B (Advanced): pip + venv (may fail for xtb on Windows)
+### Option B: pip + venv (may fail for xtb on Windows)
 
 > **Windows note:** If installation fails with Meson/MSVC errors like “Unknown compiler(s)” or “cl.exe not found”, `xtb` is being built from source and you need the MSVC C++ build tools.
 
@@ -87,7 +87,7 @@ pip install -r requirements.txt
 
 ---
 
-### Install the project (editable)
+### Install the project
 
 ```bash
 python -m pip install -e .
@@ -98,7 +98,7 @@ python -m pip install -e .
 
 ## Usage
 
-### Run as a module (recommended)
+### Run as a module
 
 Non-interactive (pass `NAME` and `SMILES`):
 
@@ -168,11 +168,11 @@ pytest -ra -vv
 
 ---
 
-## Project layout (important)
+## Project layout
 
 - `martini_mapper/` — importable package code
-- `tests/` — pytest test suite
-- Run via `python -m martini_mapper` (preferred)
+- `tests/` — pytest test
+- Run via `python -m martini_mapper`
 
 ---
 
