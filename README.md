@@ -1,4 +1,4 @@
-# Automated Martini 3 Coarse-Graining Framework
+# Martini Mapper - An Automated Martini 3 Coarse-Graining Framework
 
 A Python-based framework for automatically generating Martini 3 coarse-grained models directly from SMILES strings.  
 This tool is designed to transform the complex, manual process of creating coarse-grained topologies into a fast, systematic, and reproducible workflow.
@@ -23,31 +23,30 @@ This framework automates that entire process. It uses a sophisticated, rule-base
 
 ---
 
-## Installation
+## Installation (pip)
 
-This project relies on **RDKit** for processing chemical structures.  
-The recommended way to set up the environment is by using **Anaconda**.
-
-If you don’t already have Anaconda installed, you can download it here:  
-[Install Anaconda](https://docs.anaconda.com/free/anaconda/install/)
-
----
-
-### Setup Steps
+### 1) Clone the repository
 
 ```bash
-# Clone the repository
-git clone https://github.com/eliobaby/Martini_3.git
-cd Martini_3
+git clone https://github.com/eliobaby/Martini_Mapper.git
+cd Martini_Mapper
 
-# Create a new Conda environment
-conda create -n martini_mapper python=3.9
+### 2) Create and activate a virtual environment
 
-# Activate the environment
-conda activate martini_mapper
+```bash
+**macOS/Linux**
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 
-# Install RDKit
-conda install -c conda-forge rdkit
+**Windows (PowerShell)**
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+
+### 3) Install dependencies
+
+pip install -r requirements.txt
 
 ## Usage
 
@@ -101,6 +100,8 @@ This framework is under active development. The current version has the followin
 ## Citation
 
 If you use this work in your research, please cite our upcoming paper:  
+
+Bigting, K. V.; Nag, S.; An, Y. *Martini Mapper: An Automated Fragment-Based Framework for Developing Coarse-Grained Models within the Martini 3 Framework.* (preprint / in preparation)
 
 ---
 
