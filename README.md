@@ -91,7 +91,7 @@ python main.py
 ### Install the project (editable)
 
 ```bash
-pip install -e .
+pip install --no-build-isolation -e .
 
 ```
 

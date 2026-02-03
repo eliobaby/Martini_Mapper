@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "martini-mapper"
+version = "0.0.1"
+description = "Automated Martini 3 coarse-graining framework from SMILES."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "rdkit",
+  "mdtraj",
+  "xtb",
+]
