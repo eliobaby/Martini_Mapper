@@ -7,4 +7,6 @@ dependencies:
   - rdkit
   - mdtraj
   - xtb-python
+  - setuptools
+  - wheel
   - pip
