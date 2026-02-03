@@ -1,4 +1,0 @@
-numpy==2.4.2
-rdkit==2025.9.4
-mdtraj==1.11.1.post1
-xtb==22.1

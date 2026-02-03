@@ -1,0 +1,10 @@
+name: martini_mapper
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - rdkit
+  - mdtraj
+  - xtb-python
+  - pip
