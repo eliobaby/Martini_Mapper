@@ -46,20 +46,13 @@ conda env create -f environment.yaml
 conda activate martini_mapper
 ```
 
-3) Run:
-
-```bash
-cd martini_mapper
-python main.py
-```
-
 > Notes:
 > - `environment.yaml` uses **conda-forge** to install `xtb-python`, `rdkit`, and other compiled dependencies reliably.
 > - If you update dependencies, update `environment.yaml` accordingly.
 
 ---
 
-### Option B: pip + venv (may fail for xtb on Windows)
+### Option B: pip + venv
 
 > **Windows note:** If installation fails with Meson/MSVC errors like “Unknown compiler(s)” or “cl.exe not found”, `xtb` is being built from source and you need the MSVC C++ build tools.
 
