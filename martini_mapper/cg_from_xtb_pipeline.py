@@ -33,7 +33,7 @@ def _circular_std(phi: np.ndarray) -> float:
     R = max(R, 1e-300)  # numerical safety only
     return float(np.sqrt(max(0.0, -2.0 * np.log(R))))
 
-from outputs import (
+from .outputs import (
     group_beads_by_type,
     compute_beads_connections,
     fix_beadtypes,
