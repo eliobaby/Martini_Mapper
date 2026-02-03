@@ -49,6 +49,7 @@ conda activate martini_mapper
 3) Run:
 
 ```bash
+cd martini_mapper
 python main.py
 ```
 
@@ -74,7 +75,7 @@ python -m venv .venv
 # macOS/Linux:
 source .venv/bin/activate
 # Windows (PowerShell):
-# .venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 
 # Upgrade pip
 python -m pip install --upgrade pip
@@ -91,7 +92,7 @@ python main.py
 ### Install the project (editable)
 
 ```bash
-pip install --no-build-isolation -e .
+python -m pip install -e .
 
 ```
 
