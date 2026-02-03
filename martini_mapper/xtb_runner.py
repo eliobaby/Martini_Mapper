@@ -1,6 +1,6 @@
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from xtb_md_runner import run_xtb_md
+from .xtb_md_runner import run_xtb_md
 import mdtraj as md
 import numpy as np
 
