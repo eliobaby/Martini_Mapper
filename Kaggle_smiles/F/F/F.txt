@@ -1,0 +1,13 @@
+Compound: F
+SMILES:   COCCC(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N3r        0,1,2,3              C,O,C,C              1            72.0     0.0931   -0.0046  -0.0090 
+1        SX3h       4,5,6                C,Cl,Cl              1            54.0     -0.2561  0.0126   0.0247  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

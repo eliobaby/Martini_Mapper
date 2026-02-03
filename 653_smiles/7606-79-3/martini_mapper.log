@@ -1,0 +1,5 @@
+Critical error: Non‐ring section division leads to unassignable sections.
+Linear path of 4 cannot be mapped: no candidate bead found for 2-edge mapping (path: NCC=O). Beginning to break down further.
+Linear path of 4 cannot be mapped: no candidate bead found for 2-edge mapping (path: NCC=O). Beginning to break down further.
+GRO file written to: 7606-79-3.gro
+ITP file written to: 7606-79-3.itp

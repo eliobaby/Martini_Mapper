@@ -1,0 +1,13 @@
+Compound: HEaSC00112
+SMILES:   NC(=O)C(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SP5        0,1,2                N,C,O                1            54.0     -0.1180  -0.0083  0.0226  
+1        SX3h       3,4,5                C,Cl,Cl              1            54.0     0.1475   0.0103   -0.0282 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

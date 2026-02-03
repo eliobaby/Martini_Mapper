@@ -1,0 +1,13 @@
+Compound: GZ
+SMILES:   CCNC(Cl)Cl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN5        0,1,2                C,C,N                1            54.0     -0.0895  -0.0071  -0.0177 
+1        SX3h       3,4,5                C,Cl,Cl              1            54.0     0.2013   0.0159   0.0330  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     
