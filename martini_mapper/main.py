@@ -8,11 +8,21 @@ from algorithm import map_martini_beads
 from cg_from_xtb_pipeline import build_cg_from_xtb
 from xtb import smiles_to_ref
 import copy
+import argparse
 
-def main():
-    # Input SMILES string
-    compound_name = input("Name: ")
-    smiles = input("Smiles: ")
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="martini_mapper")
+    parser.add_argument("name", nargs="?", help="Compound name (e.g., Benzene)")
+    parser.add_argument("smiles", nargs="?", help="SMILES string (e.g., c1ccccc1)")
+    args = parser.parse_args(argv)
+    if args.name is None:
+        compound_name = input("Name: ")
+    else:
+        compound_name = args.name
+    if args.smiles is None:
+        smiles = input("Smiles: ")
+    else:
+        smiles = args.smiles
     smiles = remove_stars(smiles)
     smiles_fix = duplicate_ring_number_handler(smiles)
     mol = Chem.MolFromSmiles(smiles)
