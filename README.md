@@ -83,8 +83,6 @@ python -m pip install --upgrade pip
 # Install dependencies
 pip install -r requirements.txt
 
-# Run
-python main.py
 ```
 
 ---
@@ -96,31 +94,115 @@ python -m pip install -e .
 
 ```
 
+---
+
 ## Usage
 
-The script is run interactively from the command line.
+### Run as a module (recommended)
+
+Non-interactive (pass `NAME` and `SMILES`):
 
 ```bash
-python main.py
+python -m martini_mapper Benzene "c1ccccc1"
 ```
 
-You will be prompted for:  
-- **Name**: The name of your molecule.  
-- **SMILES**: The SMILES string representation of your molecule.  
-
-### Example Session
+Interactive (no positional args → prompts for Name/Smiles):
 
 ```bash
-python main.py
-Name: Aspirin
-SMILES: CC(=O)OC1=CC=CC=C1C(=O)O
+python -m martini_mapper
+```
+
+---
+
+## CLI arguments
+
+Positional:
+
+- `name` (optional): compound name (e.g., `Benzene`). If omitted, you will be prompted.
+- `smiles` (optional): SMILES string (e.g., `c1ccccc1`). If omitted, you will be prompted.
+
+Options:
+
+- `--no-xtb`  
+  Skip xTB coordinate/CG generation.
+
+- `--no-files`  
+  Do not write output files (`.txt/.gro/.itp`). Useful for “library mode” and tests.
+
+- `--out-dir PATH`  
+  Directory to place final outputs.  
+  Default: `./<name>/`
+
+- `--keep-intermediates`  
+  Do not delete intermediate xTB/MD files.
+
+Examples:
+
+```bash
+# Run without xTB and write no files (fast / test-friendly)
+python -m martini_mapper Benzene c1ccccc1 --no-xtb --no-files
+
+# Put outputs in a specific folder
+python -m martini_mapper Benzene c1ccccc1 --out-dir outputs/Benzene
+
+# Keep intermediate xTB/MD files for debugging
+python -m martini_mapper Benzene c1ccccc1 --keep-intermediates
+```
+
+---
+
+## Testing
+
+Install pytest and run the test suite from the repository root:
+
+```bash
+python -m pip install pytest
+pytest -q
+```
+
+More verbose output:
+
+```bash
+pytest -ra -vv
+```
+
+---
+
+## Project layout (important)
+
+- `martini_mapper/` — importable package code
+- `tests/` — pytest test suite
+- Run via `python -m martini_mapper` (preferred)
+
+---
+
+## Troubleshooting
+
+### `ModuleNotFoundError` for sibling modules
+When running as a package, imports must be **relative** inside `martini_mapper/`, e.g.:
+
+```python
+from .setup_mapping import ...
+```
+
+not:
+
+```python
+from setup_mapping import ...
+```
+
+### xTB issues
+If xTB isn’t available on your machine or you want a quick run, use:
+
+```bash
+python -m martini_mapper NAME SMILES --no-xtb
 ```
 
 ---
 
 ## Output Files
 
-After running, the script will generate three files in the same directory:
+After running, by default, the script will generate three files in the same directory:
 
 - `<MOLECULE_NAME>.gro`: A GROMACS coordinate file containing the 3D positions of each coarse-grained bead.  
 - `<MOLECULE_NAME>.itp`: A GROMACS topology file that defines the bead types, bonds, and other parameters for the simulation.  
@@ -155,5 +237,5 @@ Bigting, K. V.; Nag, S.; An, Y. *Martini Mapper: An Automated Fragment-Based Fra
 
 ## License
 
-
+MIT
 
