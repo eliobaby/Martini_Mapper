@@ -149,7 +149,6 @@ python -m martini_mapper Benzene c1ccccc1 --keep-intermediates
 Install pytest and run the test suite from the repository root:
 
 ```bash
-python -m pip install pytest
 pytest -q
 ```
 
