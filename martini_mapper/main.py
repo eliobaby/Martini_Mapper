@@ -1,11 +1,11 @@
 from pathlib import Path
 import shutil
 from rdkit import Chem
-from setup_mapping import get_atom_properties, connectivity_matrix, duplicate_ring_number_handler, remove_stars
-from martini_3_dictionary import get_m3_dict
-from mapping_scheme import map_molecule, parse_smiles
-from algorithm import map_martini_beads
-from cg_from_xtb_pipeline import build_cg_from_xtb
+from .setup_mapping import get_atom_properties, connectivity_matrix, duplicate_ring_number_handler, remove_stars
+from .martini_3_dictionary import get_m3_dict
+from .mapping_scheme import map_molecule, parse_smiles
+from .algorithm import map_martini_beads
+from .cg_from_xtb_pipeline import build_cg_from_xtb
 from xtb import smiles_to_ref
 import copy
 import argparse
