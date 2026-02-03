@@ -1748,6 +1748,40 @@ def fix_isedge(section: List[List[Any]]) -> None:
         else:
             atom[5] = False
 
+def rebuild_all_outer_connections(full_mapping: List[List[List[Any]]],
+                                  old_pair_to_gid: Dict[Tuple[int,int], int]) -> None:
+    """
+    Rewrites every atom[3] = [(sec_idx, local_idx, bond_order), ...] so that
+    sec_idx/local_idx are correct after full_mapping has been structurally changed.
+
+    Uses global atom id as the stable key.
+    """
+    # Build new gid -> (sec_idx, local_idx)
+    gid_to_new_pair: Dict[int, Tuple[int,int]] = {}
+    for si, sec in enumerate(full_mapping):
+        for li, atom in enumerate(sec):
+            gid_to_new_pair[atom[0]] = (si, li)
+
+    # Rewrite all outer tuples everywhere
+    for sec in full_mapping:
+        for atom in sec:
+            new_outer = []
+            for (fsi, fli, bo) in atom[3]:
+                # Translate old (sec,local) -> foreign gid (from before the split)
+                fgid = old_pair_to_gid.get((fsi, fli))
+                if fgid is None:
+                    # Defensive: if something is missing, keep original tuple
+                    # (or raise if you prefer strictness)
+                    new_outer.append((fsi, fli, bo))
+                    continue
+
+                # Translate foreign gid -> new (sec,local)
+                if fgid not in gid_to_new_pair:
+                    raise ValueError(f"Outer-connection target global id {fgid} vanished after remap.")
+                nsi, nli = gid_to_new_pair[fgid]
+                new_outer.append((nsi, nli, bo))
+
+            atom[3] = new_outer
 
 def subdivide_non_ring_section_normal(section: List[List[Any]], 
                                       final: List[str],
@@ -2079,6 +2113,10 @@ def map_non_ring_section_long(section: List[List[Any]],
       - Recursively map each new section.
     Returns updated final and full mapping.
     """
+    old_pair_to_gid = {}
+    for si, sec in enumerate(full_mapping):
+        for li, a in enumerate(sec):
+            old_pair_to_gid[(si, li)] = a[0]
     sub_sec, rem_sec, sub_old_indices, rem_old_indices = subdivide_non_ring_section(section, final, full_mapping, martini_dict)
     sub_sec = reindex_section(sub_sec, sub_old_indices)
     rem_sec = reindex_section(rem_sec, rem_old_indices)
@@ -2088,6 +2126,8 @@ def map_non_ring_section_long(section: List[List[Any]],
     full_mapping.pop(section_index)
     full_mapping.insert(section_index, sub_sec)
     full_mapping.insert(section_index + 1, rem_sec)
+    
+    rebuild_all_outer_connections(full_mapping, old_pair_to_gid)
     if not is_non_ring_section_1bead_mappable(sub_sec):
         final, full_mapping = map_non_ring_section_long(sub_sec, final, martini_dict, full_mapping, section_index)
     else:

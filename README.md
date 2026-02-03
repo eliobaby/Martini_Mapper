@@ -33,20 +33,40 @@ cd Martini_Mapper
 
 ### 2) Create and activate a virtual environment
 
-```bash
 **macOS/Linux**
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 
 **Windows (PowerShell)**
+```powershell
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 
 ### 3) Install dependencies
 
+```bash
 pip install -r requirements.txt
+```
+
+### 4) Install the project (editable)
+
+```bash
+pip install -e .
+```
+
+### Dependencies
+
+We pin dependency versions in `requirements.txt` to improve reproducibility for benchmarks and the paper.
+
+- RDKit
+- NumPy
+- MDTraj
+- xtb
+
+**Note on xtb:** If your workflow uses the `xtb` executable (command-line program), you must also install the xtb binaries and ensure `xtb` is available on your PATH.
 
 ## Usage
 
@@ -101,7 +121,7 @@ This framework is under active development. The current version has the followin
 
 If you use this work in your research, please cite our upcoming paper:  
 
-Bigting, K. V.; Nag, S.; An, Y. *Martini Mapper: An Automated Fragment-Based Framework for Developing Coarse-Grained Models within the Martini 3 Framework.* (preprint / in preparation)
+Bigting, K. V.; Nag, S.; An, Y. *Martini Mapper: An Automated Fragment-Based Framework for Developing Coarse-Grained Models within the Martini 3 Framework.* 
 
 ---
 

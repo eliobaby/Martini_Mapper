@@ -99,7 +99,8 @@ def compute_beads_connections(coi, mapping):
                 foreign_sec_index = ext[0]
                 local_index = ext[1]
                 bond = ext[2]
-                foreign_trace = mapping[foreign_sec_index][local_index][0]
+                sec = mapping[foreign_sec_index]
+                foreign_trace = sec[local_index][0]
                 if foreign_trace not in group:
                     for c_index, other_group in enumerate(coi):
                         if foreign_trace in other_group:

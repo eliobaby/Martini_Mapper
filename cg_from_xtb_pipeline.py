@@ -41,74 +41,6 @@ from text_file import (
     fix_beadtypes,
 )
 
-def assign_hydrogens_to_heavy_from_aa(
-    aa: md.Trajectory,
-    cutoff_nm: float = 0.12,
-    frame_index: int = 0,
-) -> Dict[int, List[int]]:
-    """
-    Build heavy_atom_index -> [hydrogen_indices] using AA topology + geometry.
-    Uses nearest-heavy assignment for each H within cutoff.
-    """
-    top = aa.topology
-    xyz = aa.xyz[frame_index]  # (n_atoms, 3) in nm
-
-    heavy_indices = []
-    hydrogen_indices = []
-
-    for a in top.atoms:
-        is_h = False
-        if a.element is not None:
-            is_h = (a.element.symbol == "H")
-        else:
-            # fallback: PDB atom names usually like "H1", "H2", "HA", etc.
-            is_h = a.name.strip().startswith("H")
-    
-        if is_h:
-            hydrogen_indices.append(a.index)
-        else:
-            heavy_indices.append(a.index)
-
-    heavy_indices = np.array(heavy_indices, dtype=int)
-    hydrogen_indices = np.array(hydrogen_indices, dtype=int)
-
-    heavy_xyz = xyz[heavy_indices]       # (nHvy, 3)
-    H_xyz = xyz[hydrogen_indices]        # (nH, 3)
-
-    # Pairwise distances: (nH, nHvy)
-    # Use broadcasting, no md.compute_distances needed
-    d = np.linalg.norm(H_xyz[:, None, :] - heavy_xyz[None, :, :], axis=2)
-
-    nearest_heavy_pos = d.argmin(axis=1)
-    nearest_heavy = heavy_indices[nearest_heavy_pos]
-    nearest_dist = d[np.arange(d.shape[0]), nearest_heavy_pos]
-
-    heavy_to_h: Dict[int, List[int]] = {int(h): [] for h in heavy_indices.tolist()}
-
-    for h_idx, hvy_idx, dist in zip(hydrogen_indices, nearest_heavy, nearest_dist):
-        if dist <= cutoff_nm:
-            heavy_to_h[int(hvy_idx)].append(int(h_idx))
-        # else: ignore stray H (shouldn't happen unless bad geometry)
-
-    return heavy_to_h
-
-
-def expand_beads_with_hydrogens_from_aa(
-    bead_heavy_atoms: List[List[int]],
-    heavy_to_h: Dict[int, List[int]],
-) -> List[List[int]]:
-    """
-    Expand each bead heavy-atom list with H assigned to those heavy atoms.
-    """
-    out = []
-    for heavy_list in bead_heavy_atoms:
-        s: Set[int] = set(int(x) for x in heavy_list)
-        for hvy in heavy_list:
-            for h in heavy_to_h.get(int(hvy), []):
-                s.add(int(h))
-        out.append(sorted(s))
-    return out
-
 # -----------------------------
 # 1) RDKit: heavy atom -> attached hydrogen indices
 # -----------------------------
@@ -491,10 +423,6 @@ def build_cg_from_xtb(
     # unique bonds list (0-based bead indices)
     bonds = sorted({(min(i, j), max(i, j)) for i, j in zip(origin, connected)})
 
-    # expand each bead to include attached H (important fix)
-    # heavy_to_h = build_heavy_to_hydrogens(smiles)
-    # bead_atom_indices = expand_beads_with_hydrogens(bead_heavy_atoms, heavy_to_h)
-
     # map AA -> CG trajectory
     out_cg_gro = f"{out_prefix}_cg_ref.gro"
     out_cg_xtc = f"{out_prefix}_cg_ref.xtc"
@@ -502,11 +430,11 @@ def build_cg_from_xtb(
     # Load AA once (also lets us fail early if ref.gro is corrupt)
     aa = md.load(ref_xtc, top=ref_gro)
     
-    # Assign H to nearest heavy atom in the actual AA geometry
-    heavy_to_h = assign_hydrogens_to_heavy_from_aa(aa, cutoff_nm=0.12, frame_index=0)
+    # Strict: assign H by true bond connectivity from SMILES (RDKit)
+    heavy_to_h = build_heavy_to_hydrogens(smiles)
     
     # Expand each bead's atom list to include its attached H
-    bead_atom_indices = expand_beads_with_hydrogens_from_aa(bead_heavy_atoms, heavy_to_h)
+    bead_atom_indices = expand_beads_with_hydrogens(bead_heavy_atoms, heavy_to_h)
     
     # Now map AA -> CG using the already-loaded aa
     cg = map_aa_to_cg_traj_from_loaded_aa(

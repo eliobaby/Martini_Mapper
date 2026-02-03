@@ -4,15 +4,17 @@ from xtb_md import run_xtb_md
 import mdtraj as md
 import numpy as np
 
-def smiles_to_xyz(smiles, xyz_file="mol.xyz"):
+def build_mol(smiles):
     mol = Chem.MolFromSmiles(smiles)
     mol = Chem.AddHs(mol)
 
     AllChem.EmbedMolecule(mol, AllChem.ETKDG())
     AllChem.UFFOptimizeMolecule(mol)
 
-    conf = mol.GetConformer()
+    return mol
 
+def write_xyz_from_mol(mol, xyz_file):
+    conf = mol.GetConformer()
     with open(xyz_file, "w") as f:
         f.write(f"{mol.GetNumAtoms()}\n\n")
         for atom in mol.GetAtoms():
@@ -20,17 +22,10 @@ def smiles_to_xyz(smiles, xyz_file="mol.xyz"):
             pos = conf.GetAtomPosition(i)
             f.write(f"{atom.GetSymbol()} {pos.x:.6f} {pos.y:.6f} {pos.z:.6f}\n")
 
-def smiles_to_pdb(smiles, pdb_file="mol.pdb"):
-    mol = Chem.MolFromSmiles(smiles)
-    mol = Chem.AddHs(mol)
-
-    AllChem.EmbedMolecule(mol, AllChem.ETKDG())
-    AllChem.UFFOptimizeMolecule(mol)
-
+def write_pdb_from_mol(mol, pdb_file):
     Chem.MolToPDBFile(mol, pdb_file)
-    return pdb_file
 
-def smiles_to_ref(name, smiles, *, drop_first_frac: float = 0.2, xtb_md_kwargs: dict = None):
+def smiles_to_ref(name, smiles, *, drop_first_frac: float = 0):
     """
     Build AA reference trajectory for a molecule:
       - RDKit embed + UFF optimize -> name.xyz and name.pdb
@@ -41,22 +36,24 @@ def smiles_to_ref(name, smiles, *, drop_first_frac: float = 0.2, xtb_md_kwargs: 
     ----------
     drop_first_frac : float
         Fraction (0..1) of *valid* frames to drop from the beginning of the trajectory
-        (simple equilibration discard). Default 0.2 (drop first 20%).
-    xtb_md_kwargs : dict
-        Optional kwargs passed to run_xtb_md() (e.g., time_ps, temp_k, step_fs, preopt).
+        (simple equilibration discard). Default 0.8 (drop first 80%).
     """
-    if xtb_md_kwargs is None:
-        xtb_md_kwargs = {}
+    mol = build_mol(smiles)
 
-    smiles_to_xyz(smiles, f"{name}.xyz")
+    xyz_path = f"{name}.xyz"
+    pdb_path = f"{name}.pdb"
+
+    write_xyz_from_mol(mol, xyz_path)
+    write_pdb_from_mol(mol, pdb_path)
+
     out = run_xtb_md(
-        xyz_path=f"{name}.xyz",
+        xyz_path=xyz_path,
         workdir=f"{name}_md",
-        **xtb_md_kwargs
     )
-    smiles_to_pdb(smiles, f"{name}.pdb")
 
     traj = md.load_xyz(f"{name}_md/xtb.trj", top=f"{name}.pdb")
+    
+    #traj.xyz *= 0.1
 
     # ---- NaN/Inf guard + frame filter ----
     finite_frame = np.isfinite(traj.xyz).all(axis=(1,2))
@@ -72,24 +69,11 @@ def smiles_to_ref(name, smiles, *, drop_first_frac: float = 0.2, xtb_md_kwargs: 
         )
 
     # ---- Drop equilibration frames (first X%) ----
-    if drop_first_frac is None:
-        drop_first_frac = 0.0
-    drop_first_frac = float(drop_first_frac)
-
-    drop_n = int(traj.n_frames * drop_first_frac)
-    if drop_n >= traj.n_frames:
-        drop_n = max(0, traj.n_frames - 1)
+    drop_n = int(traj.n_frames * float(drop_first_frac))
+    drop_n = min(drop_n, traj.n_frames - 1)
 
     if drop_n > 0:
-        print(f"[smiles_to_ref] Dropping first {drop_n}/{traj.n_frames} frames ({drop_first_frac*100:.1f}%).")
         traj = traj[drop_n:]
-
-    if traj.n_frames == 0:
-        raise RuntimeError(
-            "No frames left after dropping equilibration. "
-            "Reduce drop_first_frac or increase MD length."
-        )
 
     traj.save_gro(f"ref_{name}.gro")
     traj.save_xtc(f"ref_{name}.xtc")
-
