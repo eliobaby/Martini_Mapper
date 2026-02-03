@@ -1,4 +1,4 @@
-# Martini Mapper - An Automated Martini 3 Coarse-Graining Framework
+# Martini Mapper
 
 A Python-based framework for automatically generating Martini 3 coarse-grained models directly from SMILES strings.  
 This tool is designed to transform the complex, manual process of creating coarse-grained topologies into a fast, systematic, and reproducible workflow.
@@ -25,48 +25,72 @@ This framework automates that entire process. It uses a sophisticated, rule-base
 
 ## Installation (pip)
 
-### 1) Clone the repository
+Because this project depends on **xtb** (Python API) and `pip` installs for `xtb` can fail on Windows (often requires building from source), the **recommended** setup is using **Anaconda/conda** for the easiest user experience.
+
+If you don’t already have Anaconda installed, see the official installer guide:
+https://docs.anaconda.com/free/anaconda/install/
+
+---
+
+
+### Option A (Recommended): Install with Anaconda / conda
 
 ```bash
+# Clone the repository
 git clone https://github.com/eliobaby/Martini_Mapper.git
 cd Martini_Mapper
 
-### 2) Create and activate a virtual environment
+# Create a new conda environment
+conda create -n martini_mapper python=3.11 -y
 
-**macOS/Linux**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
+# Activate the environment
+conda activate martini_mapper
 
-**Windows (PowerShell)**
-```powershell
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+# Install dependencies from conda-forge
+conda install -c conda-forge -y rdkit mdtraj xtb-python numpy
 
-### 3) Install dependencies
-
-```bash
-pip install -r requirements.txt
+# Run (see Usage below)
+python main.py
 ```
 
-### 4) Install the project (editable)
+---
+
+### Option B (Advanced): Install with pip (may fail for xtb on Windows)
+
+> **Windows note:** If installation fails with Meson/MSVC errors like “Unknown compiler(s)” or “cl.exe not found”, you need **Visual Studio Build Tools** (C++ toolchain) installed and must retry from a VS Developer prompt.
+
+```bash
+# Clone the repository
+git clone https://github.com/eliobaby/Martini_Mapper.git
+cd Martini_Mapper
+
+# Create a virtual environment
+python -m venv .venv
+
+# Activate it
+# macOS/Linux:
+source .venv/bin/activate
+# Windows (PowerShell):
+# .venv\Scripts\Activate.ps1
+
+# Upgrade pip
+python -m pip install --upgrade pip
+
+# Install pinned dependencies
+pip install -r requirements.txt
+
+# Run (see Usage below)
+python main.py
+```
+
+---
+
+### Install the project (editable)
 
 ```bash
 pip install -e .
+
 ```
-
-### Dependencies
-
-We pin dependency versions in `requirements.txt` to improve reproducibility for benchmarks and the paper.
-
-- RDKit
-- NumPy
-- MDTraj
-- xtb
-
-**Note on xtb:** If your workflow uses the `xtb` executable (command-line program), you must also install the xtb binaries and ensure `xtb` is available on your PATH.
 
 ## Usage
 
