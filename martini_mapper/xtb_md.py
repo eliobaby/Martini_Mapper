@@ -8,7 +8,7 @@ def run_xtb_md(
     xyz_path: str,
     workdir: str = "xtb_md_run",
     temp_k: float = 298.15,
-    time_ps: float = 20.0,
+    time_ps: float = 10.0,
     *,
     step_fs: float = 0.1,
     shake: int = 0,
