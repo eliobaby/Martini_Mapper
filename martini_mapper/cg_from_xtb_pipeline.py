@@ -372,6 +372,7 @@ def write_itp_with_bonds_angles_dihedrals(
     for (i, j, k_, th0_rad, k_rad, sigma_rad) in angles_fit:
         th0_deg = th0_rad * RAD2DEG
         lines.append(f"{i+1:5d} {j+1:5d} {k_+1:5d} {1:5d} {th0_deg:12.5f} {k_rad:16.2f}")
+        '''
     lines.append("")
 
     lines.append("[ dihedrals ]")
@@ -379,7 +380,7 @@ def write_itp_with_bonds_angles_dihedrals(
     for (i,j,k,l,phi0_rad,kk,n) in dihedrals_fit:
         phi0_deg = phi0_rad * RAD2DEG
         lines.append(f"{i+1:5d} {j+1:5d} {k+1:5d} {l+1:5d} {1:5d} {phi0_deg:12.5f} {kk:12.3f} {n:6d}")
-
+'''
     Path(out_itp).write_text("\n".join(lines) + "\n")
 
 # -----------------------------
