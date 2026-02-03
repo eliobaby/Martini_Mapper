@@ -111,7 +111,7 @@ You will be prompted for:
 ### Example Session
 
 ```bash
-$ python main.py
+python main.py
 Name: Aspirin
 SMILES: CC(=O)OC1=CC=CC=C1C(=O)O
 ```
