@@ -89,6 +89,22 @@ python -m pip install -e .
 
 ---
 
+## Testing
+
+Install pytest and run the test suite from the repository root:
+
+```bash
+pytest -q
+```
+
+More verbose output:
+
+```bash
+pytest -ra -vv
+```
+
+---
+
 ## Usage
 
 ### Run as a module
@@ -140,22 +156,6 @@ python -m martini_mapper Benzene c1ccccc1 --out-dir outputs/Benzene
 
 # Keep intermediate xTB/MD files for debugging
 python -m martini_mapper Benzene c1ccccc1 --keep-intermediates
-```
-
----
-
-## Testing
-
-Install pytest and run the test suite from the repository root:
-
-```bash
-pytest -q
-```
-
-More verbose output:
-
-```bash
-pytest -ra -vv
 ```
 
 ---
