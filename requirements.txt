@@ -4,3 +4,4 @@ mdtraj
 xtb
 setuptools
 wheel
+pytest
