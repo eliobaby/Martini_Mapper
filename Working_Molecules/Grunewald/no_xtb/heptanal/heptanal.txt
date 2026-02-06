@@ -1,0 +1,13 @@
+Compound: heptanal
+SMILES:   CCCCCCC=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        C1         0,1,2,3              C,C,C,C              1            72.0     -0.1634  0.0204   0.0305  
+1        N6a        4,5,6,7              C,C,C,O              1            72.0     0.2360   -0.0295  -0.0507 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

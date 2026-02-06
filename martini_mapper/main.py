@@ -101,7 +101,7 @@ def run_mapping(
             build_cg_from_xtb(
                 smiles=smiles_clean,
                 final=final,
-                mapping=mapping,
+                mapping=mapping_copy,
                 ref_gro=f"ref_{compound_name}.gro",
                 ref_xtc=f"ref_{compound_name}.xtc",
                 compound=compound_name,

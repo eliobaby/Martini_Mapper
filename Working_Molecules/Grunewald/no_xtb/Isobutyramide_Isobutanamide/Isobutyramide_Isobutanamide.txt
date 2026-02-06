@@ -1,0 +1,13 @@
+Compound: Isobutyramide_Isobutanamide
+SMILES:   O=C(N)C(C)C
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SP5        0,1,2                O,C,N                1            54.0     0.1722   -0.0976  0.0268  
+1        SC2        3,4,5                C,C,C                1            54.0     -0.0861  0.0488   -0.0134 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

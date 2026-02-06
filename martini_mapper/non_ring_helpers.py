@@ -435,3 +435,20 @@ def dfs_trace_from_seed(section: List[List[Any]], seed: int) -> List[int]:
 
     return _dfs(seed)
 
+def dist_to_nearest_center(section: List[List[Any]], center_nodes: set, start: int) -> int:
+    """
+    BFS until we hit any center node (excluding start itself unless it is a center).
+    Returns a large number if no center is found.
+    """
+    q = deque([(start, 0)])
+    visited = {start}
+    while q:
+        curr, d = q.popleft()
+        if curr in center_nodes and curr != start:
+            return d
+        for (nbr, _bo) in section[curr][4]:
+            if nbr not in visited:
+                visited.add(nbr)
+                q.append((nbr, d + 1))
+    return 10**9
+

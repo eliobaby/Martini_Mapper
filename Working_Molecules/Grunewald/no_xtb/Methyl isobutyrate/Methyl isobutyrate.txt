@@ -1,0 +1,13 @@
+Compound: Methyl isobutyrate
+SMILES:   O=C(OC)C(C)(C)
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N4a        0,1,2,3              O,C,O,C              1            72.0     0.2085   0.0368   0.0075  
+1        SC2        4,5,6                C,C,C                1            54.0     -0.1459  -0.0257  0.0364  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

@@ -1,0 +1,13 @@
+Compound: butylamine
+SMILES:   CCCCN
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC2        0,1,2                C,C,C                1            54.0     -0.1118  -0.0380  -0.0189 
+1        TN6d       3,4                  C,N                  1            36.0     0.1864   0.0634   0.0341  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

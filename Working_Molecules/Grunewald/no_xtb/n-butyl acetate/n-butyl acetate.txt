@@ -1,0 +1,13 @@
+Compound: n-butyl acetate
+SMILES:   CCCCOC(C)=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        C1         0,1,2,3              C,C,C,C              1            72.0     -0.1750  0.0120   -0.0098 
+1        SN4a       4,5,6,7              O,C,C,O              1            54.0     0.3250   -0.0223  0.0089  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

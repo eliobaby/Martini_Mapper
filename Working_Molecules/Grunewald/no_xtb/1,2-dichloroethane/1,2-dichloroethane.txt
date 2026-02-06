@@ -1,0 +1,11 @@
+Compound: 1,2-dichloroethane
+SMILES:   ClCCCl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X3h        0,1,2,3              Cl,C,C,Cl            0            72.0     0.0000   -0.0000  0.0000  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
