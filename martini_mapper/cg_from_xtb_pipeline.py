@@ -360,12 +360,20 @@ def write_itp_with_bonds_angles_dihedrals(
         mass = bead_mass_from_type(bt)
         lines.append(f"{idx:7d} {bt[:5]:5s} {1:5d} {'res':5s} {'C'+str(idx):5s} {idx:5d} {0.0:10.3f} {mass:10.3f}")
     lines.append("")
-
+    # constraints(when k > 2x10^4 kJ/mol/nm^2)
+    lines.append("[ constraints ]")
+    lines.append(";  ai    aj   funct      b0(nm)")
+    for (i, j, b0, k, sigma) in bonds_fit:
+        if k > 20000:
+            lines.append(f"{i+1:5d} {j+1:5d} {1:5d} {b0:12.5f}")
+    lines.append("")
+    
     # bonds (funct=1 harmonic)
     lines.append("[ bonds ]")
     lines.append(";  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)")
     for (i, j, b0, k, sigma) in bonds_fit:
-        lines.append(f"{i+1:5d} {j+1:5d} {1:5d} {b0:12.5f} {k:16.1f}")
+        if k <= 20000:
+            lines.append(f"{i+1:5d} {j+1:5d} {1:5d} {b0:12.5f} {k:16.1f}")
     lines.append("")
 
     # angles (funct=1 harmonic, in radians here — if you prefer degrees we can convert)
