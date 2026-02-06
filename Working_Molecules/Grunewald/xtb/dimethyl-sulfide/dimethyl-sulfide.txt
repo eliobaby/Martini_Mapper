@@ -1,0 +1,11 @@
+Compound: dimethyl-sulfide
+SMILES:   CSC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC6        0,1,2                C,S,C                0            54.0     -0.0000  -0.0000  -0.0271 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

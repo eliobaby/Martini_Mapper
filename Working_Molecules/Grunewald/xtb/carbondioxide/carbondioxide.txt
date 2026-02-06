@@ -1,0 +1,11 @@
+Compound: carbondioxide
+SMILES:   O=C=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC6        0,1,2                O,C,O                0            54.0     0.0000   -0.0379  0.0000  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

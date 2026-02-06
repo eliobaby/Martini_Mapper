@@ -1,0 +1,13 @@
+Compound: butanol
+SMILES:   CCCCO
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC2        0,1,2                C,C,C                1            54.0     -0.0912  0.0107   0.0157  
+1        TP1        3,4                  C,O                  1            36.0     0.1824   -0.0213  -0.0315 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

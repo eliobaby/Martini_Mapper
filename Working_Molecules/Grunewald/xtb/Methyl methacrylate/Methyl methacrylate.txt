@@ -1,0 +1,13 @@
+Compound: Methyl methacrylate
+SMILES:   O=C(OC)C(=C)(C)
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N4a        0,1,2,3              O,C,O,C              1            72.0     0.1888   0.0625   -0.0399 
+1        SC4        4,5,6                C,C,C                1            54.0     -0.1652  -0.0547  0.0517  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

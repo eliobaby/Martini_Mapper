@@ -1,0 +1,15 @@
+Compound: 1-propylsulfonylpropane
+SMILES:   CCC[S](=O)(=O)CCC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC2        0,1,2                C,C,C                1            54.0     -0.2835  0.0011   0.0147  
+1        SP5        3,4,5                S,O,O                2            54.0     0.0258   0.0790   -0.0563 
+2        SC2        6,7,8                C,C,C                1            54.0     0.2757   -0.0248  -0.0110 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     
+1        2        1.0     

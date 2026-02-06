@@ -1,0 +1,13 @@
+Compound: Piperidine
+SMILES:   C1CCNCC1
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC3        0,1,5                C,C,C                1            54.0     -0.0521  -0.1014  -0.0115 
+1        SN6d       2,3,4                C,N,C                1            54.0     0.0586   0.1140   0.0130  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

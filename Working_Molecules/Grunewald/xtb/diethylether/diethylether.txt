@@ -1,0 +1,13 @@
+Compound: diethylether
+SMILES:   CCOCC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN3r       0,1,2                C,C,O                1            54.0     0.1730   0.0245   0.0118  
+1        TC3        3,4                  C,C                  1            36.0     -0.1977  -0.0280  -0.0135 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

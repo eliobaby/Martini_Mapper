@@ -1,0 +1,13 @@
+Compound: Tetrahydrothiophene
+SMILES:   S1CCCC1
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC6        0,1,4                S,C,C                1            54.0     -0.0008  0.0702   0.0536  
+1        TC3        2,3                  C,C                  1            36.0     0.0010   -0.0819  -0.0626 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

@@ -1,0 +1,13 @@
+Compound: acetylacetone
+SMILES:   CC(=O)CC(C)=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN4a       0,1,2                C,C,O                1            54.0     0.1779   0.0046   -0.0592 
+1        SN5a       3,4,5,6              C,C,C,O              1            54.0     -0.1186  -0.0031  0.0544  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

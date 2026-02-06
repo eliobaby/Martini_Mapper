@@ -1,0 +1,13 @@
+Compound: Cyclopentane
+SMILES:   C1CCCC1
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        TC3        0,1                  C,C                  1            36.0     0.0464   0.1283   -0.0117 
+1        SC3        2,3,4                C,C,C                1            54.0     -0.0309  -0.0855  0.0078  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

@@ -1,0 +1,13 @@
+Compound: diisopropylsufide
+SMILES:   CC(C)SC(C)C
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC2        0,1,2                C,C,C                1            54.0     0.2070   0.0419   0.0032  
+1        SC6        3,4,5,6              S,C,C,C              1            54.0     -0.1882  -0.0381  -0.0029 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     
