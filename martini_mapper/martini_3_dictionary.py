@@ -389,35 +389,6 @@ def get_m3_dict():
         ("X1",   [7, 2, "C(Cl)(Cl)(Cl)(Cl)", 0, "."]), #X2
         # sulfonate
         ("SQ4n", [7, 1, "S(=O)(=O)(O)",   0, "", []]), #SP6
-        
-        # INFERRED AND TUNED from old model
-        # di-halogen-o-ethane
-        ("SX4h", [7, 0, "FCF",          1, "", []]),
-        ("X4h",  [7, 0, "FCCF",         1, "", []]),
-        ("X2h",  [7, 0, "BrCCBr",       0, "", []]),
-        ("SX2h", [7, 0, "BrCBr",        0, "", []]),
-        # glycolaldehyde
-        ("N5a",  [7, 1, "C(C)(=O)(CO)", 0, "", []]),
-        ("N5a",  [7, 0, "O=CCO",        0, "", []]),
-        # Carbamate
-        ("SP2",  [7, 1, "C(O)(=O)(N)",  0, "", []]),
-        ("P6",   [7, 1, "C(NC)(=O)(O)", 0, "", []]),
-        # hydrazone
-        ("N1a",  [7, 1, "C(C)(C)(=NN)", 0, "", []]),
-        ("N1a",  [7, 0, "CC=NN",        0, "", []]),
-        ("SN1a", [7, 0, "C=NN",         0, "", []]),
-        # secondary organo-halogens
-        ("SX4e", [7, 1, "C(C)(C)(F)",      0, "", []]),
-        ("X1",   [7, 1, "C(C)(C)(I)",      0, "", []]),
-        ("SX2",  [7, 1, "C(C)(C)(Br)",     0, "", []]),
-        ("SX3",  [7, 1, "C(C)(C)(Cl)",     0, "", []]),
-        # tertiary organo-halogens
-        ("X3",   [7, 2, "C(C)(C)(C)(Cl)"   , 0, "", []]),
-        ("X2",   [7, 2, "C(C)(C)(C)(Br)"   , 0, "", []]),
-        ("X1",   [7, 2, "C(C)(C)(C)(I)"    , 0, "", []]),
-        # tetra-halogen-methane
-        ("X2",   [7, 2, "C(Br)(Br)(Br)(Br)", 0, "."]), #X1
-        ("X3",   [7, 2, "C(F)(F)(F)(F)"    , 0, "."]), #X4
 
         # -------------------------------------------
         # Section 8: node that is in 2 benzene rings
@@ -450,7 +421,34 @@ def get_m3_dict():
         # Section 11: Structures that are forced
         # ---------------------------------------
         
-        # INFERRED and yet to be tuned
+        # INFERRED
+        # di-halogen-o-ethane
+        ("SX4h?", [11, 0, "FCF",          1, "", []]),
+        ("X4h?",  [11, 0, "FCCF",         1, "", []]),
+        ("X2h?",  [11, 0, "BrCCBr",       0, "", []]),
+        ("SX2h?", [11, 0, "BrCBr",        0, "", []]),
+        # glycolaldehyde
+        ("N5a?",  [11, 1, "C(C)(=O)(CO)", 0, "", []]),
+        ("N5a?",  [11, 0, "O=CCO",        0, "", []]),
+        # Carbamate
+        ("SP2?",  [11, 1, "C(O)(=O)(N)",  0, "", []]),
+        ("P6?",   [11, 1, "C(NC)(=O)(O)", 0, "", []]),
+        # hydrazone
+        ("N1a?",  [11, 1, "C(C)(C)(=NN)", 0, "", []]),
+        ("N1a?",  [11, 0, "CC=NN",        0, "", []]),
+        ("SN1a?", [11, 0, "C=NN",         0, "", []]),
+        # secondary organo-halogens
+        ("SX4e?", [11, 1, "C(C)(C)(F)",      0, "", []]),
+        ("X1?",   [11, 1, "C(C)(C)(I)",      0, "", []]),
+        ("SX2?",  [11, 1, "C(C)(C)(Br)",     0, "", []]),
+        ("SX3?",  [11, 1, "C(C)(C)(Cl)",     0, "", []]),
+        # tertiary organo-halogens
+        ("X3?",   [11, 2, "C(C)(C)(C)(Cl)"   , 0, "", []]),
+        ("X2?",   [11, 2, "C(C)(C)(C)(Br)"   , 0, "", []]),
+        ("X1?",   [11, 2, "C(C)(C)(C)(I)"    , 0, "", []]),
+        # tetra-halogen-methane
+        ("X2?",   [11, 2, "C(Br)(Br)(Br)(Br)", 0, "."]), #X1
+        ("X3?",   [11, 2, "C(F)(F)(F)(F)"    , 0, "."]), #X4
         ("P3?",   [11, 2, "S(C)(=O)(=O)(C)"  , 0, "", []]),
         # Tetramethyl-group 14
         ("C2?",   [11, 2, "Ge(C)(C)(C)(C)"   , 0, "", []]),
