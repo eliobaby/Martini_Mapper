@@ -1,24 +1,12 @@
 """
-Helper utilities for TASK 3.e (non-ring section 1–bead mapping).
-
-These were extracted from algorithm.py to keep map_ring_...()
-small and readable.
+Helper utilities for TASK 3.a
 """
 
 from __future__ import annotations
 
 import string
 import random
-from typing import Any, Dict, List, Tuple, Optional
-
-def qualifies_foreign_non_CO(foreign_sec) -> bool:
-    """Return True if foreign section has len>=3 OR len==2 but not (C,O)."""
-    if len(foreign_sec) >= 3:
-        return True
-    if len(foreign_sec) == 2:
-        elems = {a[1].upper() for a in foreign_sec}
-        return elems != {"C", "O"}
-    return False
+from typing import Any, Dict, List, Tuple, Optional, Set
 
 def generate_random_string(length=6):
     """
@@ -105,18 +93,15 @@ def benzene_collect_array3_candidates(
     atoms_by_gid: Dict[int, List[Any]],
     final: List[str],
     full_mapping: List[List[List[Any]]],
-    array4: List[int],
     atom_global_idx: int
 ) -> List[Tuple[int, float]]:
     """
     Same logic as Step 6 nested collect_array3_candidates().
     Returns [(candidate_gid, bond_order), ...]
     """
-    if len(array4) != 0:
-        return []
-
     atom = atoms_by_gid[atom_global_idx]
     candidates: List[Tuple[int, float]] = []
+    seen_neighbors: Set[int] = set()
 
     for nbr_local, bond_order in atom[4]:
         if not (0 <= nbr_local < len(section)):
@@ -127,24 +112,19 @@ def benzene_collect_array3_candidates(
 
         if final[g_nbr] != "":
             continue
-
-        if neighbor[1].upper() != "C":
+        
+        has_len1_foreign = any(len(full_mapping[outer[0]]) == 1 for outer in neighbor[3])
+        if has_len1_foreign:
             continue
+        
+        # seen_neighbors counts ANY qualifying neighbor next to the atom
+        seen_neighbors.add(g_nbr)
 
-        qualifies = False
-        if len(neighbor[3]) == 0:
-            qualifies = True
-        else:
-            for outer in neighbor[3]:
-                foreign_sec = full_mapping[outer[0]]
-                if qualifies_foreign_non_CO(foreign_sec):
-                    qualifies = True
-                    break
-
-        if qualifies:
+        # candidates remain carbon-only
+        if neighbor[1].upper() == "C":
             candidates.append((g_nbr, bond_order))
 
-    return candidates
+    return candidates, seen_neighbors
 
 
 def benzene_assign_S_triplet(
@@ -216,13 +196,22 @@ def benzene_process_array3_two_passes(
     martini_dict: Dict[str, List[Any]],
     full_mapping: List[List[List[Any]]],
     array3: List[int],
-    array4: List[int],
 ) -> None:
     """
     Entire Step 6 logic moved out. Mutates final + array3.
     """
 
     seen_candidates_pass1 = set()
+    nbr_candidates = []
+
+    # Edge case (must run before PASS 1)
+    benzene_handle_array3_size3_unmapped_edgecase(
+        section=section,
+        atoms_by_gid=atoms_by_gid,
+        final=final,
+        martini_dict=martini_dict,
+        array3=array3,
+    )
 
     # PASS 1
     for a_idx in list(array3):
@@ -230,17 +219,40 @@ def benzene_process_array3_two_passes(
             array3.remove(a_idx)
             continue
 
-        nbr_candidates = benzene_collect_array3_candidates(
+        _, seen_neighbors = benzene_collect_array3_candidates(
             section=section,
             atoms_by_gid=atoms_by_gid,
             final=final,
             full_mapping=full_mapping,
-            array4=array4,
             atom_global_idx=a_idx
         )
 
-        for cand_g, _ in nbr_candidates:
-            seen_candidates_pass1.add(cand_g)
+        seen_candidates_pass1.update(seen_neighbors)
+        
+    # PASS 2
+    for a_idx in list(array3):
+        if final[a_idx] != "":
+            array3.remove(a_idx)
+            continue
+        
+        if len(seen_candidates_pass1) == 4:
+            benzene_assign_T_pair(
+                center_gid=a_idx,
+                atoms_by_gid=atoms_by_gid,
+                final=final,
+                martini_dict=martini_dict,
+                full_mapping=full_mapping,
+            )
+            array3.remove(a_idx)
+            continue
+        
+        nbr_candidates, _ = benzene_collect_array3_candidates(
+            section=section,
+            atoms_by_gid=atoms_by_gid,
+            final=final,
+            full_mapping=full_mapping,
+            atom_global_idx=a_idx
+        )
 
         if len(nbr_candidates) == 1:
             chosen = nbr_candidates[0][0]
@@ -268,29 +280,17 @@ def benzene_process_array3_two_passes(
             )
             array3.remove(a_idx)
 
-    # PASS 2
+    # PASS 3
     for a_idx in list(array3):
         if final[a_idx] != "":
             array3.remove(a_idx)
             continue
 
-        if len(seen_candidates_pass1) == 4:
-            benzene_assign_T_pair(
-                center_gid=a_idx,
-                atoms_by_gid=atoms_by_gid,
-                final=final,
-                martini_dict=martini_dict,
-                full_mapping=full_mapping,
-            )
-            array3.remove(a_idx)
-            continue
-
-        nbr_candidates = benzene_collect_array3_candidates(
+        nbr_candidates, _ = benzene_collect_array3_candidates(
             section=section,
             atoms_by_gid=atoms_by_gid,
             final=final,
             full_mapping=full_mapping,
-            array4=array4,
             atom_global_idx=a_idx
         )
 
@@ -396,7 +396,7 @@ def merge_phenol_to_diol(section, final, martini_dict, full_mapping, tn_prefix="
 
     ring_len = len(order)
     if ring_len != n:
-        # section isn't a simple 1-cycle ring (rare for ring tasks) -> don't touch
+        # section isn't a simple 1-cycle ring (rare for your ring tasks) -> don't touch
         return
 
     # map cycle position -> local index, and local -> cycle position
@@ -463,8 +463,232 @@ def merge_phenol_to_diol(section, final, martini_dict, full_mapping, tn_prefix="
             if o1 is None or o2 is None:
                 continue
 
+            # "rip everything off" for these 4 atoms (optional but matches your intent)
             for g in (gid1, gid2, o1, o2):
                 final[g] = ""
 
             # assign diol bead to 4 atoms
             assign_bead(final, bead_key, gid1, gid2, o1, o2)
+
+def benzene_step8_pair_remaining_array1(section, atoms_by_gid, gid_to_local, array1, final, martini_dict):
+    """
+    Step 8 extracted into a helper.
+    Builds pairs from array1 and assigns beads to those pairs.
+
+    CHANGE: if len(array1)==2, only pair if they are directly connected in the ring.
+    """
+    pairs1 = []
+
+    def are_connected(g1, g2) -> bool:
+        a = atoms_by_gid[g1]
+        # a[4] = [(nbr_local, bo), ...]
+        for nbr_local, _bo in a[4]:
+            if 0 <= nbr_local < len(section):
+                if section[nbr_local][0] == g2:
+                    return True
+        return False
+
+    if len(array1) == 2:
+        if are_connected(array1[0], array1[1]):
+            pairs1.append((array1[0], array1[1]))
+        # else: do nothing (leave them for later logic/fallback)
+
+    elif len(array1) == 4:
+        candidate_pair = None
+        for a_global in array1:
+            a_atom = atoms_by_gid[a_global]
+            connected_neighbors = []
+            for nbr_local, _ in a_atom[4]:
+                if 0 <= nbr_local < len(section):
+                    neighbor = section[nbr_local]
+                    if neighbor[0] in array1:
+                        connected_neighbors.append(neighbor[0])
+            if len(connected_neighbors) == 1:
+                candidate_pair = (a_global, connected_neighbors[0])
+                break
+
+        if candidate_pair is not None:
+            pairs1.append(candidate_pair)
+            remaining = [x for x in array1 if x not in candidate_pair]
+            if len(remaining) == 2:
+                pairs1.append((remaining[0], remaining[1]))
+            else:
+                for i in range(0, len(remaining), 2):
+                    pairs1.append((remaining[i], remaining[i+1]))
+        else:
+            sorted_array1 = sorted(array1, key=gid_to_local.get)
+            for i in range(0, len(sorted_array1), 2):
+                pairs1.append((sorted_array1[i], sorted_array1[i+1]))
+
+    elif len(array1) == 6:
+        candidate_pair = None
+
+        # Prefer N–N pairing first (your existing behavior)
+        n_nodes = [g for g in array1 if atoms_by_gid[g][1].upper() == "N"]
+        if len(n_nodes) >= 2:
+            for a_global in n_nodes:
+                a_atom = atoms_by_gid[a_global]
+                for nbr_local, _ in a_atom[4]:
+                    if 0 <= nbr_local < len(section):
+                        neighbor = section[nbr_local]
+                        if neighbor[0] in n_nodes:
+                            candidate_pair = (a_global, neighbor[0])
+                            break
+                if candidate_pair is not None:
+                    break
+
+        if candidate_pair is None:
+            for a_global in array1:
+                a_atom = atoms_by_gid[a_global]
+                connected_neighbors = []
+                for nbr_local, _ in a_atom[4]:
+                    if 0 <= nbr_local < len(section):
+                        neighbor = section[nbr_local]
+                        if neighbor[0] in array1:
+                            connected_neighbors.append(neighbor[0])
+                if connected_neighbors:
+                    candidate_pair = (a_global, connected_neighbors[0])
+                    break
+
+        if candidate_pair is not None:
+            pairs1.append(candidate_pair)
+            remaining = [x for x in array1 if x not in candidate_pair]
+
+            candidate_pair_4 = None
+            for a_global in remaining:
+                a_atom = next(atom for atom in section if atom[0] == a_global)
+                connected_neighbors = []
+                for nbr_local, _ in a_atom[4]:
+                    if 0 <= nbr_local < len(section):
+                        neighbor = section[nbr_local]
+                        if neighbor[0] in remaining:
+                            connected_neighbors.append(neighbor[0])
+                if len(connected_neighbors) == 1:
+                    candidate_pair_4 = (a_global, connected_neighbors[0])
+                    break
+
+            if candidate_pair_4 is not None:
+                pairs1.append(candidate_pair_4)
+                remaining = [x for x in remaining if x not in candidate_pair_4]
+                if len(remaining) == 2:
+                    pairs1.append((remaining[0], remaining[1]))
+                else:
+                    for i in range(0, len(remaining), 2):
+                        pairs1.append((remaining[i], remaining[i+1]))
+            else:
+                sorted_remaining = sorted(remaining, key=gid_to_local.get)
+                for i in range(0, len(sorted_remaining), 2):
+                    pairs1.append((sorted_remaining[i], sorted_remaining[i+1]))
+        else:
+            sorted_array1 = sorted(array1, key=gid_to_local.get)
+            for i in range(0, len(sorted_array1), 2):
+                pairs1.append((sorted_array1[i], sorted_array1[i+1]))
+
+    # Assign beads for the resulting pairs (your existing logic)
+    for pair in pairs1:
+        atom1 = atoms_by_gid[pair[0]]
+        atom2 = atoms_by_gid[pair[1]]
+        e1 = atom1[1].upper()
+        e2 = atom2[1].upper()
+
+        path = e1 + e2
+        bead_key = find_bead(martini_dict, 1, path)
+        assign_bead(final, bead_key, pair[0], pair[1])
+        
+def benzene_handle_array3_size3_unmapped_edgecase(
+    *,
+    section: List[List[Any]],
+    atoms_by_gid: Dict[int, List[Any]],
+    final: List[str],
+    martini_dict: Dict[str, List[Any]],
+    array3: List[int],
+) -> bool:
+    """
+    Edge case handler (runs BEFORE PASS 1):
+
+    Trigger if:
+      - len(array3) == 3
+      - NONE of the atoms in this ring are mapped yet (final[gid] == "" for all gids in section)
+      - within array3, one atom connects to the other two (a 'hub')
+
+    Action:
+      - consider the other 3 atoms not in array3 (the complement)
+      - find the 'hub' in the complement (connects to the other two)
+      - group that hub with ONE of the other two, prioritizing a non-carbon partner
+      - map the chosen pair using SECTION 1:
+            key = find_bead(martini_dict, 1, "{type1}{type2}")
+            assign_bead(final, key, hub_gid, partner_gid)
+
+    Returns True if it applied a mapping, else False.
+    """
+
+    if len(array3) != 3:
+        return False
+
+    ring_gids = [a[0] for a in section]
+
+    # none of the atoms in this ring mapped
+    if any(final[g] != "" for g in ring_gids):
+        return False
+
+    array3_set = set(array3)
+
+    def neighbors_in_set(gid: int, allowed: set[int]) -> List[int]:
+        out = []
+        atom = atoms_by_gid[gid]
+        for nbr_local, _bo in atom[4]:
+            if 0 <= nbr_local < len(section):
+                nbr_gid = section[nbr_local][0]
+                if nbr_gid in allowed:
+                    out.append(nbr_gid)
+        return out
+
+    def find_hub(gids: List[int]) -> int | None:
+        s = set(gids)
+        for g in gids:
+            if len(neighbors_in_set(g, s)) == 2:
+                return g
+        return None
+
+    # array3 must have a hub connected to the other two
+    hub_in_array3 = find_hub(array3)
+    if hub_in_array3 is None:
+        return False
+
+    # complement (the other 3 atoms)
+    other_gids = [g for g in ring_gids if g not in array3_set]
+    if len(other_gids) != 3:
+        return False
+
+    hub_other = find_hub(other_gids)
+    if hub_other is None:
+        return False
+
+    partners = [g for g in other_gids if g != hub_other]  # two atoms
+    if len(partners) != 2:
+        return False
+
+    # pick partner: prioritize non-carbon, else any
+    p1, p2 = partners
+    t1 = atoms_by_gid[p1][1].upper()
+    t2 = atoms_by_gid[p2][1].upper()
+
+    if t1 != "C" and t2 == "C":
+        partner = p1
+    elif t2 != "C" and t1 == "C":
+        partner = p2
+    else:
+        partner = p1  # both carbon or both non-carbon -> pick any
+
+    hub_type = atoms_by_gid[hub_other][1].upper()
+    partner_type = atoms_by_gid[partner][1].upper()
+
+    key = find_bead(martini_dict, 1, f"{hub_type}{partner_type}")
+    if key is None:
+        # optional: try reversed order if your dict stores the other orientation
+        key = find_bead(martini_dict, 1, f"{partner_type}{hub_type}")
+    if key is None:
+        raise ValueError(f"No section-1 bead for pair {hub_type}{partner_type} (or reversed)")
+
+    assign_bead(final, key, hub_other, partner)
+    return True
