@@ -35,7 +35,7 @@ def _circular_std(phi: np.ndarray) -> float:
 
 # Reuse your existing functions from text_file.py
 # (adjust import path/name as needed)
-from text_file import (
+from .text_file import (
     group_beads_by_type,
     compute_beads_connections,
     fix_beadtypes,
@@ -432,10 +432,6 @@ def build_cg_from_xtb(
     # unique bonds list (0-based bead indices)
     bonds = ({(min(i, j), max(i, j)) for i, j in zip(origin, connected)})
     
-    pairs_build = set(bonds)
-    print("[build] bead pairs:", sorted(pairs_build))
-    print("[build] origin/connected/bond_types:", list(zip(origin, connected, bond_types))) 
-
     # map AA -> CG trajectory
     out_cg_gro = f"{out_prefix}_cg_ref.gro"
     out_cg_xtc = f"{out_prefix}_cg_ref.xtc"

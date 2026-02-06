@@ -4,7 +4,7 @@ import warnings
 # =================================================
 # HELPER FUNCTIONS
 # =================================================
-from non_aromatic_helpers import (
+from .non_aromatic_helpers import (
     build_cn_candidate_graph, 
     choose_pairs_for_nonbenzene_5_ring, 
     adjacent_in_allowed_set,
@@ -14,7 +14,7 @@ from non_aromatic_helpers import (
     nb6_handle_count3,
 )
 
-from non_ring_helpers import (
+from .non_ring_helpers import (
     trace_linear_path,
     trace_branch,
     get_final_edge,
@@ -32,7 +32,7 @@ from non_ring_helpers import (
     dist_to_nearest_center,
 )
 
-from ring_helpers import (
+from .ring_helpers import (
      outer_info,
      assign_bead,
      benzene_process_array3_two_passes,
