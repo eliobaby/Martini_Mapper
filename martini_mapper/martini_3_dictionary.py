@@ -136,6 +136,9 @@ def get_m3_dict():
         ("N6a",  [7, 0, "CCC=O",        1, "C1"]), 
         ("TN4a", [7, 0, "C=O",          1, "", []]),
         ("SN4a", [7, 0, "CC=O",         1, "", []]), 
+        # Carbamate
+        ("SP2",  [7, 1, "C(O)(=O)(N)",  0, "", []]),
+        ("P2",   [7, 1, "C(NC)(=O)(O)", 0, "", []]),
         #("SN3r", [7, 0, "COC",          0, "", []]), describe in ether
         #("P1",   [7, 1, "C(O)(C)(C)",     0, "", []]), describein alcohol
         #("N4a",  [7, 0, "COC=O",        1, "", []]), #N5a describe in ester
@@ -190,6 +193,9 @@ def get_m3_dict():
         # vinylchloride
         ("SX3",  [7, 0, "C=CCl",         0, "", []]), #SX3
         ("SX3",  [7, 0, "ClC=C",         0, "", []]), #SX3
+        # diflouro-ethane
+        ("TX4",  [7, 0, "FCF",          1, "", []]),
+        ("SX4",  [7, 0, "FCCF",         1, "", []]),
         
         # FROM TABLE 24: (no change)
         # "#" are old tuned version of the bead
@@ -423,16 +429,11 @@ def get_m3_dict():
         
         # INFERRED
         # di-halogen-o-ethane
-        ("SX4h?", [11, 0, "FCF",          1, "", []]),
-        ("X4h?",  [11, 0, "FCCF",         1, "", []]),
         ("X2h?",  [11, 0, "BrCCBr",       0, "", []]),
         ("SX2h?", [11, 0, "BrCBr",        0, "", []]),
         # glycolaldehyde
         ("N5a?",  [11, 1, "C(C)(=O)(CO)", 0, "", []]),
         ("N5a?",  [11, 0, "O=CCO",        0, "", []]),
-        # Carbamate
-        ("SP2?",  [11, 1, "C(O)(=O)(N)",  0, "", []]),
-        ("P6?",   [11, 1, "C(NC)(=O)(O)", 0, "", []]),
         # hydrazone
         ("N1a?",  [11, 1, "C(C)(C)(=NN)", 0, "", []]),
         ("N1a?",  [11, 0, "CC=NN",        0, "", []]),
