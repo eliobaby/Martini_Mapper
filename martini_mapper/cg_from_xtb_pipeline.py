@@ -35,7 +35,7 @@ def _circular_std(phi: np.ndarray) -> float:
 
 # Reuse your existing functions from text_file.py
 # (adjust import path/name as needed)
-from .text_file import (
+from .outputs import (
     group_beads_by_type,
     compute_beads_connections,
     fix_beadtypes,
