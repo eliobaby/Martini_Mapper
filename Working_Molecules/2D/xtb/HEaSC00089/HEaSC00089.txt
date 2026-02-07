@@ -1,0 +1,13 @@
+Compound: HEaSC00089
+SMILES:   FC(F)(F)[C@@H](Cl)Br
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SX4e       0,1,2,3              F,C,F,F              1            54.0     -0.1153  -0.0052  0.0060  
+1        SX2        4,5,6                C,Cl,Br              1            54.0     0.1153   0.0052   -0.0060 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

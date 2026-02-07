@@ -9,7 +9,7 @@ res           1
 
 [ constraints ]
 ;  ai    aj   funct      b0(nm)
-    1     2     1      0.26822
+    1     2     1      0.26848
 
 [ bonds ]
 ;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)

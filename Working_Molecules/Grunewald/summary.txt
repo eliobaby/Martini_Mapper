@@ -1,0 +1,5 @@
+working count: 332
+half-working count: 0
+fake-working count: 0
+large-working count: 0
+non-working count: 2

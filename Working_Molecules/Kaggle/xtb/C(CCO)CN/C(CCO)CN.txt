@@ -1,0 +1,13 @@
+Compound: C(CCO)CN
+SMILES:   C(CCO)CN
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN6d       0,4,5                C,C,N                1            54.0     -0.1561  0.0180   -0.0388 
+1        SP1        1,2,3                C,C,O                1            54.0     0.1756   -0.0203  0.0437  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

@@ -4,18 +4,25 @@ res           1
 
 [ atoms ]
 ;    nr  type  resnr resid  atom  cgnr     charge       mass
-      1 X2h       1 res   C1        1      0.000     72.000
-      2 X2h       1 res   C2        2      0.000     72.000
+      1 SX2       1 res   C1        1      0.000     54.000
+      2 SX2       1 res   C2        2      0.000     54.000
+      3 SX2       1 res   C3        3      0.000     54.000
+      4 SX2       1 res   C4        4      0.000     54.000
 
 [ constraints ]
 ;  ai    aj   funct      b0(nm)
-    1     2     1      0.32153
+    1     2     1      0.22862
+    2     3     1      0.25076
+    3     4     1      0.22812
 
 [ bonds ]
 ;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)
 
 [ angles ]
 ;  ai    aj    ak  funct     th0(deg)        k(kJ/mol/rad^2)
+    1     2     3     1     78.36498           826.25
+    2     3     4     1     78.72709           863.94
 
 [ dihedrals ]
 ;  ai    aj    ak    al  funct   phi0(deg)        k(kJ/mol)   mult
+    1     2     3     4     1      0.14721       17.828      1

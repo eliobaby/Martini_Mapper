@@ -1,0 +1,13 @@
+Compound: CCOCCNC
+SMILES:   CCOCCNC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N3r        0,1,2,3              C,C,O,C              1            72.0     0.2026   -0.0136  0.0036  
+1        SN1        4,5,6                C,N,C                1            54.0     -0.2476  0.0167   -0.0116 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

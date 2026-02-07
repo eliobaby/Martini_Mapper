@@ -1,0 +1,13 @@
+Compound: C(CC(Cl)Cl)CO
+SMILES:   C(CC(Cl)Cl)CO
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        P1         0,1,5,6              C,C,C,O              1            72.0     0.0900   -0.0004  0.0057  
+1        SX3h       2,3,4                C,Cl,Cl              1            54.0     -0.2475  0.0010   -0.0158 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

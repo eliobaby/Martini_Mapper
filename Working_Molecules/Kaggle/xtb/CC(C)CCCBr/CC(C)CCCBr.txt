@@ -1,0 +1,13 @@
+Compound: CC(C)CCCBr
+SMILES:   CC(C)CCCBr
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC2        0,1,2                C,C,C                1            54.0     -0.1784  -0.0006  -0.0060 
+1        X2         3,4,5,6              C,C,C,Br             1            72.0     0.1784   0.0006   0.0060  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

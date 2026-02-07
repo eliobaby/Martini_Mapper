@@ -1,0 +1,13 @@
+Compound: CCOC(CO)O
+SMILES:   CCOC(CO)O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN3r       0,1,2                C,C,O                1            54.0     -0.1975  -0.0021  -0.0327 
+1        P4         3,4,5,6              C,C,O,O              1            72.0     0.1755   0.0018   0.0753  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

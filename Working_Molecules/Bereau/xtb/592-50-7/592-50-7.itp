@@ -9,10 +9,10 @@ res           1
 
 [ constraints ]
 ;  ai    aj   funct      b0(nm)
+    1     2     1      0.33344
 
 [ bonds ]
 ;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)
-    1     2     1      0.33054          12912.5
 
 [ angles ]
 ;  ai    aj    ak  funct     th0(deg)        k(kJ/mol/rad^2)

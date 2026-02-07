@@ -1,0 +1,13 @@
+Compound: CCC(OC)F
+SMILES:   CCC(OC)F
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        X4e        0,1,2,5              C,C,C,F              1            72.0     0.1066   -0.0191  0.0320  
+1        TN3r       3,4                  O,C                  1            36.0     -0.2131  0.0383   -0.0640 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

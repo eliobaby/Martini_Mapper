@@ -1,0 +1,13 @@
+Compound: C(O)OCOCO
+SMILES:   C(O)OCOCO
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        P2         0,1,2,3              C,O,O,C              1            72.0     0.1649   0.0124   0.0102  
+1        SP2        4,5,6                O,C,O                1            54.0     -0.2473  -0.0186  0.0071  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

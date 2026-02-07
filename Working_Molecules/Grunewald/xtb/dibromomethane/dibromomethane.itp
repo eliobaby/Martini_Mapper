@@ -4,7 +4,7 @@ res           1
 
 [ atoms ]
 ;    nr  type  resnr resid  atom  cgnr     charge       mass
-      1 SX2h      1 res   C1        1      0.000     54.000
+      1 SX1      1 res   C1        1      0.000     54.000
 
 [ constraints ]
 ;  ai    aj   funct      b0(nm)

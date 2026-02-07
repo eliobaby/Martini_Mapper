@@ -1,0 +1,11 @@
+Compound: HEaSC00267
+SMILES:   C=CC(N)=O
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        P5         0,1,2,3,4            C,C,C,N,O            0            72.0     0.0000   0.0000   0.0177  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    

@@ -13,12 +13,12 @@ res           1
 
 [ bonds ]
 ;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)
-    1     2     1      0.38639           2230.6
-    2     3     1      0.43895           4913.6
+    1     2     1      0.39154           3877.5
+    2     3     1      0.40352           6820.3
 
 [ angles ]
 ;  ai    aj    ak  funct     th0(deg)        k(kJ/mol/rad^2)
-    1     2     3     1     77.90660           155.99
+    1     2     3     1     81.04700           246.24
 
 [ dihedrals ]
 ;  ai    aj    ak    al  funct   phi0(deg)        k(kJ/mol)   mult

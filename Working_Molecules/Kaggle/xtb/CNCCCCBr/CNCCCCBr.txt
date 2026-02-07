@@ -1,0 +1,13 @@
+Compound: CNCCCCBr
+SMILES:   CNCCCCBr
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        N5         0,1,2,3              C,N,C,C              1            72.0     0.1468   -0.0128  0.0063  
+1        X2         4,5,6                C,C,Br               1            72.0     -0.2517  0.0220   0.0082  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

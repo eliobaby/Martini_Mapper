@@ -1,0 +1,13 @@
+Compound: CCSCN=C
+SMILES:   CCSCN=C
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC6        0,1,2                C,C,S                1            54.0     -0.1798  0.0095   0.0002  
+1        SN1a       3,4,5                C,N,C                1            54.0     0.2055   -0.0109  -0.0529 
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

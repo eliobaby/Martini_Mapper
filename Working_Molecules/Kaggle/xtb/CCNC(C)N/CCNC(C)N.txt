@@ -1,0 +1,13 @@
+Compound: CCNC(C)N
+SMILES:   CCNC(C)N
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN5        0,1,2                C,C,N                1            54.0     0.1695   0.0006   -0.0100 
+1        SN6d       3,4,5                C,C,N                1            54.0     -0.1695  -0.0006  0.0140  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

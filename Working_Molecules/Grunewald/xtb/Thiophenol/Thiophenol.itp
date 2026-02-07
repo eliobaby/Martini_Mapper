@@ -10,18 +10,18 @@ res           1
 
 [ constraints ]
 ;  ai    aj   funct      b0(nm)
-    1     2     1      0.33815
-    2     3     1      0.28792
+    1     2     1      0.33893
+    2     3     1      0.28801
 
 [ bonds ]
 ;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)
-    1     3     1      0.30292          10974.4
+    1     3     1      0.30431          12703.9
 
 [ angles ]
 ;  ai    aj    ak  funct     th0(deg)        k(kJ/mol/rad^2)
-    1     2     3     1     57.22125           727.39
-    1     3     2     1     69.79888          1138.40
-    2     1     3     1     52.98007          4588.02
+    1     2     3     1     57.40361           827.99
+    1     3     2     1     69.77394          1181.42
+    2     1     3     1     52.82252          4654.09
 
 [ dihedrals ]
 ;  ai    aj    ak    al  funct   phi0(deg)        k(kJ/mol)   mult

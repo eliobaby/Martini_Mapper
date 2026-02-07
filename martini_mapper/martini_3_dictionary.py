@@ -196,6 +196,9 @@ def get_m3_dict():
         # diflouro-ethane
         ("TX4",  [7, 0, "FCF",          1, "", []]),
         ("SX4",  [7, 0, "FCCF",         1, "", []]),
+        # dibromomethane
+        ("X1",  [11, 0, "BrCCBr",       0, "", []]),
+        ("SX1", [11, 0, "BrCBr",        0, "", []]),
         
         # FROM TABLE 24: (no change)
         # "#" are old tuned version of the bead
@@ -428,9 +431,6 @@ def get_m3_dict():
         # ---------------------------------------
         
         # INFERRED
-        # di-halogen-o-ethane
-        ("X2h?",  [11, 0, "BrCCBr",       0, "", []]),
-        ("SX2h?", [11, 0, "BrCBr",        0, "", []]),
         # glycolaldehyde
         ("N5a?",  [11, 1, "C(C)(=O)(CO)", 0, "", []]),
         ("N5a?",  [11, 0, "O=CCO",        0, "", []]),

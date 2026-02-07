@@ -1,0 +1,33 @@
+[ moleculetype ]
+; name        nrexcl
+res           1
+
+[ atoms ]
+;    nr  type  resnr resid  atom  cgnr     charge       mass
+      1 SN3a      1 res   C1        1      0.000     54.000
+      2 TN6a      1 res   C2        2      0.000     36.000
+      3 TC5       1 res   C3        3      0.000     36.000
+      4 TN6d      1 res   C4        4      0.000     36.000
+
+[ constraints ]
+;  ai    aj   funct      b0(nm)
+    1     2     1      0.22880
+    3     4     1      0.24534
+    2     3     1      0.21825
+    2     4     1      0.21509
+
+[ bonds ]
+;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)
+
+[ angles ]
+;  ai    aj    ak  funct     th0(deg)        k(kJ/mol/rad^2)
+    1     2     3     1    150.16252          1426.14
+    1     2     4     1     81.66064          1195.45
+    2     3     4     1     54.91117          5974.43
+    2     4     3     1     56.13357          5006.71
+    3     2     4     1     68.95520          5186.35
+
+[ dihedrals ]
+;  ai    aj    ak    al  funct   phi0(deg)        k(kJ/mol)   mult
+    1     2     3     4     1   -178.32751       17.668      1
+    1     2     4     3     1      0.02165       10.715      1

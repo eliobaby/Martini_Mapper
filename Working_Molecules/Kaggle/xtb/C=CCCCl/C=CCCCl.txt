@@ -1,0 +1,13 @@
+Compound: C=CCCCl
+SMILES:   C=CCCCl
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SC4        0,1,2                C,C,C                1            54.0     -0.0855  -0.0148  -0.0168 
+1        TX3        3,4                  C,Cl                 1            36.0     0.1709   0.0297   0.0337  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        1.0     

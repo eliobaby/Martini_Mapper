@@ -1,0 +1,13 @@
+Compound: CNC=CNC
+SMILES:   CNC=CNC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN1        0,1,2                C,N,C                1            54.0     0.2271   -0.0146  -0.0158 
+1        SN1        3,4,5                C,N,C                1            54.0     -0.2271  0.0146   0.0177  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        2.0     

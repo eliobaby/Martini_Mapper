@@ -5,11 +5,11 @@ res           1
 [ atoms ]
 ;    nr  type  resnr resid  atom  cgnr     charge       mass
       1 SX4e      1 res   C1        1      0.000     54.000
-      2 SX4h      1 res   C2        2      0.000     54.000
+      2 TX4       1 res   C2        2      0.000     36.000
 
 [ constraints ]
 ;  ai    aj   funct      b0(nm)
-    1     2     1      0.22011
+    1     2     1      0.21913
 
 [ bonds ]
 ;  ai    aj   funct      b0(nm)          k(kJ/mol/nm^2)

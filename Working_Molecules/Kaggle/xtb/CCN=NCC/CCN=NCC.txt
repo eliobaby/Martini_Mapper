@@ -1,0 +1,13 @@
+Compound: CCN=NCC
+SMILES:   CCN=NCC
+
+All beads
+--------------------------------------------------------------------------------
+index    bead_type  atoms_idx            atoms_elem           #conns       mass     x        y        z       
+0        SN3a       0,1,2                C,C,N                1            54.0     0.2330   -0.0008  -0.0217 
+1        SN3a       3,4,5                N,C,C                1            54.0     -0.2330  0.0008   0.0236  
+
+Bead connections
+--------------------------------------------------------------------------------
+index    to_idx   bond    
+0        1        2.0     
