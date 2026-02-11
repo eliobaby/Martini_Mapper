@@ -408,7 +408,7 @@ def build_cg_from_xtb(
     ref_xtc: str,
     compound: str,
     out_prefix: str,
-    dihedrals: bool,
+    dihedrals_flag: bool,
     T: float = 300.0,
 ):
     """
@@ -466,7 +466,7 @@ def build_cg_from_xtb(
     dihedrals_fit = fit_dihedrals_simple(cg, dihedrals, T=T)
 
     out_itp = f"{out_prefix}.itp"
-    write_itp_with_bonds_angles_dihedrals(compound, bead_types_fixed, bonds_fit, angles_fit, dihedrals_fit, dihedrals, out_itp)
+    write_itp_with_bonds_angles_dihedrals(compound, bead_types_fixed, bonds_fit, angles_fit, dihedrals_fit, dihedrals_flag, out_itp)
 
     return {
         "cg_gro": out_cg_gro,

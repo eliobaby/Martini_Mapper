@@ -107,7 +107,7 @@ def run_mapping(
                 ref_xtc=f"ref_{compound_name}.xtc",
                 compound=compound_name,
                 out_prefix=compound_name,
-                dihedrals=dihedrals,
+                dihedrals_flag=dihedrals,
                 T=300.0,
             )
         except Exception as e:
