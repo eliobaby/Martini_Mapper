@@ -133,7 +133,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("smiles", nargs="?", help="SMILES string (e.g. c1ccccc1)")
     p.add_argument("--no-xtb", action="store_true", help="Skip xtb coordinate/CG generation.")
     p.add_argument("--no-files", action="store_true", help="Do not write .txt/.gro/.itp outputs (library mode).")
-    p.add_argument("--dihedrals", action="store_true", help="Comment out the dihedrals in ITP file.")
+    p.add_argument("--dihedrals", action="store_true", help="Do not comment out the dihedrals in ITP file.")
 
     p.add_argument(
         "--out-dir",
