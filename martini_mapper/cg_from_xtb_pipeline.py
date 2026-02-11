@@ -341,6 +341,7 @@ def write_itp_with_bonds_angles_dihedrals(
     bonds_fit,
     angles_fit,
     dihedrals_fit,
+    dihedrals,
     out_itp: str,
 ):
     """
@@ -389,8 +390,10 @@ def write_itp_with_bonds_angles_dihedrals(
     lines.append(";  ai    aj    ak    al  funct   phi0(deg)        k(kJ/mol)   mult")
     for (i,j,k,l,phi0_rad,kk,n) in dihedrals_fit:
         phi0_deg = phi0_rad * RAD2DEG
-        lines.append(f"{i+1:5d} {j+1:5d} {k+1:5d} {l+1:5d} {1:5d} {phi0_deg:12.5f} {kk:12.3f} {n:6d}")
-
+        if dihedrals == False:
+            lines.append(f";{i+1:5d} {j+1:5d} {k+1:5d} {l+1:5d} {1:5d} {phi0_deg:12.5f} {kk:12.3f} {n:6d}")
+        else:
+            lines.append(f"{i+1:5d} {j+1:5d} {k+1:5d} {l+1:5d} {1:5d} {phi0_deg:12.5f} {kk:12.3f} {n:6d}")
     Path(out_itp).write_text("\n".join(lines) + "\n")
 
 # -----------------------------
@@ -405,6 +408,7 @@ def build_cg_from_xtb(
     ref_xtc: str,
     compound: str,
     out_prefix: str,
+    dihedrals: bool,
     T: float = 300.0,
 ):
     """
@@ -462,7 +466,7 @@ def build_cg_from_xtb(
     dihedrals_fit = fit_dihedrals_simple(cg, dihedrals, T=T)
 
     out_itp = f"{out_prefix}.itp"
-    write_itp_with_bonds_angles_dihedrals(compound, bead_types_fixed, bonds_fit, angles_fit, dihedrals_fit, out_itp)
+    write_itp_with_bonds_angles_dihedrals(compound, bead_types_fixed, bonds_fit, angles_fit, dihedrals_fit, dihedrals, out_itp)
 
     return {
         "cg_gro": out_cg_gro,

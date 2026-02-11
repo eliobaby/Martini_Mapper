@@ -28,6 +28,7 @@ def run_mapping(
     write_files: bool = True,
     out_dir: Optional[Path] = None,
     keep_intermediates: bool = False,
+    dihedrals: bool = False
 ) -> Tuple[list[str], list]:
     """Run the full Martini mapping pipeline.
 
@@ -106,6 +107,7 @@ def run_mapping(
                 ref_xtc=f"ref_{compound_name}.xtc",
                 compound=compound_name,
                 out_prefix=compound_name,
+                dihedrals=dihedrals,
                 T=300.0,
             )
         except Exception as e:
@@ -131,6 +133,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("smiles", nargs="?", help="SMILES string (e.g. c1ccccc1)")
     p.add_argument("--no-xtb", action="store_true", help="Skip xtb coordinate/CG generation.")
     p.add_argument("--no-files", action="store_true", help="Do not write .txt/.gro/.itp outputs (library mode).")
+    p.add_argument("--dihedrals", action="store_true", help="Comment out the dihedrals in ITP file.")
 
     p.add_argument(
         "--out-dir",
@@ -162,6 +165,7 @@ def main(argv=None) -> int:
             write_files=not args.no_files,
             out_dir=out_dir,
             keep_intermediates=args.keep_intermediates,
+            dihedrals=args.dihedrals,
         )
     except (InvalidSmilesError, MappingError, ExternalToolError, OutputError) as e:
         raise SystemExit(str(e)) from e
