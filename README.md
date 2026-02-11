@@ -138,6 +138,9 @@ Options:
 - `--no-files`  
   Do not write output files (`.txt/.gro/.itp`). Useful for “library mode” and tests.
 
+- `--dihedrals`
+  Comment out the dihedrals in ITP file.
+
 - `--out-dir PATH`  
   Directory to place final outputs.  
   Default: `./<name>/`
