@@ -68,7 +68,6 @@ def build_heavy_to_hydrogens(smiles: str) -> Dict[int, List[int]]:
 
     return heavy_to_h
 
-
 def expand_beads_with_hydrogens(
     bead_heavy_atoms: List[List[int]],
     heavy_to_h: Dict[int, List[int]],
@@ -84,7 +83,6 @@ def expand_beads_with_hydrogens(
                 s.add(hid)
         bead_atoms.append(sorted(s))
     return bead_atoms
-
 
 # -----------------------------
 # 2) Map AA trajectory -> bead trajectory (center of geometry)
@@ -105,7 +103,6 @@ def map_aa_to_cg_traj(
     aa = md.load(ref_xtc, top=ref_gro)
     if not np.isfinite(aa.xyz).all():
         raise RuntimeError("AA trajectory contains NaN/Inf; ref.gro/ref.xtc are corrupted.")
-
 
     n_frames = aa.n_frames
     n_beads = len(bead_atom_indices)
@@ -196,7 +193,6 @@ def generate_angle_list_from_bonds(n_beads: int, bonds: List[Tuple[int, int]]) -
                 angles.add((min(i, k), j, max(i, k)))
 
     return sorted(angles)
-
 
 def fit_bonds_and_angles(
     cg: md.Trajectory,
@@ -321,9 +317,8 @@ def fit_dihedrals_simple(
 
     return out
 
-
 # -----------------------------
-# 4) Write .itp using your style (atoms + bonds + angles)
+# 4) Write .itp using atoms + bonds + angles
 # -----------------------------
 
 def bead_mass_from_type(bt: str) -> float:
@@ -395,9 +390,9 @@ def write_itp_with_bonds_angles_dihedrals(
             lines.append(f"{i+1:5d} {j+1:5d} {k+1:5d} {l+1:5d} {1:5d} {phi0_deg:12.5f} {kk:12.3f} {n:6d}")
     Path(out_itp).write_text("\n".join(lines) + "\n")
 
-# -----------------------------
-# 5) The one function you call
-# -----------------------------
+# -------------------
+# 5) Main function
+# -------------------
 
 def build_cg_from_xtb(
     smiles: str,
@@ -477,4 +472,3 @@ def build_cg_from_xtb(
         "angles": angles,
         "dihedrals": dihedrals
     }
-    
