@@ -175,7 +175,6 @@ def k_from_sigma(T: float, sigma: float) -> float:
         return 0.0
     return (kB * T) / (sigma * sigma)
 
-
 def generate_angle_list_from_bonds(n_beads: int, bonds: List[Tuple[int, int]]) -> List[Tuple[int, int, int]]:
     """
     From bond graph, generate unique angles i-j-k (j is central).
