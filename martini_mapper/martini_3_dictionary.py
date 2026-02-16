@@ -182,8 +182,8 @@ def get_m3_dict():
         ("TX4",  [7, 0, "FCF",          1, "", []]),
         ("SX4",  [7, 0, "FCCF",         1, "", []]),
         # dibromomethane
-        ("X1",  [11, 0, "BrCCBr",       0, "", []]),
-        ("SX1", [11, 0, "BrCBr",        0, "", []]),
+        ("X1",   [7, 0, "BrCCBr",       0, "", []]),
+        ("SX1",  [7, 0, "BrCBr",        0, "", []]),
         
         # FROM TABLE 24: (no change)
         # "#" are old tuned version of the bead
@@ -261,7 +261,7 @@ def get_m3_dict():
         ("N5a",  [7, 1, "C(=O)(C)(CC)",   0, "", []]),
         ("N5a",  [7, 1, "C(=C)(C)(C=O)",   1, "", []]),
         ("N5a",  [7, 1, "C(C=C)(C)(=O)",   1, "", []]),
-        # primary amin
+        # primary amine
         ("TN6d", [7, 0, "CN",           0, "", ["N", 2]]),
         ("SN6d", [7, 0, "CCN",          0, "", ["N", 2]]),
         ("SN6d", [7, 0, "C=CN",         0, "", ["N", 2]]),
