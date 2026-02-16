@@ -1,255 +1,255 @@
-Count,Section,Section Description,Bead Type,Functional Group,SMILES
-1,1,Benzene,TN6a,heteroaromatic,CN
-2,1,Benzene,TC5,aromatic,CC
-3,1,Benzene,TN1a,heteroaromatic,NN
-4,2,Benzene border,SN6d,aryl amine,CC(N)
-5,2,Benzene border,TN6a,aryl carbonyl,C(=O)
-6,2,Benzene border,SN2a,aryl ether,C(OC)
-7,2,Benzene border,SC6,aryl thioether,CC(S)
-8,2,Benzene border,SC4,substituted alkyl,CC(C)
-9,2,Benzene border,TC4,substituted alkyl,C(C)
-10,2,Benzene border,SX3,aryl halide,CC(Cl)
-11,2,Benzene border,SX2,aryl halide,CC(Br)
-12,2,Benzene border,X1,aryl halide,CC(I)
-13,2,Benzene border,TN1,methyl pyrrole,N(C)
-14,2,Benzene border,SX4e,aryl halide,CC(F)
-15,2,Benzene border,SN6a,aryl carbonyl,CC(=O)
-16,2,Benzene border,TX3,aryl halide,C(Cl)
-17,2,Benzene border,TN6d,aryl amine,C(N)
-18,2,Benzene border,TC6,aryl thioether,C(S)
-19,2,Benzene border,TX1,aryl halide,C(I)
-20,2,Benzene border,TX2,aryl halide,C(Br)
-21,2,Benzene border,TX4e,aryl halide,C(F)
-22,2,Benzene border,SN6,phenol,CC(O)
-23,2,Benzene border,TN6,aryl alcohol,C(O)
-24,2,Benzene border,SP4,diol,C(O)(CO)
-25,3,Non-benzene 6-ring,SN4a,ether,COC
-26,3,Non-benzene 6-ring,SN3a,ether,COC
-27,3,Non-benzene 6-ring,SC3,alkane ring,CCC
-28,3,Non-benzene 6-ring,SN6d,primary amine,CCN
-29,3,Non-benzene 6-ring,TN6d,primary amine,CN
-30,4,Non-benzene 6-ring border,TN1,methyl pyrrole,N(C)
-31,4,Non-benzene 6-ring border,SN5a,cyclic acetal,OCO
-32,4,Non-benzene 6-ring border,SN1,cyclic aminal,NCN
-33,4,Non-benzene 6-ring border,SX4e,alkyl halide,FCF
-34,4,Non-benzene 6-ring border,SN3a,ether,COC
-35,5,5-ring,TN6d,pyrrole,NH
-36,5,5-ring,SN5a,cyclic acetal,OCO
-37,5,5-ring,SC3,alkane ring,CCC
-38,5,5-ring,TN4a,cyclic ether,OC
-39,5,5-ring,TN2a,cyclic ether,O
-40,5,5-ring,TC3,alkane ring,CC
-41,5,5-ring,SC6,thiophene,CSC
-42,5,5-ring,TC6,thiophene,S
-43,5,5-ring,TC6,disulfide,SS
-44,6,5-ring border,SC3,substituted alkyl,CC(C)
-45,6,5-ring border,TN1,methyl pyrrole,N(C)
-46,6,5-ring border,SN6,cycloalkanol,CC(O)
-47,6,5-ring border,TN6a,cyclic ketone,CC(=O)
-48,6,5-ring border,SN6d,cyclic amine,CC(N)
-49,7,Non-ring,SX4e,trifluoromethane,C(F)(F)(F)
-50,7,Non-ring,X2,trichloromethane,C(Cl)(Cl)(Cl)
-51,7,Non-ring,TN4a,nitrile,N#C
-52,7,Non-ring,SN3a,nitrite,ON=O
-53,7,Non-ring,TP1d,alcohol,CO
-54,7,Non-ring,TN2a,ether,CO
-55,7,Non-ring,SN1,tertiary amine,CNC
-56,7,Non-ring,TC3,linear alkane,CC
-57,7,Non-ring,SC2,linear alkane,CCC
-58,7,Non-ring,N6a,aldehyde,CCC=O
-59,7,Non-ring,TN4a,aldehyde,C=O
-60,7,Non-ring,SN4a,aldehyde,CC=O
-61,7,Non-ring,SP2,carbamate,C(O)(=O)(N)
-62,7,Non-ring,P2,carbamate,C(NC)(=O)(O)
-63,7,Non-ring,SC1,branched alkane,C(C)(C)(C)
-64,7,Non-ring,P4,sulfonamide,S(=O)(=O)(N)
-65,7,Non-ring,P4,n-oxy sulfonamide,S(=O)(=O)(NO)
-66,7,Non-ring,P4,n-carbon sulfonamide,S(=O)(=O)(NC)
-67,7,Non-ring,P4d,cyanamide,NC#N
-68,7,Non-ring,SX1,bromoalkene,BrC=C
-69,7,Non-ring,SX1,bromoalkene,C=CBr
-70,7,Non-ring,N4a,aldehyde,C(C)(C)(C=O)
-71,7,Non-ring,X4,sulfonyl fluoride,S(=O)(=O)(F)
-72,7,Non-ring,SP5,sulfone,O=S=O
-73,7,Non-ring,P4,sulfone,S(=O)(=O)(C)
-74,7,Non-ring,C6,carbon disulfide,S=C=S
-75,7,Non-ring,SC6,carbon dioxide,O=C=O
-76,7,Non-ring,SX2,chlorobromomethane,ClCBr
-77,7,Non-ring,SX2,chlorobromomethane,BrCCl
-78,7,Non-ring,SX4,chlorofluoromethane,FCCl
-79,7,Non-ring,SX4,chlorofluoromethane,ClCF
-80,7,Non-ring,X2,diiodomethane,ICI
-81,7,Non-ring,P5d,Methylhydrazine,CNN
-82,7,Non-ring,X3h,trichloroethylene,C(=CCl)(Cl)(Cl)
-83,7,Non-ring,SX3,vinylchloride,C=CCl
-84,7,Non-ring,SX3,vinylchloride,ClC=C
-85,7,Non-ring,TX4,diflouro-ethane,FCF
-86,7,Non-ring,SX4,diflouro-ethane,FCCF
-87,7,Non-ring,X1,dibromomethane,BrCCBr
-88,7,Non-ring,SX1,dibromomethane,BrCBr
-89,7,Non-ring,C1,linear alkane,CCCC
-90,7,Non-ring,C2,branched alkane,C(C)(C)(C)(C)
-91,7,Non-ring,C2,branched alkane,C(CC)(C)(C)
-92,7,Non-ring,SC4,alkene,C(=C)(C)(C)
-93,7,Non-ring,C4,alkene,C(=CC)(C)(C)
-94,7,Non-ring,C4,alkene,C(=C)(CC)(C)
-95,7,Non-ring,C4,alkene,C(=C)(C=C)(C)
-96,7,Non-ring,C4,alkene,C=CCC
-97,7,Non-ring,SC4,alkene,C=CC
-98,7,Non-ring,C4,alkene,CC=CC
-99,7,Non-ring,SC5,diene,C=C=C
-100,7,Non-ring,SC5,diene,C=CC=C
-101,7,Non-ring,TC5,diene,C=C
-102,7,Non-ring,C6r,alkyne,CC#CC
-103,7,Non-ring,C6r,alkyne,C#CCC
-104,7,Non-ring,C6r,alkene,C#CC=C
-105,7,Non-ring,C6r,alkyne,C#CC#C
-106,7,Non-ring,SC6r,alkyne,C#CC
-107,7,Non-ring,TC6r,alkyne,C#C
-108,7,Non-ring,SC6,thiol/sulfide,CCS
-109,7,Non-ring,SC6,thiol/sulfide,CSC
-110,7,Non-ring,TC6,thiol/sulfide,CS
-111,7,Non-ring,SC6,thiol/sulfide,C(C)(C)(S)
-112,7,Non-ring,C6,thiol/sulfide,C(C)(C)(SC)
-113,7,Non-ring,C6,thiol/sulfide,C(C)(C)(CS)
-114,7,Non-ring,C6,thiol/sulfide,C(C)(CC)(S)
-115,7,Non-ring,SN2,primary imine,CC=N
-116,7,Non-ring,TN2,primary imine,C=N
-117,7,Non-ring,SN2,primary imine,C=C=N
-118,7,Non-ring,SN2,primary imine,C(C)(C)(=N)
-119,7,Non-ring,SN1a,secondary imine,CC=N
-120,7,Non-ring,TN1a,secondary imine,C=N
-121,7,Non-ring,SN1a,secondary imine,C=C=N
-122,7,Non-ring,SN1a,secondary imine,C(C)(C)(=N)
-123,7,Non-ring,SN1a,secondary imine,C=NC
-124,7,Non-ring,N1a,secondary imine,CC=NC
-125,7,Non-ring,N1a,secondary imine,C=NCC
-126,7,Non-ring,SN2ah,acyl chloride,O=CCl
-127,7,Non-ring,SN2ah,acyl chloride,ClC=O
-128,7,Non-ring,SN2ah,acyl chloride,C(C)(=O)(Cl)
-129,7,Non-ring,N2ah,acyl chloride,C(CC)(=O)(Cl)
-130,7,Non-ring,SN2a,nitrile,N#CC
-131,7,Non-ring,SN3r,ether,COC
-132,7,Non-ring,N3r,ether,COCC
-133,7,Non-ring,N3r,ether,CCCO
-134,7,Non-ring,SN3r,ether,CCO
-135,7,Non-ring,TN3r,ether,CO
-136,7,Non-ring,N3r,ether,C(O)(C)(CC)
-137,7,Non-ring,N3r,ether,C(C)(C)(CO)
-138,7,Non-ring,N3r,ether,C(O)(C)(C)
-139,7,Non-ring,N3r,ether,C(C)(C)(OC)
-140,7,Non-ring,P1,alcohol,C(O)(C)(C)
-141,7,Non-ring,P1,alcohol,C(O)(C)(CC)
-142,7,Non-ring,P1,alcohol,C(C)(C)(CO)
-143,7,Non-ring,P1,alcohol,CCCO
-144,7,Non-ring,SP1,alcohol,CCO
-145,7,Non-ring,TP1,alcohol,CO
-146,7,Non-ring,SN5a,Ketone/aldehyde,C(=O)(C)(C)
-147,7,Non-ring,N5a,Ketone/aldehyde,C(=O)(C)(CC)
-148,7,Non-ring,N5a,Ketone/aldehyde,C(=C)(C)(C=O)
-149,7,Non-ring,N5a,Ketone/aldehyde,C(C=C)(C)(=O)
-150,7,Non-ring,TN6d,primary amine,CN
-151,7,Non-ring,SN6d,primary amine,CCN
-152,7,Non-ring,SN6d,primary amine,C=CN
-153,7,Non-ring,N6d,primary amine,CCCN
-154,7,Non-ring,SN6d,primary amine,C(N)(C)(C)
-155,7,Non-ring,N6d,primary amine,C(N)(CC)(C)
-156,7,Non-ring,N6d,primary amine,C(N)(C=C)(C)
-157,7,Non-ring,TN5,secondary amine,CN
-158,7,Non-ring,SN5,secondary amine,CCN
-159,7,Non-ring,SN5,secondary amine,C=CN
-160,7,Non-ring,N5,secondary amine,CCCN
-161,7,Non-ring,N5,secondary amine,CNCC
-162,7,Non-ring,N5,secondary amine,CNC=C
-163,7,Non-ring,SN5,secondary amine,C(N)(C)(C)
-164,7,Non-ring,N5,secondary amine,C(N)(CC)(C)
-165,7,Non-ring,N5,secondary amine,C(N)(C=C)(C)
-166,7,Non-ring,N5,secondary amine,C(NC)(C)(C)
-167,7,Non-ring,TN3a,tertiary amine,CN
-168,7,Non-ring,SN3a,tertiary amine,CCN
-169,7,Non-ring,SN3a,tertiary amine,C=CN
-170,7,Non-ring,N3a,tertiary amine,CCCN
-171,7,Non-ring,N3a,tertiary amine,CNCC
-172,7,Non-ring,N3a,tertiary amine,CNC=C
-173,7,Non-ring,SN3a,tertiary amine,C(N)(C)(C)
-174,7,Non-ring,N3a,tertiary amine,C(N)(CC)(C)
-175,7,Non-ring,N3a,tertiary amine,C(N)(C=C)(C)
-176,7,Non-ring,N3a,tertiary amine,C(NC)(C)(C)
-177,7,Non-ring,SN3a,tertiary amine,N(C)(C)(C)
-178,7,Non-ring,N3a,tertiary amine,N(C)(C)(C=C)
-179,7,Non-ring,N3a,tertiary amine,N(C)(C)(CC)
-180,7,Non-ring,SP2,enol,C=CO
-181,7,Non-ring,P2,enol,CC=CO
-182,7,Non-ring,SP2,enol,C(O)(=C)(C)
-183,7,Non-ring,P2,enol,C(O)(=CC)(C)
-184,7,Non-ring,SP2,carboxylic acid,OC=O
-185,7,Non-ring,P2,carboxylic acid,C(O)(=O)(CC)
-186,7,Non-ring,SP2,carboxylic acid,C(O)(=O)(C)
-187,7,Non-ring,P2,carboxylic acid,C(O)(=O)(C=C)
-188,7,Non-ring,N4a,ester,COC=O
-189,7,Non-ring,SN4a,ester,OC=O
-190,7,Non-ring,N4a,ester,C(O)(=O)(CC)
-191,7,Non-ring,SN4a,ester,C(O)(=O)(C)
-192,7,Non-ring,N4a,ester,C(O)(=O)(C=C)
-193,7,Non-ring,N4a,ester,C(OC)(=O)(C)
-194,7,Non-ring,SN4a,acetal/ketal,OCO
-195,7,Non-ring,N4a,acetal/ketal,OCOC
-196,7,Non-ring,SN4a,acetal/ketal,C(O)(O)(C)
-197,7,Non-ring,N4a,acetal/ketal,C(O)(O)(CC)
-198,7,Non-ring,N4a,acetal/ketal,C(O)(OC)(C)
-199,7,Non-ring,N4a,acetal/ketal,C(O)(OC)(=C)
-200,7,Non-ring,SP2,hemiacetal/hemiketal,OCO
-201,7,Non-ring,P2,hemiacetal/hemiketal,OCOC
-202,7,Non-ring,SP2,hemiacetal/hemiketal,C(O)(O)(C)
-203,7,Non-ring,P2,hemiacetal/hemiketal,C(O)(O)(CC)
-204,7,Non-ring,P2,hemiacetal/hemiketal,C(O)(OC)(C)
-205,7,Non-ring,P2,hemiacetal/hemiketal,C(O)(OC)(=C)
-206,7,Non-ring,P4,diol,OCO
-207,7,Non-ring,P4,diol,C(O)(O)(C)
-208,7,Non-ring,P4,diol,C(O)(O)(CC)
-209,7,Non-ring,P4,diol,OCCO
-210,7,Non-ring,SP5,primary amide,NC=O
-211,7,Non-ring,SP5,primary amide,C(N)(=O)(C)
-212,7,Non-ring,P5,primary amide,C(N)(=O)(CC)
-213,7,Non-ring,P5,primary amide,C(N)(=O)(C=C)
-214,7,Non-ring,SP3,secondary amide,NC=O
-215,7,Non-ring,SP3,secondary amide,C(N)(=O)(C)
-216,7,Non-ring,P3,secondary amide,O=CNC
-217,7,Non-ring,P3,secondary amide,C(NC)(=O)(C)
-218,7,Non-ring,SP3a,tertiary amide,NC=O
-219,7,Non-ring,SP3a,tertiary amide,C(N)(=O)(C)
-220,7,Non-ring,P3a,tertiary amide,O=CNC
-221,7,Non-ring,P3a,tertiary amide,C(NC)(=O)(C)
-222,7,Non-ring,P3a,tertiary amide,N(C=O)(C)(C)
-223,7,Non-ring,P4,sulfoxide,S(=O)(C)(C)
-224,7,Non-ring,SP4,sulfoxide,CS=O
-225,7,Non-ring,P6,amino acid,C(CN)(=O)(O)
-226,7,Non-ring,X1,primary organoiodine,CCI
-227,7,Non-ring,X1,primary organoiodine,CCCI
-228,7,Non-ring,SX1,primary organoiodine,CI
-229,7,Non-ring,X2,primary organobromide,CCBr
-230,7,Non-ring,X2,primary organobromide,BrCC
-231,7,Non-ring,X2,primary organobromide,CCCBr
-232,7,Non-ring,X2,primary organobromide,BrCCC
-233,7,Non-ring,SX2,primary organobromide,CBr
-234,7,Non-ring,SX2,primary organobromide,BrC
-235,7,Non-ring,SX3,primary organochloride,CCCl
-236,7,Non-ring,SX3,primary organochloride,ClCC
-237,7,Non-ring,X3,primary organochloride,CCCCl
-238,7,Non-ring,X3,primary organochloride,ClCCC
-239,7,Non-ring,TX3,primary organochloride,CCl
-240,7,Non-ring,TX3,primary organochloride,ClC
-241,7,Non-ring,X3 ,primary organochloride,C(C)(C)(CCl)
-242,7,Non-ring,X4e,primary organoflourine,CCCF
-243,7,Non-ring,SX4e,primary organoflourine,CCF
-244,7,Non-ring,TX4e,primary organoflourine,CF
-245,7,Non-ring,SX3h,dichloroethane,C(C)(Cl)(Cl)
-246,7,Non-ring,SX3h,dichloroethane,ClCCl
-247,7,Non-ring,X3h,dichloroethane,ClCCCl
-248,7,Non-ring,X1,tetrahalomethane,C(Cl)(Cl)(Cl)(Cl)
-249,7,Non-ring,SQ4n,sulfonate,S(=O)(=O)(O)
-250,8,Ring Fusion,TC5e,aromatic,CC
-251,8,Ring Fusion,TC5,aromatic,CC
-252,9,3/4/7/8-ring,SC3,cycloalkane,CCC
-253,9,3/4/7/8-ring,P4,diol,COC
-254,10,Singular atom,TC6,thiol,S
+Section,Section Description,Bead Type,Functional Group,SMILES
+1,Benzene,TN6a,heteroaromatic,CN
+1,Benzene,TC5,aromatic,CC
+1,Benzene,TN1a,heteroaromatic,NN
+2,Benzene border,SN6d,aryl amine,CC(N)
+2,Benzene border,TN6a,aryl carbonyl,C(=O)
+2,Benzene border,SN2a,aryl ether,C(OC)
+2,Benzene border,SC6,aryl thioether,CC(S)
+2,Benzene border,SC4,substituted alkyl,CC(C)
+2,Benzene border,TC4,substituted alkyl,C(C)
+2,Benzene border,SX3,aryl halide,CC(Cl)
+2,Benzene border,SX2,aryl halide,CC(Br)
+2,Benzene border,X1,aryl halide,CC(I)
+2,Benzene border,TN1,methyl pyrrole,N(C)
+2,Benzene border,SX4e,aryl halide,CC(F)
+2,Benzene border,SN6a,aryl carbonyl,CC(=O)
+2,Benzene border,TX3,aryl halide,C(Cl)
+2,Benzene border,TN6d,aryl amine,C(N)
+2,Benzene border,TC6,aryl thioether,C(S)
+2,Benzene border,TX1,aryl halide,C(I)
+2,Benzene border,TX2,aryl halide,C(Br)
+2,Benzene border,TX4e,aryl halide,C(F)
+2,Benzene border,SN6,phenol,CC(O)
+2,Benzene border,TN6,aryl alcohol,C(O)
+2,Benzene border,SP4,diol,C(O)(CO)
+3,Non-benzene 6-ring,SN4a,ether,COC
+3,Non-benzene 6-ring,SN3a,ether,COC
+3,Non-benzene 6-ring,SC3,alkane ring,CCC
+3,Non-benzene 6-ring,SN6d,primary amine,CCN
+3,Non-benzene 6-ring,TN6d,primary amine,CN
+4,Non-benzene 6-ring border,TN1,methyl pyrrole,N(C)
+4,Non-benzene 6-ring border,SN5a,cyclic acetal,OCO
+4,Non-benzene 6-ring border,SN1,cyclic aminal,NCN
+4,Non-benzene 6-ring border,SX4e,alkyl halide,FCF
+4,Non-benzene 6-ring border,SN3a,ether,COC
+5,5-ring,TN6d,pyrrole,NH
+5,5-ring,SN5a,cyclic acetal,OCO
+5,5-ring,SC3,alkane ring,CCC
+5,5-ring,TN4a,cyclic ether,OC
+5,5-ring,TN2a,cyclic ether,O
+5,5-ring,TC3,alkane ring,CC
+5,5-ring,SC6,thiophene,CSC
+5,5-ring,TC6,thiophene,S
+5,5-ring,TC6,disulfide,SS
+6,5-ring border,SC3,substituted alkyl,CC(C)
+6,5-ring border,TN1,methyl pyrrole,N(C)
+6,5-ring border,SN6,cycloalkanol,CC(O)
+6,5-ring border,TN6a,cyclic ketone,CC(=O)
+6,5-ring border,SN6d,cyclic amine,CC(N)
+7,Non-ring,SX4e,trifluoromethane,C(F)(F)(F)
+7,Non-ring,X2,trichloromethane,C(Cl)(Cl)(Cl)
+7,Non-ring,TN4a,nitrile,N#C
+7,Non-ring,SN3a,nitrite,ON=O
+7,Non-ring,TP1d,alcohol,CO
+7,Non-ring,TN2a,ether,CO
+7,Non-ring,SN1,tertiary amine,CNC
+7,Non-ring,TC3,linear alkane,CC
+7,Non-ring,SC2,linear alkane,CCC
+7,Non-ring,N6a,aldehyde,CCC=O
+7,Non-ring,TN4a,aldehyde,C=O
+7,Non-ring,SN4a,aldehyde,CC=O
+7,Non-ring,SP2,carbamate,C(O)(=O)(N)
+7,Non-ring,P2,carbamate,C(NC)(=O)(O)
+7,Non-ring,SC1,branched alkane,C(C)(C)(C)
+7,Non-ring,P4,sulfonamide,S(=O)(=O)(N)
+7,Non-ring,P4,n-oxy sulfonamide,S(=O)(=O)(NO)
+7,Non-ring,P4,n-carbon sulfonamide,S(=O)(=O)(NC)
+7,Non-ring,P4d,cyanamide,NC#N
+7,Non-ring,SX1,bromoalkene,BrC=C
+7,Non-ring,SX1,bromoalkene,C=CBr
+7,Non-ring,N4a,aldehyde,C(C)(C)(C=O)
+7,Non-ring,X4,sulfonyl fluoride,S(=O)(=O)(F)
+7,Non-ring,SP5,sulfone,O=S=O
+7,Non-ring,P4,sulfone,S(=O)(=O)(C)
+7,Non-ring,C6,carbon disulfide,S=C=S
+7,Non-ring,SC6,carbon dioxide,O=C=O
+7,Non-ring,SX2,chlorobromomethane,ClCBr
+7,Non-ring,SX2,chlorobromomethane,BrCCl
+7,Non-ring,SX4,chlorofluoromethane,FCCl
+7,Non-ring,SX4,chlorofluoromethane,ClCF
+7,Non-ring,X2,diiodomethane,ICI
+7,Non-ring,P5d,Methylhydrazine,CNN
+7,Non-ring,X3h,trichloroethylene,C(=CCl)(Cl)(Cl)
+7,Non-ring,SX3,vinylchloride,C=CCl
+7,Non-ring,SX3,vinylchloride,ClC=C
+7,Non-ring,TX4,diflouro-ethane,FCF
+7,Non-ring,SX4,diflouro-ethane,FCCF
+7,Non-ring,X1,dibromomethane,BrCCBr
+7,Non-ring,SX1,dibromomethane,BrCBr
+7,Non-ring,C1,linear alkane,CCCC
+7,Non-ring,C2,branched alkane,C(C)(C)(C)(C)
+7,Non-ring,C2,branched alkane,C(CC)(C)(C)
+7,Non-ring,SC4,alkene,C(=C)(C)(C)
+7,Non-ring,C4,alkene,C(=CC)(C)(C)
+7,Non-ring,C4,alkene,C(=C)(CC)(C)
+7,Non-ring,C4,alkene,C(=C)(C=C)(C)
+7,Non-ring,C4,alkene,C=CCC
+7,Non-ring,SC4,alkene,C=CC
+7,Non-ring,C4,alkene,CC=CC
+7,Non-ring,SC5,diene,C=C=C
+7,Non-ring,SC5,diene,C=CC=C
+7,Non-ring,TC5,diene,C=C
+7,Non-ring,C6r,alkyne,CC#CC
+7,Non-ring,C6r,alkyne,C#CCC
+7,Non-ring,C6r,alkene,C#CC=C
+7,Non-ring,C6r,alkyne,C#CC#C
+7,Non-ring,SC6r,alkyne,C#CC
+7,Non-ring,TC6r,alkyne,C#C
+7,Non-ring,SC6,thiol/sulfide,CCS
+7,Non-ring,SC6,thiol/sulfide,CSC
+7,Non-ring,TC6,thiol/sulfide,CS
+7,Non-ring,SC6,thiol/sulfide,C(C)(C)(S)
+7,Non-ring,C6,thiol/sulfide,C(C)(C)(SC)
+7,Non-ring,C6,thiol/sulfide,C(C)(C)(CS)
+7,Non-ring,C6,thiol/sulfide,C(C)(CC)(S)
+7,Non-ring,SN2,primary imine,CC=N
+7,Non-ring,TN2,primary imine,C=N
+7,Non-ring,SN2,primary imine,C=C=N
+7,Non-ring,SN2,primary imine,C(C)(C)(=N)
+7,Non-ring,SN1a,secondary imine,CC=N
+7,Non-ring,TN1a,secondary imine,C=N
+7,Non-ring,SN1a,secondary imine,C=C=N
+7,Non-ring,SN1a,secondary imine,C(C)(C)(=N)
+7,Non-ring,SN1a,secondary imine,C=NC
+7,Non-ring,N1a,secondary imine,CC=NC
+7,Non-ring,N1a,secondary imine,C=NCC
+7,Non-ring,SN2ah,acyl chloride,O=CCl
+7,Non-ring,SN2ah,acyl chloride,ClC=O
+7,Non-ring,SN2ah,acyl chloride,C(C)(=O)(Cl)
+7,Non-ring,N2ah,acyl chloride,C(CC)(=O)(Cl)
+7,Non-ring,SN2a,nitrile,N#CC
+7,Non-ring,SN3r,ether,COC
+7,Non-ring,N3r,ether,COCC
+7,Non-ring,N3r,ether,CCCO
+7,Non-ring,SN3r,ether,CCO
+7,Non-ring,TN3r,ether,CO
+7,Non-ring,N3r,ether,C(O)(C)(CC)
+7,Non-ring,N3r,ether,C(C)(C)(CO)
+7,Non-ring,N3r,ether,C(O)(C)(C)
+7,Non-ring,N3r,ether,C(C)(C)(OC)
+7,Non-ring,P1,alcohol,C(O)(C)(C)
+7,Non-ring,P1,alcohol,C(O)(C)(CC)
+7,Non-ring,P1,alcohol,C(C)(C)(CO)
+7,Non-ring,P1,alcohol,CCCO
+7,Non-ring,SP1,alcohol,CCO
+7,Non-ring,TP1,alcohol,CO
+7,Non-ring,SN5a,Ketone/aldehyde,C(=O)(C)(C)
+7,Non-ring,N5a,Ketone/aldehyde,C(=O)(C)(CC)
+7,Non-ring,N5a,Ketone/aldehyde,C(=C)(C)(C=O)
+7,Non-ring,N5a,Ketone/aldehyde,C(C=C)(C)(=O)
+7,Non-ring,TN6d,primary amine,CN
+7,Non-ring,SN6d,primary amine,CCN
+7,Non-ring,SN6d,primary amine,C=CN
+7,Non-ring,N6d,primary amine,CCCN
+7,Non-ring,SN6d,primary amine,C(N)(C)(C)
+7,Non-ring,N6d,primary amine,C(N)(CC)(C)
+7,Non-ring,N6d,primary amine,C(N)(C=C)(C)
+7,Non-ring,TN5,secondary amine,CN
+7,Non-ring,SN5,secondary amine,CCN
+7,Non-ring,SN5,secondary amine,C=CN
+7,Non-ring,N5,secondary amine,CCCN
+7,Non-ring,N5,secondary amine,CNCC
+7,Non-ring,N5,secondary amine,CNC=C
+7,Non-ring,SN5,secondary amine,C(N)(C)(C)
+7,Non-ring,N5,secondary amine,C(N)(CC)(C)
+7,Non-ring,N5,secondary amine,C(N)(C=C)(C)
+7,Non-ring,N5,secondary amine,C(NC)(C)(C)
+7,Non-ring,TN3a,tertiary amine,CN
+7,Non-ring,SN3a,tertiary amine,CCN
+7,Non-ring,SN3a,tertiary amine,C=CN
+7,Non-ring,N3a,tertiary amine,CCCN
+7,Non-ring,N3a,tertiary amine,CNCC
+7,Non-ring,N3a,tertiary amine,CNC=C
+7,Non-ring,SN3a,tertiary amine,C(N)(C)(C)
+7,Non-ring,N3a,tertiary amine,C(N)(CC)(C)
+7,Non-ring,N3a,tertiary amine,C(N)(C=C)(C)
+7,Non-ring,N3a,tertiary amine,C(NC)(C)(C)
+7,Non-ring,SN3a,tertiary amine,N(C)(C)(C)
+7,Non-ring,N3a,tertiary amine,N(C)(C)(C=C)
+7,Non-ring,N3a,tertiary amine,N(C)(C)(CC)
+7,Non-ring,SP2,enol,C=CO
+7,Non-ring,P2,enol,CC=CO
+7,Non-ring,SP2,enol,C(O)(=C)(C)
+7,Non-ring,P2,enol,C(O)(=CC)(C)
+7,Non-ring,SP2,carboxylic acid,OC=O
+7,Non-ring,P2,carboxylic acid,C(O)(=O)(CC)
+7,Non-ring,SP2,carboxylic acid,C(O)(=O)(C)
+7,Non-ring,P2,carboxylic acid,C(O)(=O)(C=C)
+7,Non-ring,N4a,ester,COC=O
+7,Non-ring,SN4a,ester,OC=O
+7,Non-ring,N4a,ester,C(O)(=O)(CC)
+7,Non-ring,SN4a,ester,C(O)(=O)(C)
+7,Non-ring,N4a,ester,C(O)(=O)(C=C)
+7,Non-ring,N4a,ester,C(OC)(=O)(C)
+7,Non-ring,SN4a,acetal/ketal,OCO
+7,Non-ring,N4a,acetal/ketal,OCOC
+7,Non-ring,SN4a,acetal/ketal,C(O)(O)(C)
+7,Non-ring,N4a,acetal/ketal,C(O)(O)(CC)
+7,Non-ring,N4a,acetal/ketal,C(O)(OC)(C)
+7,Non-ring,N4a,acetal/ketal,C(O)(OC)(=C)
+7,Non-ring,SP2,hemiacetal/hemiketal,OCO
+7,Non-ring,P2,hemiacetal/hemiketal,OCOC
+7,Non-ring,SP2,hemiacetal/hemiketal,C(O)(O)(C)
+7,Non-ring,P2,hemiacetal/hemiketal,C(O)(O)(CC)
+7,Non-ring,P2,hemiacetal/hemiketal,C(O)(OC)(C)
+7,Non-ring,P2,hemiacetal/hemiketal,C(O)(OC)(=C)
+7,Non-ring,P4,diol,OCO
+7,Non-ring,P4,diol,C(O)(O)(C)
+7,Non-ring,P4,diol,C(O)(O)(CC)
+7,Non-ring,P4,diol,OCCO
+7,Non-ring,SP5,primary amide,NC=O
+7,Non-ring,SP5,primary amide,C(N)(=O)(C)
+7,Non-ring,P5,primary amide,C(N)(=O)(CC)
+7,Non-ring,P5,primary amide,C(N)(=O)(C=C)
+7,Non-ring,SP3,secondary amide,NC=O
+7,Non-ring,SP3,secondary amide,C(N)(=O)(C)
+7,Non-ring,P3,secondary amide,O=CNC
+7,Non-ring,P3,secondary amide,C(NC)(=O)(C)
+7,Non-ring,SP3a,tertiary amide,NC=O
+7,Non-ring,SP3a,tertiary amide,C(N)(=O)(C)
+7,Non-ring,P3a,tertiary amide,O=CNC
+7,Non-ring,P3a,tertiary amide,C(NC)(=O)(C)
+7,Non-ring,P3a,tertiary amide,N(C=O)(C)(C)
+7,Non-ring,P4,sulfoxide,S(=O)(C)(C)
+7,Non-ring,SP4,sulfoxide,CS=O
+7,Non-ring,P6,amino acid,C(CN)(=O)(O)
+7,Non-ring,X1,primary organoiodine,CCI
+7,Non-ring,X1,primary organoiodine,CCCI
+7,Non-ring,SX1,primary organoiodine,CI
+7,Non-ring,X2,primary organobromide,CCBr
+7,Non-ring,X2,primary organobromide,BrCC
+7,Non-ring,X2,primary organobromide,CCCBr
+7,Non-ring,X2,primary organobromide,BrCCC
+7,Non-ring,SX2,primary organobromide,CBr
+7,Non-ring,SX2,primary organobromide,BrC
+7,Non-ring,SX3,primary organochloride,CCCl
+7,Non-ring,SX3,primary organochloride,ClCC
+7,Non-ring,X3,primary organochloride,CCCCl
+7,Non-ring,X3,primary organochloride,ClCCC
+7,Non-ring,TX3,primary organochloride,CCl
+7,Non-ring,TX3,primary organochloride,ClC
+7,Non-ring,X3 ,primary organochloride,C(C)(C)(CCl)
+7,Non-ring,X4e,primary organoflourine,CCCF
+7,Non-ring,SX4e,primary organoflourine,CCF
+7,Non-ring,TX4e,primary organoflourine,CF
+7,Non-ring,SX3h,dichloroethane,C(C)(Cl)(Cl)
+7,Non-ring,SX3h,dichloroethane,ClCCl
+7,Non-ring,X3h,dichloroethane,ClCCCl
+7,Non-ring,X1,tetrahalomethane,C(Cl)(Cl)(Cl)(Cl)
+7,Non-ring,SQ4n,sulfonate,S(=O)(=O)(O)
+8,Ring Fusion,TC5e,aromatic,CC
+8,Ring Fusion,TC5,aromatic,CC
+9,3/4/7/8-ring,SC3,cycloalkane,CCC
+9,3/4/7/8-ring,P4,diol,COC
+10,Singular atom,TC6,thiol,S
