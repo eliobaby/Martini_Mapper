@@ -6,62 +6,54 @@ def get_m3_dict():
         # Section 1: Benzene nodes
         # -------------------------
         
-        # FROM THE BUILDING BLOCK TABLE: (unchangable)
+        # FROM 90 ORIGINAL MOLECULES:
         ("TN6a", [1, 0, "CN", 2, "", []]),
         ("TC5",  [1, 0, "CC", 2, "", []]),
-        # FROM TABLE 24: (no change)
+        ("TN1a",  [1, 0, "NN", 2, "", []]), 
+        # FROM TABLE 24:
         # aromatic (no hydrogens)
         # ("TC5e",  [1, 0, "CC", 2, "", []]),
-        
-        # FROM 90 ORIGINAL MOLECULES:
-        ("TN1a",  [1, 0, "NN", 2, "", []]), #TN3a
 
         # ----------------------------------
         # Section 2: Benzene border nodes
         # ----------------------------------
         
-        # FROM THE BUILDING BLOCK TABLE: (unchangable)
-        ("SN6d",  [2, 0, "CC(N)",   2, "", []]), #SN4d 
-        ("TN6a",  [2, 0, "C(=O)",   2, "", []]), #TN2a 
-        ("SN2a",  [2, 0, "C(OC)",   2, "", []]), #SN1a 
+        # FROM 90 ORIGINAL MOLECULES:
+        ("SN6d",  [2, 0, "CC(N)",   2, "", []]),
+        ("TN6a",  [2, 0, "C(=O)",   2, "", []]),
+        ("SN2a",  [2, 0, "C(OC)",   2, "", []]),
         ("SC6",   [2, 0, "CC(S)",   2, "", []]),
         ("SC4",   [2, 0, "CC(C)",   2, "", []]),
-        ("TC4",   [2, 0, "C(C)",    2, "", []]), #TC6 
+        ("TC4",   [2, 0, "C(C)",    2, "", []]),
         ("SX3",   [2, 0, "CC(Cl)",  2, "", []]),
-        ("SX2",   [2, 0, "CC(Br)",  2, "", []]), #SX1 
+        ("SX2",   [2, 0, "CC(Br)",  2, "", []]), 
         ("X1",    [2, 0, "CC(I)",   2, "", []]),
-        
-        # FROM TABLE 24: (no change)
-        # Phenol
-        ("SN6",   [2, 0, "CC(O)",   2, "", []]), #SN2 after old tuning
-        ("TN6+",  [2, 0, "C(O)",    2, "", []]), #TN2 
-        # Phenol + Phenol = Diol
-        ("SP4",   [2, 0, "C(O)(CO)", 2, "", []]),
-        # FROM 90 ORIGINAL MOLECULES:
-        # methyl pyrrole
-        ("TN1",   [2, 0, "N(C)",  2, "", []]), #TN3 
-        
-        # INFERRED AND TUNED from old model
-        ("SX4e",  [2, 0, "CC(F)",   2, "", []]), #SX3e
-        ("SN6a",  [2, 0, "CC(=O)",  2, "", []]), #SP1a
-        ("TX3",   [2, 0, "C(Cl)",   2, "", []]), #TX4
+        ("TN1",   [2, 0, "N(C)",    2, "", []]), # methyl pyrrole
+        ("SX4e",  [2, 0, "CC(F)",   2, "", []]),
+        ("SN6a",  [2, 0, "CC(=O)",  2, "", []]),
+        ("TX3",   [2, 0, "C(Cl)",   2, "", []]),
         ("TN6d",  [2, 0, "C(N)",    2, "", []]),
         ("TC6",   [2, 0, "C(S)",    2, "", []]),
         ("TX1",   [2, 0, "C(I)",    2, "", []]),
-        ("TX2",   [2, 0, "C(Br)",   2, "", []]), #TX1
+        ("TX2",   [2, 0, "C(Br)",   2, "", []]),
         ("TX4e",  [2, 0, "C(F)",    2, "", []]),
-        
+        # FROM TABLE 24:
+        # Phenol
+        ("SN6",   [2, 0, "CC(O)",   2, "", []]),
+        ("TN6+",  [2, 0, "C(O)",    2, "", []]),
+        # Phenol + Phenol = Diol
+        ("SP4",   [2, 0, "C(O)(CO)", 2, "", []]),
         
         # ----------------------------------
         # Section 3: Non‑benzene 6‑ring nodes
         # ----------------------------------
         
-        # FROM THE BUILDING BLOCK TABLE: (unchangable)
+        # FROM 90 ORIGINAL MOLECULES:
         ("SN4a", [3, 0, "COC", 2, "SC3"]),
         ("SN3a", [3, 0, "COC", 2, "SN3a"]),
         ("SC3",  [3, 0, "CCC", 2, "", []]),
         
-        # FROM TABLE 24: (no change)
+        # FROM TABLE 24:
         # primary amine
         ("SN6d", [3, 0, "CCN", 2, "", []]),
         ("TN6d", [3, 0, "CN", 2, "", []]),
@@ -69,53 +61,48 @@ def get_m3_dict():
         # -----------------------------------------        
         # Section 4: Non‑benzene 6‑ring border nodes
         # -----------------------------------------
-        # INFERRED AND TUNED from old model
+        # FROM 90 ORIGINAL MOLECULES:
+        # methyl pyrrole
+        ("TN1",  [4, 0, "N(C)",  2, "", []]),
         ("SN5a", [4, 0, "OCO", 2, "", []]),
         ("SN1",  [4, 0, "NCN", 2, "", []]),
         ("SX4e", [4, 0, "FCF", 2, "", []]),
         ("SN3a", [4, 0, "COC", 2, "", []]),
-        # FROM 90 ORIGINAL MOLECULES:
-        # methyl pyrrole
-        ("TN1",  [4, 0, "N(C)",  2, "", []]), #TN3 
+        
         # -----------------------
         # Section 5: 5‑ring nodes
         # -----------------------
         
-        # FROM THE BUILDING BLOCK TABLE: (unchangable)
+        # FROM 90 ORIGINAL MOLECULES:
         ("TN6d", [5, 0, "NH",  2, "", []]),
         ("SN5a", [5, 0, "OCO", 2, "", []]),
         ("SC3",  [5, 0, "CCC", 2, "", []]),
-        ("TN4a", [5, 0, "OC",  2, "", []]), #TP6a
-        ("TN2a", [5, 0, "O",   2, "", []]), #TN3a 
+        ("TN4a", [5, 0, "OC",  2, "", []]),
+        ("TN2a", [5, 0, "O",   2, "", []]),
         ("TC3",  [5, 0, "CC",  2, "", []]),
         # Thiophene
         ("SC6",  [5, 0, "CSC", 2, "", []]),
-        ("TC6",  [5, 0, "S",   2, "", []]), #TN2 
-        
-        # INFERRED AND TUNED from old model
+        ("TC6",  [5, 0, "S",   2, "", []]),
+        # Dithio
         ("TC6",  [5, 0, "SS",  2, "", []]),
 
         # ------------------------------
         # Section 6: 5‑ring border nodes
         # ------------------------------
         
-        # FROM THE BUILDING BLOCK TABLE:(unchangable)
+        # FROM 90 ORIGINAL MOLECULES:
         ("SC3", [6, 0, "CC(C)", 2, "", []]),
         # methyl pyrrole
-        ("TN1", [6, 0, "N(C)",  2, "", []]), #TN3 
-        
-        # FROM 90 ORIGINAL MOLECULES:
+        ("TN1", [6, 0, "N(C)",  2, "", []]),
         ("SN6",  [6, 0, "CC(O)", 2, "", []]),
         ("TN6a", [6, 0, "CC(=O)", 2, "", []]),
-        
-        # INFERRED AND TUNED from old model
-        ("SN6d", [6, 0, "CC(N)", 2, "", []]), #SP6
+        ("SN6d", [6, 0, "CC(N)", 2, "", []]),
         
         # --------------------------------------------------
         # Section 7: Non‑ring nodes (polar/apolar fragments)
         # --------------------------------------------------
         
-        # FROM THE BUILDING BLOCK TABLE: (unchangable)
+        # FROM 90 ORIGINAL MOLECULES:
         # tri-halogen-o-methane
         ("SX4e", [7, 1, "C(F)(F)(F)",      1, "", []]),
         ("X2",   [7, 1, "C(Cl)(Cl)(Cl)",   0, "", []]),
@@ -124,9 +111,8 @@ def get_m3_dict():
         # Nitrite
         ("SN3a", [7, 0, "ON=O",         1, "", []]),
         # alcohol or ether
-        # I put dummy data for val[6] bc conflicts
-        ("TP1d", [7, 0, "CO",           1, "SX4e", ["O", 2]]), 
-        ("TN2a", [7, 0, "CO",           1, "TC5", ["O", 2]]), #TN4a 
+        ("TP1d", [7, 0, "CO",           1, "SX4e", ["O", 2]]), # val[6] for handle conflict
+        ("TN2a", [7, 0, "CO",           1, "TC5",  ["O", 2]]), # val[6] for handle conflict
         # tertiary amine
         ("SN1",  [7, 0, "CNC",          1, "", []]), #SN1 
         # linear alkane
@@ -140,20 +126,19 @@ def get_m3_dict():
         ("SP2",  [7, 1, "C(O)(=O)(N)",  0, "", []]),
         ("P2",   [7, 1, "C(NC)(=O)(O)", 0, "", []]),
         #("SN3r", [7, 0, "COC",          0, "", []]), describe in ether
-        #("P1",   [7, 1, "C(O)(C)(C)",     0, "", []]), describein alcohol
-        #("N4a",  [7, 0, "COC=O",        1, "", []]), #N5a describe in ester
-        #("C1",   [7, 0, "CCCC",         0, "", []]), #C3 describe in linear alkane
+        #("P1",   [7, 1, "C(O)(C)(C)",   0, "", []]), describe in alcohol
+        #("N4a",  [7, 0, "COC=O",        1, "", []]), describe in ester
+        #("C1",   [7, 0, "CCCC",         0, "", []]), describe in linear alkane
         #("C4",   [7, 0, "CC=CC",        0, "", []]), describe in alkene
         #("TC5",  [7, 0, "C=C",          1, "", []]), describe in dienes
         # describe in carboxylic acid
-        #("P2",   [7, 1, "C(O)(=O)(CC)",   0, "", []]), #P3
-        #("SP2",  [7, 1, "C(O)(=O)(C)",    0, "", []]), #SN5
+        #("P2",   [7, 1, "C(O)(=O)(CC)",   0, "", []]),
+        #("SP2",  [7, 1, "C(O)(=O)(C)",    0, "", []]),
         # describe in ester
-        #("N4a",  [7, 1, "C(C)(=O)(OC)",    0, "", []]), #N5a
-        #("N4a",  [7, 0, "COC=O",        1, "", []]), #N5a
-        
-        # FROM 90 ORIGINAL MOLECULES:
-        ("SC1",  [7, 1, "C(C)(C)(C)",     0, "", []]), # would have been SC2 by table 24 standard
+        #("N4a",  [7, 1, "C(C)(=O)(OC)",   0, "", []]),
+        #("N4a",  [7, 0, "COC=O",          1, "", []]),
+        # Alkyl
+        ("SC1",  [7, 1, "C(C)(C)(C)",     0, "", []]),
             
         # FROM GRUNEWALD'S DATASET:
         # Sulfonamide
@@ -191,8 +176,8 @@ def get_m3_dict():
         # trichloroethylene
         ("X3h",  [7, 1, "C(=CCl)(Cl)(Cl)",0, "", []]),
         # vinylchloride
-        ("SX3",  [7, 0, "C=CCl",         0, "", []]), #SX3
-        ("SX3",  [7, 0, "ClC=C",         0, "", []]), #SX3
+        ("SX3",  [7, 0, "C=CCl",         0, "", []]),
+        ("SX3",  [7, 0, "ClC=C",         0, "", []]),
         # diflouro-ethane
         ("TX4",  [7, 0, "FCF",          1, "", []]),
         ("SX4",  [7, 0, "FCCF",         1, "", []]),
@@ -205,20 +190,19 @@ def get_m3_dict():
         # linear alkane
         ("C1",   [7, 0, "CCCC",         0, "", []]),
         # branched alkane
-        ("C2",   [7, 2, "C(C)(C)(C)(C)" , 0, "", []]), #C1
-        #("SC2",  [7, 1, "C(C)(C)(C)",     0, "", []]), #SC3
+        ("C2",   [7, 2, "C(C)(C)(C)(C)" , 0, "", []]),
         ("C2",   [7, 1, "C(CC)(C)(C)",    0, "", []]),
         # alkene
         ("SC4",  [7, 1, "C(=C)(C)(C)",    0, "", []]),
         ("C4",   [7, 1, "C(=CC)(C)(C)",   0, "", []]),
         ("C4",   [7, 1, "C(=C)(CC)(C)",   0, "", []]),
         ("C4",   [7, 1, "C(=C)(C=C)(C)",  0, "", []]),
-        ("C4",   [7, 0, "C=CCC",        0, "", []]), #C6
+        ("C4",   [7, 0, "C=CCC",        0, "", []]),
         ("SC4",  [7, 0, "C=CC",         0, "", []]),
         ("C4",   [7, 0, "CC=CC",        0, "", []]),
         # dienes
-        ("SC5",  [7, 0, "C=C=C",        0, "", []]), #SC4
-        ("SC5",  [7, 0, "C=CC=C",       0, "", []]), #new
+        ("SC5",  [7, 0, "C=C=C",        0, "", []]),
+        ("SC5",  [7, 0, "C=CC=C",       0, "", []]),
         ("TC5",  [7, 0, "C=C",          1, "", []]),
         # alkynes
         ("C6r",  [7, 0, "CC#CC",        0, "", []]),
@@ -258,8 +242,8 @@ def get_m3_dict():
         # ether:
         ("SN3r", [7, 0, "COC",          0, "", []]),
         ("N3r",  [7, 0, "COCC",         0, "", []]),
-        ("N3r",  [7, 0, "CCCO",         1, "", ["O", 0]]), #N2
-        ("SN3r", [7, 0, "CCO",          1, "", ["O", 0]]), #SN2
+        ("N3r",  [7, 0, "CCCO",         1, "", ["O", 0]]),
+        ("SN3r", [7, 0, "CCO",          1, "", ["O", 0]]),
         ("TN3r", [7, 0, "CO",           1, "", ["O", 0]]),
         ("N3r",  [7, 1, "C(O)(C)(CC)",  0, "", ["O", 0]]),
         ("N3r",  [7, 1, "C(C)(C)(CO)",  0, "", ["O", 0]]),
@@ -278,10 +262,10 @@ def get_m3_dict():
         ("N5a",  [7, 1, "C(=C)(C)(C=O)",   1, "", []]),
         ("N5a",  [7, 1, "C(C=C)(C)(=O)",   1, "", []]),
         # primary amin
-        ("TN6d", [7, 0, "CN",           0, "", ["N", 2]]), #TP1
-        ("SN6d", [7, 0, "CCN",          0, "", ["N", 2]]), #SN5
-        ("SN6d", [7, 0, "C=CN",         0, "", ["N", 2]]), #SP1
-        ("N6d",  [7, 0, "CCCN",         0, "", ["N", 2]]), #P3
+        ("TN6d", [7, 0, "CN",           0, "", ["N", 2]]),
+        ("SN6d", [7, 0, "CCN",          0, "", ["N", 2]]),
+        ("SN6d", [7, 0, "C=CN",         0, "", ["N", 2]]),
+        ("N6d",  [7, 0, "CCCN",         0, "", ["N", 2]]),
         ("SN6d", [7, 1, "C(N)(C)(C)",   0, "", ["N", 2]]),
         ("N6d",  [7, 1, "C(N)(CC)(C)",  0, "", ["N", 2]]),
         ("N6d",  [7, 1, "C(N)(C=C)(C)", 0, "", ["N", 2]]),
@@ -307,7 +291,7 @@ def get_m3_dict():
         ("N3a",   [7, 1, "C(N)(CC)(C)",  0, "", ["N", 0]]),
         ("N3a",   [7, 1, "C(N)(C=C)(C)", 0, "", ["N", 0]]),
         ("N3a",   [7, 1, "C(NC)(C)(C)",  0, "", ["N", 0]]),
-        ("SN3a", [7, 1, "N(C)(C)(C)",    0, "",  []]), #SN2a
+        ("SN3a", [7, 1, "N(C)(C)(C)",    0, "", []]), 
         ("N3a",  [7, 1, "N(C)(C)(C=C)",  0, "", []]),
         ("N3a",  [7, 1, "N(C)(C)(CC)",   0, "", []]),
         # enol
@@ -403,7 +387,7 @@ def get_m3_dict():
         # Section 8: node that is in 2 benzene rings
         # -------------------------------------------
         
-        # FROM THE BUILDING BLOCK TABLE: (unchangable)
+        # FROM 90 ORIGINAL MOLECULES:
         ("TC5e", [8, 2, "CC", 4, "", []]),
         
         # FROM TABLE 24: (no change)
@@ -422,8 +406,8 @@ def get_m3_dict():
         # ----------------------------------
         # Section 10: Singular atom section
         # ----------------------------------
-        # INFERRED AND TUNED from old model
-        # Thiophene
+        # FROM 90 ORIGINAL MOLECULES:
+        # Thiol
         ("TC6",  [10, 0, "S", 0, "", []]),
         
         # ---------------------------------------
@@ -448,8 +432,8 @@ def get_m3_dict():
         ("X2?",   [11, 2, "C(C)(C)(C)(Br)"   , 0, "", []]),
         ("X1?",   [11, 2, "C(C)(C)(C)(I)"    , 0, "", []]),
         # tetra-halogen-methane
-        ("X2?",   [11, 2, "C(Br)(Br)(Br)(Br)", 0, "."]), #X1
-        ("X3?",   [11, 2, "C(F)(F)(F)(F)"    , 0, "."]), #X4
+        ("X2?",   [11, 2, "C(Br)(Br)(Br)(Br)", 0, ".", []]),
+        ("X3?",   [11, 2, "C(F)(F)(F)(F)"    , 0, ".", []]),
         ("P3?",   [11, 2, "S(C)(=O)(=O)(C)"  , 0, "", []]),
         # Tetramethyl-group 14
         ("C2?",   [11, 2, "Ge(C)(C)(C)(C)"   , 0, "", []]),
