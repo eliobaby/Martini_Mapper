@@ -156,6 +156,8 @@ def main(argv=None) -> int:
     smiles = args.smiles if args.smiles is not None else input("Smiles: ")
 
     out_dir = Path(args.out_dir) if args.out_dir else None
+    if out_dir is not None:
+        out_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         run_mapping(
