@@ -71,46 +71,58 @@ def organize_outputs(
     """Move final outputs into a folder and optionally delete intermediates."""
     compound_name = ensure_nonempty(compound_name, field="name")
     out_dir = out_dir or Path(compound_name)
-    out_dir.mkdir(exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    keep = {
-        f"{compound_name}.gro",
-        f"{compound_name}.itp",
-        f"{compound_name}.txt",
-    }
+    if not keep_intermediates:
+        keep = {
+            f"{compound_name}.gro",
+            f"{compound_name}.itp",
+            f"{compound_name}.txt",
+        }
+                
+        trash_files = [
+            f"{compound_name}.xyz",
+            f"{compound_name}.pdb",
+            f"ref_{compound_name}.gro",
+            f"ref_{compound_name}.xtc",
+            f"{compound_name}_cg_ref.gro",
+            f"{compound_name}_cg_ref.xtc",
+            f"{compound_name}_bonded_report.txt",
+        ]
+        
+        for f in trash_files:
+            p = Path(f)
+            if p.exists():
+                try:
+                    p.unlink()
+                except Exception as e:  # pragma: no cover
+                    raise OutputError(f"Failed to delete intermediate file {p}: {e}") from e
 
+        trash_dirs = [f"{compound_name}_md"]
+        for d in trash_dirs:
+            p = Path(d)
+            if p.exists() and p.is_dir():
+                try:
+                    shutil.rmtree(p)
+                except Exception as e:  # pragma: no cover
+                    raise OutputError(f"Failed to remove intermediate dir {p}: {e}") from e
+    else:
+        keep = {
+            f"{compound_name}.gro",
+            f"{compound_name}.itp",
+            f"{compound_name}.txt",
+            f"{compound_name}.xyz",
+            f"{compound_name}.pdb",
+            f"ref_{compound_name}.gro",
+            f"ref_{compound_name}.xtc",
+            f"{compound_name}_cg_ref.gro",
+            f"{compound_name}_cg_ref.xtc",
+            f"{compound_name}_bonded_report.txt",
+        }
+        
     for fname in keep:
         src = Path(fname)
         if src.exists():
             shutil.move(str(src), str(out_dir / src.name))
-
-    if keep_intermediates:
-        return out_dir
-
-    trash_files = [
-        f"{compound_name}.xyz",
-        f"{compound_name}.pdb",
-        f"ref_{compound_name}.gro",
-        f"ref_{compound_name}.xtc",
-        f"{compound_name}_cg_ref.gro",
-        f"{compound_name}_cg_ref.xtc",
-        f"{compound_name}_bonded_report.txt",
-    ]
-    for f in trash_files:
-        p = Path(f)
-        if p.exists():
-            try:
-                p.unlink()
-            except Exception as e:  # pragma: no cover
-                raise OutputError(f"Failed to delete intermediate file {p}: {e}") from e
-
-    trash_dirs = [f"{compound_name}_md"]
-    for d in trash_dirs:
-        p = Path(d)
-        if p.exists() and p.is_dir():
-            try:
-                shutil.rmtree(p)
-            except Exception as e:  # pragma: no cover
-                raise OutputError(f"Failed to remove intermediate dir {p}: {e}") from e
 
     return out_dir
