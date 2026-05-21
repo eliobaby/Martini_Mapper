@@ -247,7 +247,6 @@ Section,Section Description,Bead Type,Functional Group,SMILES
 7,Non-ring,SX3h,dichloroethane,ClCCl
 7,Non-ring,X3h,dichloroethane,ClCCCl
 7,Non-ring,X1,tetrahalomethane,C(Cl)(Cl)(Cl)(Cl)
-7,Non-ring,SQ4n,sulfonate,S(=O)(=O)(O)
 8,Ring Fusion,TC5e,aromatic,CC
 8,Ring Fusion,TC5,aromatic,CC
 9,3/4/7/8-ring,SC3,cycloalkane,CCC

@@ -380,8 +380,6 @@ def get_m3_dict():
         ("X3h",  [7, 0, "ClCCCl",       0, "", []]),
         # tetrachloromethane
         ("X1",   [7, 2, "C(Cl)(Cl)(Cl)(Cl)", 0, "."]), #X2
-        # sulfonate
-        ("SQ4n", [7, 1, "S(=O)(=O)(O)",   0, "", []]), #SP6
 
         # -------------------------------------------
         # Section 8: node that is in 2 benzene rings
@@ -511,7 +509,8 @@ def get_m3_dict():
         # ---------------------------------------
         # Section 12: Charged / ionic placeholders
         # ---------------------------------------
-        #
+
+        # FROM TABLE 25 (TABLE OF CHARGED ION):)
         # Section 12.0: Lone ions / standalone charged species.
         # These are intentionally scaffold entries for the charged-ion mapper, we can use the unused “charge” column to store the actual charge of the ion.
         ("TQ5n", [12, 0, "Cl",                   -1, "", []]), # chloride
@@ -529,25 +528,21 @@ def get_m3_dict():
         ("Q1",  [12, 2, "P(CC)(C)(C)(C)",           1, "", []]),
         ("Q1",  [12, 2, "P(C=C)(C)(C)(C)",          1, "", []]),
         ("Q1",  [12, 2, "P(C)(C)(C)",               1, "", []]),
-
         # tetramethyl ammonium
         ("Q2",  [12, 2, "N(C)(C)(C)(C)",            1, "", []]),
         ("Q2",  [12, 2, "N(CC)(C)(C)(C)",           1, "", []]),
         ("Q2",  [12, 2, "N(C=C)(C)(C)(C)",          1, "", []]),
         ("SQ2", [12, 2, "N(C)(C)(C)",               1, "", ["N", 0]]),
-        
         # dimethyl alkyl ammonium
         ("Q2p",  [12, 2, "N(CC)(C)(C)",             1, "", []]),
         ("Q2p",  [12, 2, "N(C=C)(C)(C)",            1, "", []]),
         ("Q2p",  [12, 2, "N(C)(C)(C)",              1, "", ["N", 1]]),
         ("SQ2p", [12, 1, "CNC",                     1, "", ["N", 1]]),
-        
         # methyl alkyl ammonium
         ("Q3p",  [12, 1, "CCNC",                    1, "", []]),
         ("Q3p",  [12, 1, "C=CNC",                   1, "", []]),
         ("SQ3p", [12, 1, "CNC",                     1, "", ["N", 2]]),
         ("TQ3p", [12, 1, "NC",                      1, "", ["N", 2]]),
-        
         # alkyl ammonium: R-NH3
         ("Q4p",  [12, 1, "CCCN",                    1, "", []]),
         ("Q4p",  [12, 1, "CC=CN",                   1, "", []]),
@@ -555,38 +550,28 @@ def get_m3_dict():
         ("SQ4p", [12, 1, "C=CN",                    1, "", []]),
         ("SQ4p", [12, 1, "CCN",                     1, "", []]),
         ("TQ4p", [12, 1, "NC",                      1, "", ["N", 3]]),
-
         # guanidinium
         ("SQ3p", [12, 2, "C(N)(N)(=N)",             1, "", []]),
-
         # sulphonate:
         ("Q4n",  [12, 2, "S(=O)(=O)(O)(C)",        -1, "", []]),
         ("SQ4n", [12, 2, "S(=O)(=O)(O)",           -1, "", []]), 
-
         # carboxylate:
         ("Q5n",  [12, 2, "C(=O)(O)(C)",            -1, "", []]),
         ("SQ5n", [12, 1, "OC=O",                   -1, "", []]),
-
         # phosphate lipid head
         ("Q5",   [12, 2, "P(O)(O)(O)(=O)",          -1, "", []]),
         ("Q5",   [12, 2, "P(OC)(O)(O)(=O)",         -1, "", []]),
         ("Q5",   [12, 2, "P(OC)(OC)(O)(=O)",        -1, "", []]),
-
         # thiocyanate
         ("SQ1",  [12, 1, "SC#N",                    -1, "", []]),
-
         # tetrafluoroborate
         ("Q2",   [12, 2, "B(F)(F)(F)(F)",           -1, "", []]), 
-
         # hexafluorophosphate
         ("Q1n",  [12, 2, "P(F)(F)(F)(F)(F)(F)",     -1, "", []]), 
-
         # nitrate
         ("SQ3",  [12, 2, "N(=O)(O)(O)",             -1, "", []]), 
-
         # perchlorate
         ("Q2",   [12, 2, "Cl(=O)(=O)(=O)(O)",       -1, "", []]), 
-
         # phosphate ion
         ("D",    [12, 2, "P(O)(O)(O)(=O)",          -2, "", []]), 
     ]
