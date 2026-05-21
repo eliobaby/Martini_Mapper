@@ -253,3 +253,47 @@ Section,Section Description,Bead Type,Functional Group,SMILES
 9,3/4/7/8-ring,SC3,cycloalkane,CCC
 9,3/4/7/8-ring,P4,diol,COC
 10,Singular atom,TC6,thiol,S
+12,charged,TQ5n,chloride,Cl
+12,charged,TQ5p,sodium,Na
+12,charged,SQ4p,potassium,K
+12,charged,TD,magnesium,Mg
+12,charged,SQ4n,bromide,Br
+12,charged,SQ2n,iodide,I
+12,charged,SD,calcium,Ca
+12,charged,TQ5p,ammonium,N
+12,charged,Q1,tetramethyl phosphonium,P(C)(C)(C)(C)
+12,charged,Q1,tetramethyl phosphonium,P(CC)(C)(C)(C)
+12,charged,Q1,tetramethyl phosphonium,P(C=C)(C)(C)(C)
+12,charged,Q1,tetramethyl phosphonium,P(C)(C)(C)
+12,charged,Q2,tetramethyl ammonium,N(C)(C)(C)(C)
+12,charged,Q2,tetramethyl ammonium,N(CC)(C)(C)(C)
+12,charged,Q2,tetramethyl ammonium,N(C=C)(C)(C)(C)
+12,charged,SQ2,tetramethyl ammonium,N(C)(C)(C)
+12,charged,Q2p,dimethyl alkyl ammonium,N(CC)(C)(C)
+12,charged,Q2p,dimethyl alkyl ammonium,N(C=C)(C)(C)
+12,charged,Q2p,dimethyl alkyl ammonium,N(C)(C)(C)
+12,charged,SQ2p,dimethyl alkyl ammonium,CNC
+12,charged,Q3p,methyl alkyl ammonium,CCNC
+12,charged,Q3p,methyl alkyl ammonium,C=CNC
+12,charged,SQ3p,methyl alkyl ammonium,CNC
+12,charged,TQ3p,methyl alkyl ammonium,NC
+12,charged,Q4p,alkyl ammonium,CCCN
+12,charged,Q4p,alkyl ammonium,CC=CN
+12,charged,Q4p,alkyl ammonium,C=CCN
+12,charged,SQ4p,alkyl ammonium,C=CN
+12,charged,SQ4p,alkyl ammonium,CCN
+12,charged,TQ4p,alkyl ammonium,NC
+12,charged,SQ3p,guanidinium,C(N)(N)(=N)
+12,charged,Q4n,sulphonate,S(=O)(=O)(O)(C)
+12,charged,SQ4n,sulphonate,S(=O)(=O)(O)
+12,charged,Q5n,carboxylate,C(=O)(O)(C)
+12,charged,SQ5n,carboxylate,OC=O
+12,charged,Q5,phosphate lipid head,P(O)(O)(O)(=O)
+12,charged,Q5,phosphate lipid head,P(OC)(O)(O)(=O)
+12,charged,Q5,phosphate lipid head,P(OC)(OC)(O)(=O)
+12,charged,SQ1,thiocyanate,SC#N
+12,charged,Q2,tetrafluoroborate,B(F)(F)(F)(F)
+12,charged,Q1n,hexafluorophosphate,P(F)(F)(F)(F)(F)(F)
+12,charged,SQ3,nitrate,N(=O)(O)(O)
+12,charged,Q2,perchlorate,Cl(=O)(=O)(=O)(O)
+12,charged,D,phosphate ion,P(O)(O)(O)(=O)

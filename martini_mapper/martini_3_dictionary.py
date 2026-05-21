@@ -507,6 +507,88 @@ def get_m3_dict():
         ("SX3?",  [11, 0, "ClCO",          0, "", []]),
         ("SC3?",  [11, 0, "CPbC",          0, "", []]),
         ("SC3?",  [11, 0, "CSiC",          0, "", []]),
+
+        # ---------------------------------------
+        # Section 12: Charged / ionic placeholders
+        # ---------------------------------------
+        #
+        # Section 12.0: Lone ions / standalone charged species.
+        # These are intentionally scaffold entries for the charged-ion mapper, we can use the unused “charge” column to store the actual charge of the ion.
+        ("TQ5n", [12, 0, "Cl",                   -1, "", []]), # chloride
+        ("TQ5p", [12, 0, "Na",                    1, "", []]), # sodium
+        ("SQ4p", [12, 0, "K",                     1, "", []]), # potassium
+        ("TD",   [12, 0, "Mg",                    2, "", []]), # magnesium
+        ("SQ4n", [12, 0, "Br",                   -1, "", []]), # bromide
+        ("SQ2n", [12, 0, "I",                    -1, "", []]), # iodide
+        ("SD",   [12, 0, "Ca",                    2, "", []]), # calcium
+        ("TQ5p", [12, 0, "N",                     1, "", []]), # ammonium
+
+        # Section 12.1 + 12.2: Linear charged fragments and non-linear charged fragments.
+        # tetramethyl phosphonium
+        ("Q1",  [12, 2, "P(C)(C)(C)(C)",            1, "", []]),
+        ("Q1",  [12, 2, "P(CC)(C)(C)(C)",           1, "", []]),
+        ("Q1",  [12, 2, "P(C=C)(C)(C)(C)",          1, "", []]),
+        ("Q1",  [12, 2, "P(C)(C)(C)",               1, "", []]),
+
+        # tetramethyl ammonium
+        ("Q2",  [12, 2, "N(C)(C)(C)(C)",            1, "", []]),
+        ("Q2",  [12, 2, "N(CC)(C)(C)(C)",           1, "", []]),
+        ("Q2",  [12, 2, "N(C=C)(C)(C)(C)",          1, "", []]),
+        ("SQ2", [12, 2, "N(C)(C)(C)",               1, "", ["N", 0]]),
+        
+        # dimethyl alkyl ammonium
+        ("Q2p",  [12, 2, "N(CC)(C)(C)",             1, "", []]),
+        ("Q2p",  [12, 2, "N(C=C)(C)(C)",            1, "", []]),
+        ("Q2p",  [12, 2, "N(C)(C)(C)",              1, "", ["N", 1]]),
+        ("SQ2p", [12, 1, "CNC",                     1, "", ["N", 1]]),
+        
+        # methyl alkyl ammonium
+        ("Q3p",  [12, 1, "CCNC",                    1, "", []]),
+        ("Q3p",  [12, 1, "C=CNC",                   1, "", []]),
+        ("SQ3p", [12, 1, "CNC",                     1, "", ["N", 2]]),
+        ("TQ3p", [12, 1, "NC",                      1, "", ["N", 2]]),
+        
+        # alkyl ammonium: R-NH3
+        ("Q4p",  [12, 1, "CCCN",                    1, "", []]),
+        ("Q4p",  [12, 1, "CC=CN",                   1, "", []]),
+        ("Q4p",  [12, 1, "C=CCN",                   1, "", []]),
+        ("SQ4p", [12, 1, "C=CN",                    1, "", []]),
+        ("SQ4p", [12, 1, "CCN",                     1, "", []]),
+        ("TQ4p", [12, 1, "NC",                      1, "", ["N", 3]]),
+
+        # guanidinium
+        ("SQ3p", [12, 2, "C(N)(N)(=N)",             1, "", []]),
+
+        # sulphonate:
+        ("Q4n",  [12, 2, "S(=O)(=O)(O)(C)",        -1, "", []]),
+        ("SQ4n", [12, 2, "S(=O)(=O)(O)",           -1, "", []]), 
+
+        # carboxylate:
+        ("Q5n",  [12, 2, "C(=O)(O)(C)",            -1, "", []]),
+        ("SQ5n", [12, 1, "OC=O",                   -1, "", []]),
+
+        # phosphate lipid head
+        ("Q5",   [12, 2, "P(O)(O)(O)(=O)",          -1, "", []]),
+        ("Q5",   [12, 2, "P(OC)(O)(O)(=O)",         -1, "", []]),
+        ("Q5",   [12, 2, "P(OC)(OC)(O)(=O)",        -1, "", []]),
+
+        # thiocyanate
+        ("SQ1",  [12, 1, "SC#N",                    -1, "", []]),
+
+        # tetrafluoroborate
+        ("Q2",   [12, 2, "B(F)(F)(F)(F)",           -1, "", []]), 
+
+        # hexafluorophosphate
+        ("Q1n",  [12, 2, "P(F)(F)(F)(F)(F)(F)",     -1, "", []]), 
+
+        # nitrate
+        ("SQ3",  [12, 2, "N(=O)(O)(O)",             -1, "", []]), 
+
+        # perchlorate
+        ("Q2",   [12, 2, "Cl(=O)(=O)(=O)(O)",       -1, "", []]), 
+
+        # phosphate ion
+        ("D",    [12, 2, "P(O)(O)(O)(=O)",          -2, "", []]), 
     ]
 
     # 2) Create the final dictionary, inserting each entry in order.
