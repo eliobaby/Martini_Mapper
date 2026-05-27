@@ -39,6 +39,7 @@ from .outputs import (
     group_beads_by_type,
     compute_beads_connections,
     fix_beadtypes,
+    compute_bead_charges,
 )
 
 # -----------------------------
@@ -332,6 +333,7 @@ def bead_mass_from_type(bt: str) -> float:
 def write_itp_with_bonds_angles_dihedrals(
     compound_name: str,
     bead_types_fixed: List[str],
+    bead_charges: List[float],
     bonds_fit,
     angles_fit,
     dihedrals_fit,
@@ -353,7 +355,8 @@ def write_itp_with_bonds_angles_dihedrals(
     lines.append(";    nr  type  resnr resid  atom  cgnr     charge       mass")
     for idx, bt in enumerate(bead_types_fixed, start=1):
         mass = bead_mass_from_type(bt)
-        lines.append(f"{idx:7d} {bt[:5]:5s} {1:5d} {'res':5s} {'C'+str(idx):5s} {idx:5d} {0.0:10.3f} {mass:10.3f}")
+        charge = float(bead_charges[idx - 1]) if idx - 1 < len(bead_charges) else 0.0
+        lines.append(f"{idx:7d} {bt[:5]:5s} {1:5d} {'res':5s} {'C'+str(idx):5s} {idx:5d} {charge:10.3f} {mass:10.3f}")
     lines.append("")
     # constraints(when k > 2x10^4 kJ/mol/nm^2)
     lines.append("[ constraints ]")
@@ -422,6 +425,7 @@ def build_cg_from_xtb(
     # bead grouping + types (heavy atoms only)
     bead_heavy_atoms, bead_types_raw = group_beads_by_type(final)  # :contentReference[oaicite:2]{index=2}
     bead_types_fixed = fix_beadtypes(bead_types_raw)               # :contentReference[oaicite:3]{index=3}
+    bead_charges = compute_bead_charges(bead_heavy_atoms, mapping)
 
     # bead connectivity from mapping
     origin, connected, bond_types = compute_beads_connections(bead_heavy_atoms, mapping)  # :contentReference[oaicite:4]{index=4}
@@ -460,7 +464,7 @@ def build_cg_from_xtb(
     dihedrals_fit = fit_dihedrals_simple(cg, dihedrals, T=T)
 
     out_itp = f"{out_prefix}.itp"
-    write_itp_with_bonds_angles_dihedrals(compound, bead_types_fixed, bonds_fit, angles_fit, dihedrals_fit, dihedrals_flag, out_itp)
+    write_itp_with_bonds_angles_dihedrals(compound, bead_types_fixed, bead_charges, bonds_fit, angles_fit, dihedrals_fit, dihedrals_flag, out_itp)
 
     return {
         "cg_gro": out_cg_gro,

@@ -561,7 +561,6 @@ def get_m3_dict():
         # phosphate lipid head
         ("Q5",   [12, 2, "P(O)(O)(O)(=O)",          -1, "", []]),
         ("Q5",   [12, 2, "P(OC)(O)(O)(=O)",         -1, "", []]),
-        ("Q5",   [12, 2, "P(OC)(OC)(O)(=O)",        -1, "", []]),
         # thiocyanate
         ("SQ1",  [12, 1, "SC#N",                    -1, "", []]),
         # tetrafluoroborate

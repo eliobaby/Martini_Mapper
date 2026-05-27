@@ -228,9 +228,9 @@ def find_negative_oxygen_cluster_indices(section: List[List[Any]]) -> Optional[L
     Identify charged O-centered anions such as carboxylate, sulphonate,
     phosphate, nitrate, and perchlorate.
 
-    Starting at an O(-1), include its central atom, all O atoms attached to that
-    center, and immediate carbon stubs attached to the center or those oxygens so
-    section 12 branch strings like P(OC)(OC)(O)(=O) remain representable.
+    Starting at an O(-1), include its central atom and all O atoms attached to
+    that center. Immediate carbon stubs are included only when they are edge
+    atoms, so charged beads do not swallow continuing carbon chains.
     """
     for local, atom in enumerate(section):
         if atom[1].upper() != "O" or atom_charge(atom) >= 0:
@@ -247,14 +247,14 @@ def find_negative_oxygen_cluster_indices(section: List[List[Any]]) -> Optional[L
             nbr_symbol = section[nbr][1].upper()
             if nbr_symbol == "O":
                 cluster.add(nbr)
-            elif nbr_symbol == "C":
+            elif nbr_symbol == "C" and section[nbr][5]:
                 cluster.add(nbr)
 
         for member in list(cluster):
             if section[member][1].upper() != "O":
                 continue
             for nbr, _bo in section[member][4]:
-                if nbr != center and section[nbr][1].upper() == "C":
+                if nbr != center and section[nbr][1].upper() == "C" and section[nbr][5]:
                     cluster.add(nbr)
 
         return sorted(cluster)
@@ -279,7 +279,7 @@ def find_positive_guanidinium_indices(section: List[List[Any]]) -> Optional[List
                 nbr_symbol = section[nbr][1].upper()
                 if nbr_symbol == "N":
                     cluster.add(nbr)
-                elif nbr_symbol == "C":
+                elif nbr_symbol == "C" and section[nbr][5]:
                     cluster.add(nbr)
             return sorted(cluster)
 

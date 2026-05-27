@@ -130,6 +130,26 @@ def compute_num_connections(num_beads, origin_beads, connected_beads):
         num_connections[bead_connected] += 1  # increment both beads symmetrically
     return num_connections
 
+def compute_atom_charge_lookup(mapping):
+    """
+    Return global atom index -> formal charge from the mapping structure.
+    Older mapping records that do not have the appended charge field are treated
+    as neutral.
+    """
+    charges = {}
+    for section in mapping:
+        for atom in section:
+            charges[atom[0]] = atom[7] if len(atom) > 7 and atom[7] is not None else 0
+    return charges
+
+def compute_bead_charges(bead_groups, mapping):
+    """Sum atom formal charges for each CG bead."""
+    atom_charges = compute_atom_charge_lookup(mapping)
+    return [
+        float(sum(atom_charges.get(atom_idx, 0) for atom_idx in bead_atoms))
+        for bead_atoms in bead_groups
+    ]
+
 def fix_beadtypes(bead_types):
     """
     For every bead type string, remove the last 6 characters and any '+' symbols.
@@ -179,6 +199,7 @@ def export_bead_mapping(final, mapping, smiles, compound_name, write_file=True):
     num_conn              = compute_num_connections(len(coi), origin, connected)
     # 5) clean up bead‐type strings (strip +’s etc)
     fixed_types           = fix_beadtypes(bead_types)
+    bead_charges          = compute_bead_charges(coi, mapping)
     # 6) pull atomic coords from SMILES
     # --- TRY to get a 3D conformer; on failure, use (0,0,0) for all atoms ---
     try:
@@ -243,6 +264,7 @@ def export_bead_mapping(final, mapping, smiles, compound_name, write_file=True):
             'composed_of_index': list(atom_list),
             'composed_of_element': list(coe[b_idx]),
             'num_connections':   num_conn[b_idx],
+            'charge':            bead_charges[b_idx],
             'mass':              mass,
             'x':                  x0,
             'y':                  y0,
@@ -260,8 +282,8 @@ def export_bead_mapping(final, mapping, smiles, compound_name, write_file=True):
 
     # --- write text report if requested ---
     if write_file:
-        fmt_hdr = "{:<8} {:<10} {:<20} {:<20} {:<12} {:<8} {:<8} {:<8} {:<8}"
-        fmt_ln  = "{:<8d} {:<10s} {:<20s} {:<20s} {:<12d} {:<8.1f} {:<8.4f} {:<8.4f} {:<8.4f}"
+        fmt_hdr = "{:<8} {:<10} {:<20} {:<20} {:<12} {:<8} {:<8} {:<8} {:<8} {:<8}"
+        fmt_ln  = "{:<8d} {:<10s} {:<20s} {:<20s} {:<12d} {:<8.3f} {:<8.1f} {:<8.4f} {:<8.4f} {:<8.4f}"
         lines = []
         lines.append(f"Compound: {compound_name}")
         lines.append(f"SMILES:   {smiles}\n")
@@ -269,14 +291,14 @@ def export_bead_mapping(final, mapping, smiles, compound_name, write_file=True):
         lines.append("-"*80)
         lines.append(fmt_hdr.format(
             "index","bead_type","atoms_idx","atoms_elem",
-            "#conns","mass","x","y","z"
+            "#conns","charge","mass","x","y","z"
         ))
         for b in beads_data:
             idxs = ",".join(str(i) for i in b['composed_of_index'])
             elems= ",".join(b['composed_of_element'])
             lines.append(fmt_ln.format(
                 b['index'], b['bead_type'], idxs, elems,
-                b['num_connections'], b['mass'],
+                b['num_connections'], b['charge'], b['mass'],
                 b['x'], b['y'], b['z']
             ))
         lines.append("\nBead connections")
@@ -394,7 +416,7 @@ def itp_maker(beads_data, connections_data, compound_name, write_file=True):
         resid  = "res"
         atom   = f"C{count}"
         cgnr   = nr
-        charge = 0.0
+        charge = float(bead.get("charge", 0.0))
         mass   = bead["mass"]
         lines.append(atom_fmt.format(nr, atype, resnr, resid, atom, cgnr, charge, mass))
     lines.append("")
