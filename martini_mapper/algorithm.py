@@ -30,6 +30,14 @@ from .non_ring_helpers import (
     induced_subgraph_components,
     dfs_trace_from_seed,
     dist_to_nearest_center,
+    atom_charge,
+    section_charge,
+    find_charged_lone_candidates,
+    find_charged_linear_candidates,
+    find_charged_branch_candidates,
+    find_negative_oxygen_cluster_indices,
+    find_positive_guanidinium_indices,
+    validate_trace_with_charged_n,
 )
 
 from .ring_helpers import (
@@ -59,6 +67,12 @@ def find_bead_by_val1(martini_dict: Dict[str, List[Any]], sect: int, val1: int) 
         if len(v) > 1 and v[0] == sect and v[1] == val1:
             return k
     return None
+
+def assign_section_key(section: List[List[Any]], final: List[str], bead_key: str) -> List[str]:
+    bead = bead_key + generate_random_string()
+    for atom in section:
+        final[atom[0]] = bead
+    return final
 
 def map_adjacent_SS_pairs(section, final, martini_dict) -> None:
     """If two unmapped sulfurs are adjacent, map them as SS immediately."""
@@ -1346,6 +1360,7 @@ def map_non_ring_section_1bead(section: List[List[Any]],
     # --- Helper variables ---
     edge_globals = [a[0] for a in section if a[5]]
     num_edges = len(edge_globals)
+    total_charge = section_charge(section)
     # --- fallback for single-edge sections ---
     # … earlier in map_non_ring_section_1bead …
     # global_to_sec_loc: Dict[int, (int,int)] = { … }
@@ -1353,6 +1368,11 @@ def map_non_ring_section_1bead(section: List[List[Any]],
         idx  = section[0][0]
         gi   = section[0][0]
         atom = section[0]
+
+        if total_charge != 0:
+            candidate_keys = find_charged_lone_candidates(martini_dict, atom[1], total_charge)
+            bead_key = resolve_unique_candidate(candidate_keys, martini_dict, section)
+            return assign_section_key(section, final, bead_key)
 
         # gather global neighbor indices (inner + outer)
         neigh = [ section[t[0]][0]           for t in atom[4] ] + \
@@ -1411,6 +1431,23 @@ def map_non_ring_section_1bead(section: List[List[Any]],
         start_global = edge_globals[0]
         start_local = next(i for i, atom in enumerate(section) if atom[0] == start_global)
         path_str = trace_linear_path(section, start_local).upper()
+
+        if total_charge != 0:
+            candidate_keys = find_charged_linear_candidates(martini_dict, path_str, total_charge)
+            if not candidate_keys:
+                other_start_global = edge_globals[1]
+                other_start_local = next(i for i, atom in enumerate(section) if atom[0] == other_start_global)
+                other_path_str = trace_linear_path(section, other_start_local).upper()
+                candidate_keys = find_charged_linear_candidates(martini_dict, other_path_str, total_charge)
+                if candidate_keys:
+                    path_str = other_path_str
+            if not candidate_keys:
+                raise ValueError(
+                    f"Charged non-ring section cannot be mapped: no section 12 linear bead "
+                    f"for charge {total_charge} and path {path_str}."
+                )
+            bead_key = resolve_unique_candidate(candidate_keys, martini_dict, section, path_str=path_str)
+            return assign_section_key(section, final, bead_key)
 
         # 1) Try section 7
         candidate_keys = [
@@ -1503,6 +1540,18 @@ def map_non_ring_section_1bead(section: List[List[Any]],
             branch_str = trace_branch(section, center_local, nbr)
             branch_paths.append(branch_str)
 
+        if total_charge != 0:
+            candidate_keys = find_charged_branch_candidates(
+                martini_dict, section[center_local][1], branch_paths, total_charge
+            )
+            if not candidate_keys:
+                raise ValueError(
+                    f"Charged non-ring section cannot be mapped: no section 12 branched bead "
+                    f"for charge {total_charge}, center {section[center_local][1]}, branches {branch_paths}."
+                )
+            bead_key = resolve_unique_candidate(candidate_keys, martini_dict, section)
+            return assign_section_key(section, final, bead_key)
+
         # 1) Try section 7 matching
         candidate_keys = find_branch_candidates(
             martini_dict, 7, section[center_local][1], branch_paths
@@ -1556,6 +1605,22 @@ def map_non_ring_section_1bead(section: List[List[Any]],
             else:
                 raise ValueError("Non-ring section with 4 edges has no 4-connected center or valid pair of 3-connected centers.")
         total_atoms = len(section)
+        if total_charge != 0:
+            branch_paths = [
+                trace_branch(section, center_local, nbr)
+                for (nbr, _) in section[center_local][4]
+            ]
+            candidate_keys = find_charged_branch_candidates(
+                martini_dict, section[center_local][1], branch_paths, total_charge
+            )
+            if not candidate_keys:
+                raise ValueError(
+                    f"Charged non-ring section cannot be mapped: no section 12 branched bead "
+                    f"for charge {total_charge}, center {section[center_local][1]}, branches {branch_paths}."
+                )
+            bead_key = resolve_unique_candidate(candidate_keys, martini_dict, section)
+            return assign_section_key(section, final, bead_key)
+
         if total_atoms == 6:
             two_branch = None
             one_branches = []
@@ -1708,6 +1773,26 @@ def map_non_ring_section_1bead(section: List[List[Any]],
 
     # CASE 4: 5 or 6 edge atoms.
     elif num_edges > 4:
+        if total_charge != 0:
+            centers = [i for i, atom in enumerate(section) if len(atom[4]) > 2]
+            if len(centers) != 1:
+                raise ValueError(f"Charged branched ion needs exactly 1 center; found {len(centers)}")
+            center_local = centers[0]
+            branch_paths = [
+                trace_branch(section, center_local, nbr)
+                for (nbr, _) in section[center_local][4]
+            ]
+            candidate_keys = find_charged_branch_candidates(
+                martini_dict, section[center_local][1], branch_paths, total_charge
+            )
+            if not candidate_keys:
+                raise ValueError(
+                    f"Charged non-ring section cannot be mapped: no section 12 branched bead "
+                    f"for charge {total_charge}, center {section[center_local][1]}, branches {branch_paths}."
+                )
+            bead_key = resolve_unique_candidate(candidate_keys, martini_dict, section)
+            return assign_section_key(section, final, bead_key)
+
         # find the two centers (atoms with >2 inner connections)
         centers = [i for i, atom in enumerate(section) if len(atom[4]) > 2]
         if len(centers) != 2:
@@ -1770,8 +1855,6 @@ def map_non_ring_section_1bead(section: List[List[Any]],
         return final
     # Should not be reached.
     raise ValueError("Non‐ring section cannot be mapped: unhandled edge count case.")
-    return final
-
 
 # =============================================================================
 # TASK 3.f: Map Non-Ring Sections That Are Too Long (Subdivision)
@@ -2069,6 +2152,7 @@ def subdivide_non_ring_section_normal(section: List[List[Any]],
     # Use the first candidate as seed for DFS tracing if candidate_edges is nonempty.
     seed = candidate_edges[0]
     trace_nodes = dfs_trace_from_seed(section, seed)
+    validate_trace_with_charged_n(section, trace_nodes)
 
     # NEW CONDITION 1: If the trace is long enough and the fourth node has ≥ 3 inner connections, limit trace to 3 nodes.
     if len(trace_nodes) >= 4 and len(section[trace_nodes[3]][4]) >= 3:
@@ -2183,6 +2267,60 @@ def update_divided_section_mapping(sub_section: List[List[Any]], remainder: List
     fix_isedge(remainder)
     return sub_section, remainder
 
+def _append_outer_unique(atom: List[Any], tup: Tuple[int, int, float]) -> None:
+    if tup not in atom[3]:
+        atom[3].append(tup)
+
+def replace_section_with_local_groups(full_mapping: List[List[List[Any]]],
+                                      section_index: int,
+                                      section: List[List[Any]],
+                                      groups: List[List[int]],
+                                      old_pair_to_gid: Dict[Tuple[int, int], int]
+                                      ) -> List[List[List[Any]]]:
+    """
+    Replace one section with multiple local-index groups and preserve the bonds
+    between those groups as outer connections.
+    """
+    normalized_groups = [sorted(g) for g in groups if g]
+    group_of: Dict[int, int] = {}
+    local_maps: List[Dict[int, int]] = []
+    new_sections: List[List[List[Any]]] = []
+
+    for group_idx, group in enumerate(normalized_groups):
+        for old_local in group:
+            group_of[old_local] = group_idx
+        local_maps.append({old: new for new, old in enumerate(group)})
+        new_sec = reindex_section([section[i] for i in group], group)
+        fix_isedge(new_sec)
+        new_sections.append(new_sec)
+
+    full_mapping.pop(section_index)
+    for offset, new_sec in enumerate(new_sections):
+        full_mapping.insert(section_index + offset, new_sec)
+
+    rebuild_all_outer_connections(full_mapping, old_pair_to_gid)
+
+    emitted = set()
+    for old_local, atom in enumerate(section):
+        for nbr_old, bond_order in atom[4]:
+            g1 = group_of.get(old_local)
+            g2 = group_of.get(nbr_old)
+            if g1 is None or g2 is None or g1 == g2:
+                continue
+            edge_key = tuple(sorted((old_local, nbr_old)))
+            if edge_key in emitted:
+                continue
+            emitted.add(edge_key)
+
+            sec1 = section_index + g1
+            sec2 = section_index + g2
+            loc1 = local_maps[g1][old_local]
+            loc2 = local_maps[g2][nbr_old]
+            _append_outer_unique(full_mapping[sec1][loc1], (sec2, loc2, bond_order))
+            _append_outer_unique(full_mapping[sec2][loc2], (sec1, loc1, bond_order))
+
+    return new_sections
+
 def map_non_ring_section_long(section: List[List[Any]],
                               final: List[str],
                               martini_dict: Dict[str, List[Any]],
@@ -2206,6 +2344,30 @@ def map_non_ring_section_long(section: List[List[Any]],
     for si, sec in enumerate(full_mapping):
         for li, a in enumerate(sec):
             old_pair_to_gid[(si, li)] = a[0]
+
+    charged_indices = (
+        find_negative_oxygen_cluster_indices(section)
+        or find_positive_guanidinium_indices(section)
+    )
+    if charged_indices:
+        charged_set = set(charged_indices)
+        if len(charged_set) == len(section):
+            final = map_non_ring_section_1bead(section, final, martini_dict, full_mapping)
+            return final, full_mapping
+
+        rem_indices = [i for i in range(len(section)) if i not in charged_set]
+        rem_components = induced_subgraph_components(rem_indices, section)
+        groups = [sorted(charged_set)] + [sorted(comp) for comp in rem_components]
+        new_sections = replace_section_with_local_groups(
+            full_mapping,
+            section_index,
+            section,
+            groups,
+            old_pair_to_gid,
+        )
+        final = map_non_ring_section_1bead(new_sections[0], final, martini_dict, full_mapping)
+        return final, full_mapping
+
     sub_sec, rem_sec, sub_old_indices, rem_old_indices = subdivide_non_ring_section(section, final, full_mapping, martini_dict)
     sub_sec = reindex_section(sub_sec, sub_old_indices)
     rem_sec = reindex_section(rem_sec, rem_old_indices)

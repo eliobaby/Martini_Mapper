@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional
 def parse_smiles(smiles: str) -> List[str]:
     """
     Tokenize the SMILES string into meaningful tokens:
-    - Multi-character elements: Cl, Br, NH
+    - Multi-character elements: Cl, Br, Na, Mg, Ca, etc.
     - Ring closures: '1'-'9' and '%dd' for 10+
     - Element symbols and lowercase aromatic symbols
     Ignores parentheses, bond symbols, stereochemistry markers, charges, and dot separators.
@@ -18,46 +18,39 @@ def parse_smiles(smiles: str) -> List[str]:
     n = len(smiles)
     while i < n:
         ch = smiles[i]
-        # Skip ignored characters
-        if smiles.startswith('Hg', i):
-            tokens.append('Hg')
-            i += 2
+        if ch == '[':
+            close = smiles.find(']', i + 1)
+            if close == -1:
+                raise ValueError("Unclosed bracket atom in SMILES")
+            content = smiles[i + 1:close]
+            j = 0
+            while j < len(content) and content[j].isdigit():
+                j += 1
+            atom_text = content[j:]
+            bracket_atom = ""
+            for element in ('Cl', 'Br', 'Na', 'Mg', 'Ca', 'Hg', 'Pb', 'Si', 'Ge', 'Sn'):
+                if atom_text.startswith(element):
+                    bracket_atom = element
+                    break
+            if not bracket_atom and atom_text:
+                bracket_atom = atom_text[0]
+            if bracket_atom:
+                tokens.append(bracket_atom)
+            i = close + 1
             continue
-        if ch in '()=#$@H[]+-/\\':
+        # Skip ignored characters
+        if ch in '()=#$@H[]+-/\\.':
             i += 1
             continue
         # Multi-letter element tokens
-        if smiles.startswith('Cl', i):
-            tokens.append('Cl')
-            i += 2
-            continue
-        if smiles.startswith('Br', i):
-            tokens.append('Br')
-            i += 2
-            continue
-        if smiles.startswith('NH', i):
-            tokens.append('NH')
-            i += 2
-            continue
-        if smiles.startswith('Pb', i):
-            tokens.append('Pb')
-            i += 2
-            continue
-        if smiles.startswith('Si', i):
-            tokens.append('Si')
-            i += 2
-            continue
-        if smiles.startswith('Si', i):
-            tokens.append('Si')
-            i += 2
-            continue
-        if smiles.startswith('Ge', i):
-            tokens.append('Ge')
-            i += 2
-            continue
-        if smiles.startswith('Sn', i):
-            tokens.append('Sn')
-            i += 2
+        for element in ('Cl', 'Br', 'Na', 'Mg', 'Ca', 'Hg', 'Pb', 'Si', 'Ge', 'Sn', 'NH'):
+            if smiles.startswith(element, i):
+                tokens.append(element)
+                i += len(element)
+                break
+        else:
+            element = None
+        if element is not None:
             continue
         # Ring closure: multi-digit
         if ch == '%':
@@ -192,7 +185,8 @@ def append_ring_section(ring_indices: List[int],
                 inner_connection.append((local_j, bond))
         isedge = False  # default set to False; will update later
         num_H = properties[idx][3]
-        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge, num_H]
+        charge = properties[idx][4] if len(properties[idx]) > 4 else 0
+        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge, num_H, charge]
         section.append(atom_rep)
         # Mark as mapped (set element to "X")
         properties[idx][0] = "X"
@@ -243,7 +237,8 @@ def append_non_ring_section(section_indices: List[int],
                 inner_connection.append((local_j, bond))
         isedge = False  # default set to False; will update later
         num_H = properties[idx][3]
-        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge, num_H]
+        charge = properties[idx][4] if len(properties[idx]) > 4 else 0
+        atom_rep = [idx, element, ring_status, outer_connection, inner_connection, isedge, num_H, charge]
         section.append(atom_rep)
         properties[idx][0] = "X"
     solution.append(section)

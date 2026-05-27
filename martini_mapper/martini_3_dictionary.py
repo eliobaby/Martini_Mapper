@@ -573,7 +573,8 @@ def get_m3_dict():
         # perchlorate
         ("Q2",   [12, 2, "Cl(=O)(=O)(=O)(O)",       -1, "", []]), 
         # phosphate ion
-        ("D",    [12, 2, "P(O)(O)(O)(=O)",          -2, "", []]), 
+        ("D",    [12, 2, "P(O)(O)(O)(=O)",          -2, "", []]),
+        ("D",    [12, 2, "P(O)(O)(O)(=O)",          -3, "", []]), 
     ]
 
     # 2) Create the final dictionary, inserting each entry in order.

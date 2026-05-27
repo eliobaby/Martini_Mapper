@@ -149,6 +149,159 @@ def find_branch_candidates(martini_dict: Dict[str, List[Any]], section_id: int, 
     return list(dict.fromkeys(candidates))
 
 
+def atom_charge(atom: Sequence[Any]) -> int:
+    """Return the appended formal charge field, defaulting to neutral for old atom records."""
+    if len(atom) <= 7 or atom[7] is None:
+        return 0
+    return int(atom[7])
+
+
+def section_charge(section: Sequence[Sequence[Any]]) -> int:
+    """Total formal charge for a mapped section."""
+    return sum(atom_charge(atom) for atom in section)
+
+
+def find_charged_lone_candidates(martini_dict: Dict[str, List[Any]], symbol: str, charge: int) -> List[str]:
+    """Find section 12.0 candidates for standalone ions."""
+    sym = symbol.upper()
+    return list(dict.fromkeys(
+        k for k, v in martini_dict.items()
+        if len(v) > 3 and v[0] == 12 and v[1] == 0
+        and str(v[2]).upper() == sym and int(v[3]) == int(charge)
+    ))
+
+
+def find_charged_linear_candidates(martini_dict: Dict[str, List[Any]],
+                                   path_str: str,
+                                   charge: int) -> List[str]:
+    """Find section 12.1 candidates for charged linear fragments."""
+    p = path_str.upper()
+    rp = p[::-1]
+    return list(dict.fromkeys(
+        k for k, v in martini_dict.items()
+        if len(v) > 3 and v[0] == 12 and v[1] == 1 and int(v[3]) == int(charge)
+        and (str(v[2]).upper() == p or str(v[2]).upper() == rp)
+    ))
+
+
+def find_charged_branch_candidates(martini_dict: Dict[str, List[Any]],
+                                   center_symbol: str,
+                                   branch_paths: Sequence[str],
+                                   charge: int) -> List[str]:
+    """Find section 12.2 candidates for charged branched fragments."""
+    import re
+
+    center = center_symbol.upper()
+    branches = [bp.upper() for bp in branch_paths]
+    candidates: List[str] = []
+
+    for key, val in martini_dict.items():
+        if not (len(val) > 3 and val[0] == 12 and val[1] == 2 and int(val[3]) == int(charge)):
+            continue
+        pattern = str(val[2])
+        if "(" not in pattern:
+            continue
+        prefix, _remainder = pattern.split("(", 1)
+        if prefix.strip().upper() != center:
+            continue
+
+        branch_segments = [seg.upper() for seg in re.findall(r"\(([^)]+)\)", pattern)]
+        if len(branch_segments) != len(branches):
+            continue
+
+        unmatched = list(branch_segments)
+        for bp in branches:
+            for bs in list(unmatched):
+                if bp == bs:
+                    unmatched.remove(bs)
+                    break
+            else:
+                break
+        else:
+            candidates.append(key)
+
+    return list(dict.fromkeys(candidates))
+
+
+def find_negative_oxygen_cluster_indices(section: List[List[Any]]) -> Optional[List[int]]:
+    """
+    Identify charged O-centered anions such as carboxylate, sulphonate,
+    phosphate, nitrate, and perchlorate.
+
+    Starting at an O(-1), include its central atom, all O atoms attached to that
+    center, and immediate carbon stubs attached to the center or those oxygens so
+    section 12 branch strings like P(OC)(OC)(O)(=O) remain representable.
+    """
+    for local, atom in enumerate(section):
+        if atom[1].upper() != "O" or atom_charge(atom) >= 0:
+            continue
+
+        center_candidates = [nbr for nbr, _bo in atom[4]]
+        if len(center_candidates) != 1:
+            continue
+
+        center = center_candidates[0]
+        cluster = {local, center}
+
+        for nbr, _bo in section[center][4]:
+            nbr_symbol = section[nbr][1].upper()
+            if nbr_symbol == "O":
+                cluster.add(nbr)
+            elif nbr_symbol == "C":
+                cluster.add(nbr)
+
+        for member in list(cluster):
+            if section[member][1].upper() != "O":
+                continue
+            for nbr, _bo in section[member][4]:
+                if nbr != center and section[nbr][1].upper() == "C":
+                    cluster.add(nbr)
+
+        return sorted(cluster)
+
+    return None
+
+
+def find_positive_guanidinium_indices(section: List[List[Any]]) -> Optional[List[int]]:
+    """
+    Identify C(=[NH2+])(N)N-like guanidinium fragments from an edge N(+1).
+    """
+    for local, atom in enumerate(section):
+        if atom[1].upper() != "N" or atom_charge(atom) <= 0 or not atom[5]:
+            continue
+
+        for center, bond_order in atom[4]:
+            if section[center][1].upper() != "C" or bond_order != 2:
+                continue
+
+            cluster = {local, center}
+            for nbr, _bo in section[center][4]:
+                nbr_symbol = section[nbr][1].upper()
+                if nbr_symbol == "N":
+                    cluster.add(nbr)
+                elif nbr_symbol == "C":
+                    cluster.add(nbr)
+            return sorted(cluster)
+
+    return None
+
+
+def validate_trace_with_charged_n(section: List[List[Any]], trace_nodes: Sequence[int]) -> None:
+    """
+    For RNHx charged traces, keep the charged-N bead carbon-only except for the
+    N(+1) itself. This prevents normal subdivision from swallowing hetero atoms
+    into the charged ammonium bead.
+    """
+    charged_n = [i for i in trace_nodes if section[i][1].upper() == "N" and atom_charge(section[i]) > 0]
+    if not charged_n:
+        return
+    for i in trace_nodes:
+        if i in charged_n:
+            continue
+        if section[i][1].upper() != "C":
+            raise ValueError("Charged-N trace contains a non-carbon atom.")
+
+
 # -------------------------------
 # Ambiguity resolution helper
 # -------------------------------

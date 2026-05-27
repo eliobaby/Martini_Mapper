@@ -4,7 +4,7 @@ import re
 def get_atom_properties(mol):
     """
     Returns per-atom properties:
-      [symbol, is_in_ring, is_edge, num_H]
+      [symbol, is_in_ring, is_edge, num_H, formal_charge]
     where num_H = total number of H attached (implicit + explicit).
     """
     atom_properties = []
@@ -16,12 +16,14 @@ def get_atom_properties(mol):
 
         # Total Hs attached to this atom (implicit + explicit)
         num_H = atom.GetTotalNumHs(includeNeighbors=True)
+        formal_charge = atom.GetFormalCharge()
 
         atom_data = [
             atom.GetSymbol(),   # Atom type (e.g., C, O, N)
             atom.IsInRing(),    # Part of a ring?
             is_edge,            # Edge node?
-            num_H               # How many H attached to this atom
+            num_H,              # How many H attached to this atom
+            formal_charge       # Formal charge from RDKit
         ]
         atom_properties.append(atom_data)
 
